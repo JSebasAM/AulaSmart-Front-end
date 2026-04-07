@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 class PrimaryButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
+  final IconData? icon;
 
   const PrimaryButton({
     super.key,
     required this.label,
     required this.onPressed,
+    this.icon,
   });
 
   @override
@@ -37,7 +39,11 @@ class PrimaryButton extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
+            Icon(
+              icon ?? Icons.arrow_forward_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
           ],
         ),
       ),

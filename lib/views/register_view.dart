@@ -1,46 +1,33 @@
-import 'package:aulasmart_front_end/models/user.dart';
 import 'package:aulasmart_front_end/routes/app_routes.dart';
-import 'package:aulasmart_front_end/services/auth_service.dart';
 import 'package:aulasmart_front_end/themes/app_colors.dart';
 import 'package:aulasmart_front_end/widgets/auth_text_field.dart';
 import 'package:aulasmart_front_end/widgets/primary_button.dart';
 import 'package:flutter/material.dart';
 
-class LoginView extends StatefulWidget {
-  const LoginView({super.key});
+class RegisterView extends StatefulWidget {
+  const RegisterView({super.key});
 
   @override
-  State<LoginView> createState() => _LoginViewState();
+  State<RegisterView> createState() => _RegisterViewState();
 }
 
-class _LoginViewState extends State<LoginView> {
+class _RegisterViewState extends State<RegisterView> {
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _authService = AuthService();
 
   bool _isStudent = true;
   bool _hidePassword = true;
-  bool _loading = false;
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  Future<void> _enterApp() async {
-    setState(() => _loading = true);
-    await _authService.login(
-      User(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      ),
-    );
-
-    if (!mounted) return;
-
-    setState(() => _loading = false);
+  void _register() {
     Navigator.pushReplacementNamed(context, AppRoutes.app);
   }
 
@@ -51,7 +38,18 @@ class _LoginViewState extends State<LoginView> {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.pageGradient),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFF4EFFB),
+              Color(0xFFECE4F9),
+              Color(0xFFD9D6F6),
+            ],
+            stops: [0.0, 0.44, 1.0],
+          ),
+        ),
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
@@ -63,12 +61,12 @@ class _LoginViewState extends State<LoginView> {
                   constraints: const BoxConstraints(maxWidth: 416),
                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 18),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.72),
+                    color: Colors.white.withValues(alpha: 0.74),
                     borderRadius: BorderRadius.circular(34),
                     border: Border.all(color: Colors.white.withValues(alpha: 0.82), width: 1.2),
                     boxShadow: const [
                       BoxShadow(
-                        color: Color(0x1A5A48C6),
+                        color: Color(0x1A7B4CEB),
                         blurRadius: 30,
                         offset: Offset(0, 12),
                       ),
@@ -81,21 +79,25 @@ class _LoginViewState extends State<LoginView> {
                         width: 76,
                         height: 76,
                         decoration: BoxDecoration(
-                          color: AppColors.primary,
+                          gradient: const LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Color(0xFF8B60EF), Color(0xFFF04CD6)],
+                          ),
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: const [
                             BoxShadow(
-                              color: Color(0x44676AF8),
+                              color: Color(0x448B60EF),
                               blurRadius: 18,
                               offset: Offset(0, 8),
                             ),
                           ],
                         ),
-                        child: const Icon(Icons.person_outline_rounded, color: Colors.white, size: 38),
+                        child: const Icon(Icons.person_add_alt_1_rounded, color: Colors.white, size: 38),
                       ),
                       const SizedBox(height: 28),
                       const Text(
-                        'Bienvenido',
+                        'Crea tu Cuenta',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: AppColors.textPrimary,
@@ -106,7 +108,7 @@ class _LoginViewState extends State<LoginView> {
                       ),
                       const SizedBox(height: 10),
                       const Text(
-                        'Ingresa a tu cuenta de AulaSmart',
+                        'Únete a AulaSmart',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: AppColors.textSecondary,
@@ -135,7 +137,14 @@ class _LoginViewState extends State<LoginView> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 22),
+                      AuthTextField(
+                        label: 'Nombre Completo',
+                        hintText: 'Juan Pérez',
+                        controller: _nameController,
+                        icon: Icons.person_outline_rounded,
+                      ),
+                      const SizedBox(height: 18),
                       AuthTextField(
                         label: 'Correo Institucional',
                         hintText: 'usuario@uceva.edu.co',
@@ -158,25 +167,18 @@ class _LoginViewState extends State<LoginView> {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      if (_loading)
-                        const SizedBox(
-                          height: 56,
-                          child: Center(
-                            child: CircularProgressIndicator(color: AppColors.primary),
-                          ),
-                        )
-                      else
-                        PrimaryButton(
-                          label: 'Iniciar Sesión',
-                          onPressed: _enterApp,
-                        ),
+                      PrimaryButton(
+                        label: 'Registrarse',
+                        icon: Icons.person_add_alt_1_rounded,
+                        onPressed: _register,
+                      ),
                       const SizedBox(height: 22),
                       Wrap(
                         alignment: WrapAlignment.center,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           const Text(
-                            '¿No tienes una cuenta? ',
+                            '¿Ya tienes cuenta? ',
                             style: TextStyle(
                               color: AppColors.textSecondary,
                               fontSize: 14,
@@ -184,9 +186,9 @@ class _LoginViewState extends State<LoginView> {
                             ),
                           ),
                           GestureDetector(
-                            onTap: () => Navigator.pushNamed(context, AppRoutes.register),
+                            onTap: () => Navigator.pushReplacementNamed(context, AppRoutes.login),
                             child: const Text(
-                              'Regístrate aquí',
+                              'Inicia sesión',
                               style: TextStyle(
                                 color: AppColors.primaryDark,
                                 fontSize: 14,
@@ -224,6 +226,12 @@ class _RoleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final gradient = const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFF8C62F0), Color(0xFFF04AD8)],
+    );
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
@@ -231,16 +239,17 @@ class _RoleButton extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         height: 56,
         decoration: BoxDecoration(
-          color: selected ? AppColors.primary : Colors.white.withValues(alpha: 0.82),
+          gradient: selected ? gradient : null,
+          color: selected ? null : Colors.white.withValues(alpha: 0.80),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: selected ? AppColors.primary : const Color(0xFFE5E9FB),
+            color: selected ? Colors.transparent : const Color(0xFFE5E9FB),
             width: 1.0,
           ),
           boxShadow: selected
               ? const [
                   BoxShadow(
-                    color: Color(0x33666CF6),
+                    color: Color(0x4A9C4CF1),
                     blurRadius: 16,
                     offset: Offset(0, 8),
                   ),
