@@ -8,6 +8,12 @@ class AppColors {
   static const Color textPrimary = Color(0xFF27369C);
   static const Color textSecondary = Color(0xFF7080E4);
 
+  // Colores para el modal de carta/reporte
+  static const Color cartaPrimary = Color(0xFF5E66F2);
+  static const Color cartaPrimaryDark = Color(0xFF4B4FA6);
+  static const Color cartaSecondary = Color(0xFF99A6F2);
+  static const Color cartaBackground = Color(0xFFF9FAFB);
+
   static const LinearGradient pageGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
@@ -24,6 +30,15 @@ class AppColors {
     colors: [
       Color(0xFF6E86FF),
       Color(0xFF4A5BEA),
+    ],
+  );
+
+  static const LinearGradient cartaButtonGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFF5E66F2),
+      Color(0xFF6B7FF2),
     ],
   );
 }

@@ -1,6 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:aulasmart_front_end/themes/app_colors.dart';
 import 'package:aulasmart_front_end/views/new_report_modal_view.dart';
-import 'package:flutter/material.dart';
 
 class ReportesView extends StatefulWidget {
   const ReportesView({super.key});
@@ -283,18 +283,37 @@ class _ReportesViewState extends State<ReportesView> {
           Positioned.fill(
             child: GestureDetector(
               onTap: _closeOverlay,
-              child: Container(color: Colors.black.withValues(alpha: 0.26)),
+              child: Container(color: Colors.black.withValues(alpha: 0.28)),
             ),
           ),
           Positioned.fill(
-            child: NewReportModalView(onClose: _closeOverlay),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Material(
+                    color: Colors.white,
+                    child: NewReportModalView(onClose: _closeOverlay),
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ],
     );
   }
+}
 
-  Widget _softCard({required Widget child, EdgeInsetsGeometry? padding}) {
+class _SoftCard extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+
+  const _SoftCard({required this.child, this.padding});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: padding ?? const EdgeInsets.all(16),
@@ -313,6 +332,9 @@ class _ReportesViewState extends State<ReportesView> {
     );
   }
 }
+
+Widget _softCard({required Widget child, EdgeInsetsGeometry? padding}) =>
+  _SoftCard(padding: padding, child: child);
 
 class _BulletLine extends StatelessWidget {
   final String emoji;
