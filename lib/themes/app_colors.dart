@@ -14,6 +14,11 @@ class AppColors {
   static const Color cartaSecondary = Color(0xFF99A6F2);
   static const Color cartaBackground = Color(0xFFF9FAFB);
 
+  static const Color accent = Color(0xFF8A67E8);
+  static const Color background = Color(0xFFF4F2FF);
+  static const Color surface = Color(0xFFF7F7FD);
+  static const Color border = Color(0xFFD8DEFF);
+
   static const LinearGradient pageGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
