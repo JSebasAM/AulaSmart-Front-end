@@ -22,7 +22,7 @@ class PrimaryButton extends StatelessWidget {
         height: 56,
         width: double.infinity,
         decoration: BoxDecoration(
-          gradient: AppColors.primaryButtonGradient,
+          gradient: AppColors.cartaButtonGradient,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: const Color(0xFFA8B4FF)),
         ),

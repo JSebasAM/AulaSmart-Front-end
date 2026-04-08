@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:aulasmart_front_end/views/app_shell_view.dart';
 import 'package:aulasmart_front_end/routes/app_routes.dart';
 import 'package:aulasmart_front_end/themes/app_theme.dart';
 import 'package:aulasmart_front_end/views/app_shell_view.dart';
@@ -17,7 +18,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'AulaSmart',
-      theme: AppTheme.light(),
+      theme: ThemeData(
+        useMaterial3: true,
+      ),
       initialRoute: AppRoutes.login,
       routes: {
         AppRoutes.login: (_) => const LoginView(),

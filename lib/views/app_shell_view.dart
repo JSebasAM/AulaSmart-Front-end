@@ -1,4 +1,8 @@
 import 'package:aulasmart_front_end/themes/app_colors.dart';
+import 'package:aulasmart_front_end/views/home_view.dart';
+import 'package:aulasmart_front_end/views/perfil_view.dart';
+import 'package:aulasmart_front_end/views/reportes_view.dart';
+import 'package:aulasmart_front_end/views/reservas_view.dart';
 import 'package:aulasmart_front_end/widgets/app_bottom_nav.dart';
 import 'package:flutter/material.dart';
 
@@ -13,15 +17,16 @@ class _AppShellViewState extends State<AppShellView> {
   int _currentIndex = 0;
 
   late final List<Widget> _pages = const [
-    _PlaceholderPage(title: 'Inicio'),
-    _PlaceholderPage(title: 'Reservas'),
-    _PlaceholderPage(title: 'Reportes'),
-    _PlaceholderPage(title: 'Perfil'),
+    HomeView(),
+    ReservasView(),
+    ReportesView(),
+    PerfilView(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: Container(
         decoration: const BoxDecoration(gradient: AppColors.pageGradient),
         child: SafeArea(
@@ -35,30 +40,14 @@ class _AppShellViewState extends State<AppShellView> {
               ),
               AppBottomNav(
                 currentIndex: _currentIndex,
-                onTap: (index) => setState(() => _currentIndex = index),
+                onTap: (value) {
+                  setState(() {
+                    _currentIndex = value;
+                  });
+                },
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PlaceholderPage extends StatelessWidget {
-  final String title;
-
-  const _PlaceholderPage({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        title,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 34,
-          fontWeight: FontWeight.w800,
         ),
       ),
     );
