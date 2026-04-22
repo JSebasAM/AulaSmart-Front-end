@@ -14,34 +14,58 @@ class LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<LoginView> {
-  final _emailController = TextEditingController();
+  final _codigoController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authService = AuthService();
 
-  bool _isStudent = true;
   bool _hidePassword = true;
   bool _loading = false;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _codigoController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
   Future<void> _enterApp() async {
+    final codigo = _codigoController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (codigo.isEmpty || password.isEmpty) {
+      _showMessage('Codigo de usuario y contraseña son obligatorios.');
+      return;
+    }
+
     setState(() => _loading = true);
-    await _authService.login(
+    final result = await _authService.login(
       User(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+        codigo: codigo,
+        password: password,
       ),
     );
 
     if (!mounted) return;
 
     setState(() => _loading = false);
+    if (!result.success) {
+      _showMessage(result.message);
+      return;
+    }
+
+    _showMessage(result.message, isError: false);
     Navigator.pushReplacementNamed(context, AppRoutes.app);
+  }
+
+  void _showMessage(String message, {bool isError = true}) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: isError ? Colors.redAccent : AppColors.primaryDark,
+        ),
+      );
   }
 
   @override
@@ -116,36 +140,16 @@ class _LoginViewState extends State<LoginView> {
                         ),
                       ),
                       const SizedBox(height: 30),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _RoleButton(
-                              label: 'Estudiante',
-                              selected: _isStudent,
-                              onTap: () => setState(() => _isStudent = true),
-                            ),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: _RoleButton(
-                              label: 'Docente',
-                              selected: !_isStudent,
-                              onTap: () => setState(() => _isStudent = false),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
                       AuthTextField(
-                        label: 'Correo Institucional',
-                        hintText: 'usuario@uceva.edu.co',
-                        controller: _emailController,
-                        icon: Icons.email_outlined,
+                        label: 'Codigo de usuario',
+                        hintText: '',
+                        controller: _codigoController,
+                        icon: Icons.badge_outlined,
                       ),
                       const SizedBox(height: 18),
                       AuthTextField(
                         label: 'Contraseña',
-                        hintText: '••••••••',
+                        hintText: '',
                         controller: _passwordController,
                         icon: Icons.lock_outline_rounded,
                         obscureText: _hidePassword,
@@ -170,90 +174,11 @@ class _LoginViewState extends State<LoginView> {
                           label: 'Iniciar Sesión',
                           onPressed: _enterApp,
                         ),
-                      const SizedBox(height: 22),
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          const Text(
-                            '¿No tienes una cuenta? ',
-                            style: TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () => Navigator.pushNamed(context, AppRoutes.register),
-                            child: const Text(
-                              'Regístrate aquí',
-                              style: TextStyle(
-                                color: AppColors.primaryDark,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w800,
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          const Icon(Icons.arrow_forward_rounded, color: AppColors.primaryDark, size: 16),
-                        ],
-                      ),
                     ],
                   ),
                 ),
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _RoleButton extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _RoleButton({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        height: 56,
-        decoration: BoxDecoration(
-          color: selected ? AppColors.primary : Colors.white.withValues(alpha: 0.82),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: selected ? AppColors.primary : const Color(0xFFE5E9FB),
-            width: 1.0,
-          ),
-          boxShadow: selected
-              ? const [
-                  BoxShadow(
-                    color: Color(0x33666CF6),
-                    blurRadius: 16,
-                    offset: Offset(0, 8),
-                  ),
-                ]
-              : const [],
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
-          style: TextStyle(
-            color: selected ? Colors.white : AppColors.textPrimary,
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
           ),
         ),
       ),
