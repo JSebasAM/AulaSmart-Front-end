@@ -18,9 +18,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'AulaSmart',
-      theme: ThemeData(
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light(),
       initialRoute: AppRoutes.login,
       routes: {
         AppRoutes.login: (_) => const LoginView(),

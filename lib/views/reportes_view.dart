@@ -36,7 +36,7 @@ class _ReportesViewState extends State<ReportesView> {
               Text(
                 'Reportar Incidencia',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                       fontSize: 36,
                       fontWeight: FontWeight.w800,
                       height: 1.05,
@@ -46,7 +46,7 @@ class _ReportesViewState extends State<ReportesView> {
               Text(
                 'Ayudanos a mantener nuestras instalaciones en perfecto estado',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: const Color(0xFFE4EAFF),
+                      color: AppColors.textSecondary,
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
                       height: 1.2,
