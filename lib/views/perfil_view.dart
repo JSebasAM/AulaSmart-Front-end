@@ -1,6 +1,7 @@
 import 'package:aulasmart_front_end/models/profile_data.dart';
 import 'package:aulasmart_front_end/services/profile_service.dart';
 import 'package:aulasmart_front_end/themes/app_colors.dart';
+import 'package:aulasmart_front_end/themes/app_text_styles.dart';
 import 'package:flutter/material.dart';
 
 class PerfilView extends StatefulWidget {
@@ -113,21 +114,12 @@ class _ProfileHeader extends StatelessWidget {
             children: const [
               Text(
                 'Perfil',
-                style: TextStyle(
-                  color: AppColors.primaryDark,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  height: 1.0,
-                ),
+                style: AppTextStyles.pageTitle,
               ),
               SizedBox(height: 6),
               Text(
                 'Visualiza y administra tu información',
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: AppTextStyles.pageSubtitle,
               ),
             ],
           ),
@@ -220,20 +212,12 @@ class _ProfileCard extends StatelessWidget {
           Text(
             perfil.nombre,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AppColors.primaryDark,
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-            ),
+            style: AppTextStyles.sectionTitle.copyWith(fontSize: 22),
           ),
           const SizedBox(height: 6),
           Text(
             perfil.rol,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTextStyles.sectionBody,
           ),
           const SizedBox(height: 14),
           Row(
@@ -325,20 +309,12 @@ class _ProfileSectionTitle extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(
-            color: AppColors.primaryDark,
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-          ),
+          style: AppTextStyles.sectionTitle,
         ),
         const SizedBox(height: 4),
         Text(
           subtitle,
-          style: const TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
+          style: AppTextStyles.sectionBody,
         ),
       ],
     );

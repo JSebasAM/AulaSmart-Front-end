@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:aulasmart_front_end/themes/app_colors.dart';
+import 'package:aulasmart_front_end/themes/app_text_styles.dart';
 import 'package:aulasmart_front_end/views/new_report_modal_view.dart';
 
 class ReportesView extends StatefulWidget {
@@ -35,22 +36,12 @@ class _ReportesViewState extends State<ReportesView> {
             children: [
               Text(
                 'Reportar Incidencia',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: AppColors.textPrimary,
-                      fontSize: 36,
-                      fontWeight: FontWeight.w800,
-                      height: 1.05,
-                    ),
+                style: AppTextStyles.pageTitle.copyWith(fontSize: 33),
               ),
               const SizedBox(height: 6),
               Text(
                 'Ayudanos a mantener nuestras instalaciones en perfecto estado',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      height: 1.2,
-                    ),
+                style: AppTextStyles.pageSubtitle,
               ),
               const SizedBox(height: 16),
               InkWell(
@@ -76,20 +67,12 @@ class _ReportesViewState extends State<ReportesView> {
                           children: [
                             Text(
                               'Nuevo Reporte',
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    color: AppColors.textPrimary,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 26,
-                                  ),
+                              style: AppTextStyles.sectionTitle,
                             ),
                             const SizedBox(height: 4),
                             Text(
                               'Reporta un problema en cualquier area del campus',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.textSecondary,
-                                    fontSize: 14,
-                                    height: 1.25,
-                                  ),
+                              style: AppTextStyles.sectionBody,
                             ),
                           ],
                         ),
@@ -118,11 +101,7 @@ class _ReportesViewState extends State<ReportesView> {
                         Expanded(
                           child: Text(
                             '¿Qué puedes reportar?',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  color: AppColors.textPrimary,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 32,
-                                ),
+                            style: AppTextStyles.pageTitle,
                             maxLines: 2,
                             softWrap: true,
                             overflow: TextOverflow.visible,
@@ -178,11 +157,7 @@ class _ReportesViewState extends State<ReportesView> {
                         Expanded(
                           child: Text(
                             'Mapa del Campus',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  color: AppColors.textPrimary,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 34,
-                                ),
+                            style: AppTextStyles.sectionTitle,
                             maxLines: 2,
                             softWrap: true,
                             overflow: TextOverflow.visible,
@@ -193,10 +168,7 @@ class _ReportesViewState extends State<ReportesView> {
                     const SizedBox(height: 8),
                     Text(
                       'Vista interactiva de las instalaciones',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary,
-                            fontSize: 14,
-                          ),
+                      style: AppTextStyles.sectionBody,
                     ),
                     const SizedBox(height: 12),
                     Container(
@@ -360,18 +332,11 @@ class _BulletLine extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 16,
-                    ),
+                style: AppTextStyles.cardTitle,
               ),
               Text(
                 text,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                      fontSize: 13,
-                    ),
+                style: AppTextStyles.cardSubtitle,
               ),
             ],
           ),
