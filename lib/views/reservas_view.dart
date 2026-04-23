@@ -1,4 +1,5 @@
 import 'package:aulasmart_front_end/themes/app_colors.dart';
+import 'package:aulasmart_front_end/themes/app_text_styles.dart';
 import 'package:flutter/material.dart';
 
 class ReservasView extends StatelessWidget {
@@ -52,22 +53,12 @@ class ReservasView extends StatelessWidget {
             children: [
               const Text(
                 'Mis Reservas',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 33,
-                  fontWeight: FontWeight.w800,
-                  height: 1.0,
-                ),
+                style: AppTextStyles.pageTitle,
               ),
               const SizedBox(height: 10),
               const Text(
                 'Administra tus reservas de aulas y eventos proximos',
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                  height: 1.2,
-                ),
+                style: AppTextStyles.pageSubtitle,
               ),
               const SizedBox(height: 28),
               const _SectionTitle(title: 'Reservas Proximas'),
@@ -99,11 +90,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: const TextStyle(
-        color: AppColors.textPrimary,
-        fontSize: 16,
-        fontWeight: FontWeight.w700,
-      ),
+      style: AppTextStyles.sectionTitle,
     );
   }
 }
@@ -138,12 +125,7 @@ class _ReservaCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   data.titulo,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    height: 1.2,
-                  ),
+                  style: AppTextStyles.cardTitle,
                 ),
               ),
               const SizedBox(width: 8),
@@ -155,11 +137,7 @@ class _ReservaCard extends StatelessWidget {
                 ),
                 child: Text(
                   data.estado,
-                  style: const TextStyle(
-                    color: Colors.black , 
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: AppTextStyles.smallLabel.copyWith(color: Colors.black),
                 ),
               ),
               const SizedBox(width: 8),
@@ -236,12 +214,7 @@ class _InfoBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      style: const TextStyle(
-        color: AppColors.textSecondary,
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-        height: 1.25,
-      ),
+      style: AppTextStyles.cardSubtitle,
     );
   }
 }
@@ -255,11 +228,7 @@ class _InlineText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: const TextStyle(
-        color: AppColors.textSecondary,
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-      ),
+      style: AppTextStyles.cardSubtitle,
     );
   }
 }
