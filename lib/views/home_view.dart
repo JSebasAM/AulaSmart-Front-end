@@ -1,6 +1,7 @@
 import 'package:aulasmart_front_end/models/aula.dart';
 import 'package:aulasmart_front_end/services/aula_service.dart';
 import 'package:aulasmart_front_end/themes/app_colors.dart';
+import 'package:aulasmart_front_end/themes/app_text_styles.dart';
 import 'package:flutter/material.dart';
 
 class HomeView extends StatefulWidget {
@@ -104,22 +105,14 @@ class _HomeViewState extends State<HomeView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Buenos días,',
-                style: TextStyle(
-                  color: Color(0xFF99A6F2),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: AppTextStyles.sectionBody.copyWith(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 4),
-              const Text(
+              Text(
                 'Juan 👋',
-                style: TextStyle(
-                  color: Color(0xFF4B4FA6),
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                ),
+                style: AppTextStyles.sectionTitle.copyWith(fontSize: 28),
               ),
               const SizedBox(height: 8),
               Container(
@@ -128,13 +121,9 @@ class _HomeViewState extends State<HomeView> {
                   color: const Color(0x268B5CF6),
                   borderRadius: BorderRadius.circular(999),
                 ),
-                child: const Text(
+                child: Text(
                   '👨‍🏫 Docente',
-                  style: TextStyle(
-                    color: Color(0xFF8B5CF6),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: AppTextStyles.smallLabel.copyWith(color: AppColors.primary),
                 ),
               ),
             ],
@@ -206,11 +195,7 @@ class _HomeViewState extends State<HomeView> {
               decoration: const InputDecoration(
                 border: InputBorder.none,
                 hintText: 'Buscar aula...',
-                hintStyle: TextStyle(
-                  color: Color(0xFF99A6F2),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
+                hintStyle: AppTextStyles.cardSubtitle,
                 isDense: true,
               ),
             ),
@@ -229,11 +214,7 @@ class _HomeViewState extends State<HomeView> {
       children: [
         const Text(
           'Categorías',
-          style: TextStyle(
-            color: Color(0xFF4B4FA6),
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-          ),
+          style: AppTextStyles.sectionTitle,
         ),
         const SizedBox(height: 10),
         SizedBox(
@@ -286,10 +267,8 @@ class _HomeViewState extends State<HomeView> {
                       const SizedBox(height: 6),
                       Text(
                         categoria,
-                        style: TextStyle(
-                          color: activa ? Colors.white : const Color(0xFF4B4FA6),
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700,
+                        style: AppTextStyles.smallLabel.copyWith(
+                          color: activa ? Colors.white : AppColors.primaryDark,
                         ),
                       ),
                     ],
@@ -309,11 +288,7 @@ class _HomeViewState extends State<HomeView> {
       children: [
         const Text(
           'Aulas Disponibles',
-          style: TextStyle(
-            color: Color(0xFF4B4FA6),
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-          ),
+          style: AppTextStyles.sectionTitle,
         ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -323,11 +298,7 @@ class _HomeViewState extends State<HomeView> {
           ),
           child: Text(
             '$cantidad aulas',
-            style: const TextStyle(
-              color: Color(0xFF5E66F2),
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-            ),
+            style: AppTextStyles.cardSubtitle.copyWith(color: AppColors.primary),
           ),
         ),
       ],
@@ -345,11 +316,7 @@ class _HomeViewState extends State<HomeView> {
       child: const Text(
         'No hay aulas para los filtros actuales.',
         textAlign: TextAlign.center,
-        style: TextStyle(
-          color: Color(0xFF7080E4),
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-        ),
+        style: AppTextStyles.sectionBody,
       ),
     );
   }
@@ -469,11 +436,7 @@ class _AulaCard extends StatelessWidget {
                         aula.nombre,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Color(0xFF4B4FA6),
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: AppTextStyles.cardTitle,
                       ),
                     ),
                     const SizedBox(width: 6),
@@ -485,11 +448,7 @@ class _AulaCard extends StatelessWidget {
                       ),
                       child: Text(
                         aula.estado,
-                        style: TextStyle(
-                          color: badgeColor,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: AppTextStyles.smallLabel.copyWith(color: badgeColor),
                       ),
                     ),
                   ],
@@ -499,11 +458,7 @@ class _AulaCard extends StatelessWidget {
                   aula.ubicacion,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Color(0xFF99A6F2),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: AppTextStyles.cardSubtitle,
                 ),
                 const Spacer(),
                 Row(
@@ -520,11 +475,7 @@ class _AulaCard extends StatelessWidget {
                           const SizedBox(width: 4),
                           Text(
                             '${aula.capacidad}',
-                            style: const TextStyle(
-                              color: Color(0xFF5E66F2),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                            ),
+                            style: AppTextStyles.smallLabel.copyWith(color: AppColors.primary),
                           ),
                         ],
                       ),
