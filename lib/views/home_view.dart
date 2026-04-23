@@ -2,6 +2,7 @@ import 'package:aulasmart_front_end/models/aula.dart';
 import 'package:aulasmart_front_end/services/aula_service.dart';
 import 'package:aulasmart_front_end/themes/app_colors.dart';
 import 'package:aulasmart_front_end/themes/app_text_styles.dart';
+import 'package:aulasmart_front_end/views/aula_detail_view.dart';
 import 'package:flutter/material.dart';
 
 class HomeView extends StatefulWidget {
@@ -372,143 +373,156 @@ class _AulaCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final badgeColor = aula.estaLibre ? const Color(0xFF10B981) : const Color(0xFFEF4444);
 
-    return Container(
-      height: 138,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.72),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.65), width: 0.8),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x145E66F2),
-            blurRadius: 24,
-            offset: Offset(0, 8),
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => AulaDetailView(aula: aula),
+            ),
+          );
+        },
+        child: Container(
+          height: 138,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.72),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.65), width: 0.8),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x145E66F2),
+                blurRadius: 24,
+                offset: Offset(0, 8),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Stack(
+          child: Row(
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(14),
-                child: Image.network(
-                  aula.imagenUrl,
-                  width: 78,
-                  height: 112,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, _, __) {
-                    return Container(
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: Image.network(
+                      aula.imagenUrl,
                       width: 78,
                       height: 112,
-                      color: const Color(0x225E66F2),
-                      alignment: Alignment.center,
-                      child: const Icon(Icons.image_not_supported_outlined, color: Color(0xFF5E66F2), size: 18),
-                    );
-                  },
-                ),
-              ),
-              Positioned(
-                left: 6,
-                top: 6,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: aula.estaLibre ? const Color(0xFF34D399) : const Color(0xFFF87171),
-                    borderRadius: BorderRadius.circular(999),
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, _, __) {
+                        return Container(
+                          width: 78,
+                          height: 112,
+                          color: const Color(0x225E66F2),
+                          alignment: Alignment.center,
+                          child: const Icon(Icons.image_not_supported_outlined, color: Color(0xFF5E66F2), size: 18),
+                        );
+                      },
+                    ),
                   ),
+                  Positioned(
+                    left: 6,
+                    top: 6,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: aula.estaLibre ? const Color(0xFF34D399) : const Color(0xFFF87171),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            aula.nombre,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.cardTitle,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: badgeColor.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            aula.estado,
+                            style: AppTextStyles.smallLabel.copyWith(color: badgeColor),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      aula.ubicacion,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.cardSubtitle,
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0x0D5E66F2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.group_outlined, color: Color(0xFF5E66F2), size: 12),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${aula.capacidad}',
+                                style: AppTextStyles.smallLabel.copyWith(color: AppColors.primary),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.videocam_outlined,
+                          color: aula.tieneVideo ? const Color(0xFF5E66F2) : const Color(0x6699A6F2),
+                          size: 14,
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.wifi,
+                          color: aula.tieneWifi ? const Color(0xFF5E66F2) : const Color(0x6699A6F2),
+                          size: 14,
+                        ),
+                        const Spacer(),
+                        Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(color: const Color(0xFFE0E7FF), width: 0.8),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: const Icon(Icons.chevron_right_rounded, color: Color(0xFF5E66F2), size: 16),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        aula.nombre,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.cardTitle,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: badgeColor.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        aula.estado,
-                        style: AppTextStyles.smallLabel.copyWith(color: badgeColor),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  aula.ubicacion,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.cardSubtitle,
-                ),
-                const Spacer(),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: const Color(0x0D5E66F2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.group_outlined, color: Color(0xFF5E66F2), size: 12),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${aula.capacidad}',
-                            style: AppTextStyles.smallLabel.copyWith(color: AppColors.primary),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(
-                      Icons.videocam_outlined,
-                      color: aula.tieneVideo ? const Color(0xFF5E66F2) : const Color(0x6699A6F2),
-                      size: 14,
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(
-                      Icons.wifi,
-                      color: aula.tieneWifi ? const Color(0xFF5E66F2) : const Color(0x6699A6F2),
-                      size: 14,
-                    ),
-                    const Spacer(),
-                    Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: const Color(0xFFE0E7FF), width: 0.8),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: const Icon(Icons.chevron_right_rounded, color: Color(0xFF5E66F2), size: 16),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
