@@ -92,7 +92,7 @@ class _PerfilViewState extends State<PerfilView> {
               ),
             ),
           ),
-        ),
+        );
       },
     );
   }
@@ -238,13 +238,6 @@ class _ProfileCard extends StatelessWidget {
           const SizedBox(height: 14),
           Row(
             children: [
-              Expanded(
-                child: _MiniStat(
-                  value: perfil.aulas.toString(),
-                  label: 'Aulas',
-                  icon: Icons.meeting_room_outlined,
-                ),
-              ),
               const SizedBox(width: 10),
               Expanded(
                 child: _MiniStat(
