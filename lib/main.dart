@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:aulasmart_front_end/views/app_shell_view.dart';
 import 'package:aulasmart_front_end/routes/app_routes.dart';
 import 'package:aulasmart_front_end/themes/app_theme.dart';
-import 'package:aulasmart_front_end/views/app_shell_view.dart';
 import 'package:aulasmart_front_end/views/login_view.dart';
 
 void main() {
