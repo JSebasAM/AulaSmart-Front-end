@@ -1,64 +1,107 @@
+import 'package:aulasmart_front_end/models/profile_data.dart';
+import 'package:aulasmart_front_end/services/profile_service.dart';
 import 'package:aulasmart_front_end/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 
-class PerfilView extends StatelessWidget {
+class PerfilView extends StatefulWidget {
   const PerfilView({super.key});
 
   @override
+  State<PerfilView> createState() => _PerfilViewState();
+}
+
+class _PerfilViewState extends State<PerfilView> {
+  final ProfileService _profileService = ProfileService();
+  late final Future<ProfileData> _futurePerfil;
+
+  @override
+  void initState() {
+    super.initState();
+    _futurePerfil = _profileService.obtenerPerfil();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.background,
-      child: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const _ProfileHeader(),
-              const SizedBox(height: 22),
-              const _ProfileCard(),
-              const SizedBox(height: 18),
-              const _ProfileSectionTitle(
-                title: 'Cuenta',
-                subtitle: 'Gestiona tu información y accesos',
+    return FutureBuilder<ProfileData>(
+      future: _futurePerfil,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          );
+        }
+
+        final perfil = snapshot.data;
+        if (perfil == null) {
+          return const Center(
+            child: Text(
+              'No fue posible cargar el perfil.',
+              style: TextStyle(
+                color: AppColors.primaryDark,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
               ),
-              const SizedBox(height: 12),
-              _ProfileOptionTile(
-                icon: Icons.edit_outlined,
-                title: 'Editar perfil',
-                subtitle: 'Actualiza tus datos personales',
-                onTap: () {},
+            ),
+          );
+        }
+
+        return Container(
+          color: AppColors.background,
+          child: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _ProfileHeader(perfil: perfil),
+                  const SizedBox(height: 22),
+                  _ProfileCard(perfil: perfil),
+                  const SizedBox(height: 18),
+                  const _ProfileSectionTitle(
+                    title: 'Cuenta',
+                    subtitle: 'Gestiona tu información y accesos',
+                  ),
+                  const SizedBox(height: 12),
+                  _ProfileOptionTile(
+                    icon: Icons.edit_outlined,
+                    title: 'Editar perfil',
+                    subtitle: 'Actualiza tus datos personales',
+                    onTap: () {},
+                  ),
+                  const SizedBox(height: 12),
+                  _ProfileOptionTile(
+                    icon: Icons.lock_outline_rounded,
+                    title: 'Cambiar contraseña',
+                    subtitle: 'Refuerza la seguridad de tu cuenta',
+                    onTap: () {},
+                  ),
+                  const SizedBox(height: 18),
+                  const _ProfileSectionTitle(
+                    title: 'Sesión',
+                    subtitle: 'Acciones relacionadas con tu acceso',
+                  ),
+                  const SizedBox(height: 12),
+                  _ProfileOptionTile(
+                    icon: Icons.logout_rounded,
+                    title: 'Cerrar sesión',
+                    subtitle: 'Salir de la aplicación',
+                    isDanger: true,
+                    onTap: () {},
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
-              _ProfileOptionTile(
-                icon: Icons.lock_outline_rounded,
-                title: 'Cambiar contraseña',
-                subtitle: 'Refuerza la seguridad de tu cuenta',
-                onTap: () {},
-              ),
-              const SizedBox(height: 18),
-              const _ProfileSectionTitle(
-                title: 'Sesión',
-                subtitle: 'Acciones relacionadas con tu acceso',
-              ),
-              const SizedBox(height: 12),
-              _ProfileOptionTile(
-                icon: Icons.logout_rounded,
-                title: 'Cerrar sesión',
-                subtitle: 'Salir de la aplicación',
-                isDanger: true,
-                onTap: () {},
-              ),
-            ],
+            ),
           ),
         ),
-      ),
+      },
     );
   }
 }
 
 class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader();
+  const _ProfileHeader({required this.perfil});
+
+  final ProfileData perfil;
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +154,9 @@ class _ProfileHeader extends StatelessWidget {
 }
 
 class _ProfileCard extends StatelessWidget {
-  const _ProfileCard();
+  const _ProfileCard({required this.perfil});
+
+  final ProfileData perfil;
 
   @override
   Widget build(BuildContext context) {
@@ -146,7 +191,7 @@ class _ProfileCard extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(999),
                   child: Image.network(
-                    'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=240',
+                    perfil.avatarUrl,
                     fit: BoxFit.cover,
                     errorBuilder: (context, _, __) => Container(
                       color: Colors.white,
@@ -172,19 +217,19 @@ class _ProfileCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-          const Text(
-            'Juan Pérez',
+          Text(
+            perfil.nombre,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               color: AppColors.primaryDark,
               fontSize: 22,
               fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
-            'Docente',
-            style: TextStyle(
+          Text(
+            perfil.rol,
+            style: const TextStyle(
               color: AppColors.textSecondary,
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -192,19 +237,26 @@ class _ProfileCard extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           Row(
-            children: const [
-              SizedBox(width: 10),
+            children: [
               Expanded(
                 child: _MiniStat(
-                  value: '8',
+                  value: perfil.aulas.toString(),
+                  label: 'Aulas',
+                  icon: Icons.meeting_room_outlined,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _MiniStat(
+                  value: perfil.aulasReservadas.toString(),
                   label: 'Aulas reservadas',
                   icon: Icons.calendar_month_outlined,
                 ),
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Expanded(
                 child: _MiniStat(
-                  value: '3',
+                  value: perfil.incidencias.toString(),
                   label: 'Incidencias',
                   icon: Icons.warning_amber_rounded,
                 ),
