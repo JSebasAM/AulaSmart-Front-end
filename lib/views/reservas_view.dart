@@ -1,80 +1,84 @@
+import 'package:aulasmart_front_end/models/reserva.dart';
+import 'package:aulasmart_front_end/services/reserva_service.dart';
 import 'package:aulasmart_front_end/themes/app_colors.dart';
 import 'package:aulasmart_front_end/themes/app_text_styles.dart';
 import 'package:flutter/material.dart';
 
-class ReservasView extends StatelessWidget {
+class ReservasView extends StatefulWidget {
   const ReservasView({super.key});
 
   @override
+  State<ReservasView> createState() => _ReservasViewState();
+}
+
+class _ReservasViewState extends State<ReservasView> {
+  final ReservaService _reservaService = ReservaService();
+  late final Future<List<Reserva>> _futureReservas;
+
+  @override
+  void initState() {
+    super.initState();
+    _futureReservas = _reservaService.listarReservas();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    const proximas = <_ReservaCardData>[
-      _ReservaCardData(
-        titulo: 'Clase de Fisica 101',
-        estado: 'Confirmado',
-        aula: 'Aula Magin A-101',
-        fecha: 'martes, 31 de marzo de 2025',
-        horario: '09:00 - 11:00',
-        asistentes: '85 asistentes',
-        descripcion: 'Clase magistral sobre fundamentos de Mecanica Cuantica',
-        estadoColor: Color(0xFF24C89A),
-      ),
-      _ReservaCardData(
-        titulo: 'Presentacion de Proyecto de Ingenieria',
-        estado: 'Confirmado',
-        aula: 'Sala de Conferencias B-301 Edificio Administrativo',
-        fecha: 'jueves, 2 de abril de 2025',
-        horario: '14:00 - 16:00',
-        asistentes: '45 asistentes',
-        descripcion: 'Presentaciones de proyectos de ultimo ano de estudiantes de Ingenieria',
-        estadoColor: Color(0xFF24C89A),
-      ),
-    ];
-
-    const pendientes = <_ReservaCardData>[
-      _ReservaCardData(
-        titulo: 'Sesion de Laboratorio de Quimica',
-        estado: 'Pendiente',
-        aula: 'Laboratorio B-205 - Edificio de Ciencias',
-        fecha: 'sabado, 4 de abril de 2025',
-        horario: '10:00 - 12:00',
-        asistentes: '30 asistentes',
-        descripcion: 'Trabajo practico de laboratorio sobre experimentos de quimica organica',
-        estadoColor: Color(0xFFF6B11A),
-      ),
-    ];
-
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
       child: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 22, 20, 120),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Mis Reservas',
-                style: AppTextStyles.pageTitle,
+        child: FutureBuilder<List<Reserva>>(
+          future: _futureReservas,
+          builder: (context, snapshot) {
+            final reservas = snapshot.data ?? const <Reserva>[];
+            final proximas = reservas.where((reserva) => !reserva.estaPendiente).toList();
+            final pendientes = reservas.where((reserva) => reserva.estaPendiente).toList();
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 22, 20, 120),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Mis Reservas', style: AppTextStyles.pageTitle),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Administra tus reservas de aulas y eventos proximos',
+                    style: AppTextStyles.pageSubtitle,
+                  ),
+                  const SizedBox(height: 28),
+                  const _SectionTitle(title: 'Reservas Proximas'),
+                  const SizedBox(height: 12),
+                  if (snapshot.connectionState == ConnectionState.waiting)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 28),
+                        child: CircularProgressIndicator(color: AppColors.primary),
+                      ),
+                    )
+                  else if (proximas.isEmpty)
+                    const _EmptyState(text: 'No hay reservas proximas disponibles.')
+                  else
+                    ...proximas.map(
+                      (reserva) => Padding(
+                        padding: const EdgeInsets.only(bottom: 14),
+                        child: _ReservaCard(data: reserva),
+                      ),
+                    ),
+                  const SizedBox(height: 10),
+                  const _SectionTitle(title: 'Pendiente de Aprobacion'),
+                  const SizedBox(height: 12),
+                  if (pendientes.isEmpty)
+                    const _EmptyState(text: 'No hay reservas pendientes.')
+                  else
+                    ...pendientes.map(
+                      (reserva) => Padding(
+                        padding: const EdgeInsets.only(bottom: 14),
+                        child: _ReservaCard(data: reserva),
+                      ),
+                    ),
+                ],
               ),
-              const SizedBox(height: 10),
-              const Text(
-                'Administra tus reservas de aulas y eventos proximos',
-                style: AppTextStyles.pageSubtitle,
-              ),
-              const SizedBox(height: 28),
-              const _SectionTitle(title: 'Reservas Proximas'),
-              const SizedBox(height: 12),
-              ...proximas.map(
-                (reserva) => Padding(
-                  padding: const EdgeInsets.only(bottom: 14),
-                  child: _ReservaCard(data: reserva),
-                ),
-              ),
-              const SizedBox(height: 10),
-              const _SectionTitle(title: 'Pendiente de Aprobacion'),
-              const SizedBox(height: 12),
-              ...pendientes.map((reserva) => _ReservaCard(data: reserva)),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
@@ -88,9 +92,29 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: AppTextStyles.sectionTitle,
+    return Text(title, style: AppTextStyles.sectionTitle);
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: AppTextStyles.cardSubtitle,
+      ),
     );
   }
 }
@@ -98,10 +122,12 @@ class _SectionTitle extends StatelessWidget {
 class _ReservaCard extends StatelessWidget {
   const _ReservaCard({required this.data});
 
-  final _ReservaCardData data;
+  final Reserva data;
 
   @override
   Widget build(BuildContext context) {
+    final estadoColor = _estadoColor(data.estado);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
@@ -132,7 +158,7 @@ class _ReservaCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
-                  color: data.estadoColor,
+                  color: estadoColor,
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
@@ -176,7 +202,7 @@ class _ReservaCard extends StatelessWidget {
                   children: [
                     const Icon(Icons.group_outlined, color: AppColors.primaryDark, size: 14),
                     const SizedBox(width: 4),
-                    Flexible(child: _InlineText(text: data.asistentes)),
+                    Flexible(child: _InlineText(text: '${data.asistentes} asistentes')),
                   ],
                 ),
               ),
@@ -202,6 +228,14 @@ class _ReservaCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Color _estadoColor(String estado) {
+    if (estado.toLowerCase() == 'pendiente') {
+      return const Color(0xFFF6B11A);
+    }
+
+    return const Color(0xFF24C89A);
   }
 }
 
@@ -255,26 +289,4 @@ class _CardIconButton extends StatelessWidget {
       ),
     );
   }
-}
-
-class _ReservaCardData {
-  const _ReservaCardData({
-    required this.titulo,
-    required this.estado,
-    required this.aula,
-    required this.fecha,
-    required this.horario,
-    required this.asistentes,
-    required this.descripcion,
-    required this.estadoColor,
-  });
-
-  final String titulo;
-  final String estado;
-  final String aula;
-  final String fecha;
-  final String horario;
-  final String asistentes;
-  final String descripcion;
-  final Color estadoColor;
 }
