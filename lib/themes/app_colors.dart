@@ -18,6 +18,11 @@ class AppColors {
   static const Color background = Color(0xFFF7F5FF);
   static const Color surface = Color(0xFFFFFFFF);
   static const Color border = Color(0xFFE3E7FF);
+  static const Color success = Color(0xFF24C89A);
+  static const Color danger = Color(0xFFEF4444);
+  static const Color warning = Color(0xFFF6B11A);
+  static const Color info = Color(0xFF4F63FF);
+  static const Color neutral = Color(0xFF6B7280);
 
   static const LinearGradient pageGradient = LinearGradient(
     begin: Alignment.topCenter,
@@ -43,6 +48,15 @@ class AppColors {
     colors: [
       Color(0xFF5E66F2),
       Color(0xFF6B7FF2),
+    ],
+  );
+
+  static const LinearGradient dangerButtonGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFFFF6B6B),
+      Color(0xFFEF4444),
     ],
   );
 }
