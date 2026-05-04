@@ -1,4 +1,4 @@
-import 'package:aulasmart_front_end/models/user.dart';
+import 'package:aulasmart_front_end/models/usuario.dart';
 import 'package:aulasmart_front_end/routes/app_routes.dart';
 import 'package:aulasmart_front_end/services/auth_service.dart';
 import 'package:aulasmart_front_end/themes/app_colors.dart';
