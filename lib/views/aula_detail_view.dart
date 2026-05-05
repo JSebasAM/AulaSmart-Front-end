@@ -10,8 +10,8 @@ class AulaDetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final disponible = aula.estaLibre;
-    final accentColor = disponible ? AppColors.success : AppColors.danger;
+    //final disponible = aula.disponible;
+    //final accentColor = disponible ? AppColors.success : AppColors.danger;
 
     return Scaffold(
       body: Container(

@@ -17,11 +17,6 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'AulaSmart',
       theme: AppTheme.light(),
-      initialRoute: AppRoutes.login,
-      routes: {
-        AppRoutes.login: (_) => const LoginView(),
-        AppRoutes.app: (_) => const AppShellView(),
-      },
     );
   }
 }
