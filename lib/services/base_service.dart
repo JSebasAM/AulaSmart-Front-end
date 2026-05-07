@@ -3,14 +3,21 @@ import 'api_exception.dart';
 
 abstract class BaseService {
 
-  const BaseService(this.dio);
-  final Dio dio;
+  const BaseService(this._dio, this._baseUrl);
+  final Dio _dio;
+  final String _baseUrl;
 
-  Future<T> get<T>(String path, {
+//URL completa para cada endpoint
+ String _url(String path) => '$_baseUrl$path';
+
+// Métodos genéricos para realizar solicitudes HTTP
+  Future<T> get<T>(
+    String path,
+   {
     Map<String, dynamic>? queryParameters, required T Function(dynamic  data) parser,
     }) async {
     try {
-      final response = await dio.get(path, queryParameters: queryParameters);
+      final response = await _dio.get(_url(path), queryParameters: queryParameters);
       return parser(response.data);
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
@@ -23,7 +30,7 @@ abstract class BaseService {
     required T Function(dynamic data) parser,
   }) async {
     try {
-      final res = await dio.post(path, data: data);
+      final res = await _dio.post(_url(path), data: data);
       return parser(res.data);
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
@@ -36,7 +43,7 @@ abstract class BaseService {
     required T Function(dynamic data) parser,
   }) async {
     try {
-      final res = await dio.put(path, data: data);
+      final res = await _dio.put(_url(path), data: data);
       return parser(res.data);
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
@@ -45,7 +52,7 @@ abstract class BaseService {
 
   Future<void> delete(String path) async {
     try {
-      await dio.delete(path);
+      await _dio.delete(_url(path));
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }
