@@ -17,35 +17,24 @@ class User {
 
   // Método para convertir un JSON a un objeto User
   factory User.fromJson(Map<String, dynamic> json) {
-    final codigoRaw = json['codigo'];
-    final int codigoValue;
-    if (codigoRaw is int) {
-      codigoValue = codigoRaw;
-    } else if (codigoRaw is String) {
-      codigoValue = int.tryParse(codigoRaw) ?? 0;
-    } else {
-      codigoValue = 0;
-    }
-
     return User(
-      codigo: codigoValue,
-      nombre: json['nombre'] ?? '',
-      apellido: json['apellido'] ?? '',
-      email: json['email'] ?? '',
-      password: json['password'] ?? '',
-      rol: json['rol'] ?? '',
-    );
+      codigo: json['codigo'],
+      nombre: json['nombre'],
+      apellido: json['apellido'],
+      email: json['email'],
+      password: json['password'],
+      rol: json['rol'],
+    ); 
   }
-
   // Método para convertir un objeto User a JSON
   Map<String, dynamic> toJson() {
     return {
       'codigo': codigo,
       'nombre': nombre,
-      'apellido': apellido,
-      'email': email,
-      'password': password,
+     'apellido': apellido,
+     'email': email,
+     'password': password,
       'rol': rol,
     };
-  }
+  } 
 }

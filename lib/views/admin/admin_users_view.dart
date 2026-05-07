@@ -38,7 +38,7 @@ class AdminUsersView extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () {
-              ref.read(usuarioProvider.notifier).remove(user.codigo);
+              //ref.read(usuarioProvider.notifier).remove(user.codigo);
               Navigator.pop(context);
             },
             child: const Text(

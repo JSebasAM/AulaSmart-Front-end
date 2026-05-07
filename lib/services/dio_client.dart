@@ -83,4 +83,3 @@ class _AuthInterceptor extends QueuedInterceptor {
     handler.next(err);
   }
 }
-
