@@ -65,11 +65,11 @@ class AulaDetailView extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: accentColor,
+                              color: aula.estaLibre ? const Color(0xFF34D399) : const Color(0xFFF87171),
                               borderRadius: BorderRadius.circular(999),
                             ),
                             child: Text(
-                              disponible ? 'Disponible' : 'Ocupada',
+                              aula.estado,
                               style: AppTextStyles.smallLabel.copyWith(color: AppColors.surface),
                             ),
                           ),

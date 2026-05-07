@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:aulasmart_front_end/views/app_shell_view.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:aulasmart_front_end/routes/app_routes.dart';
 import 'package:aulasmart_front_end/themes/app_theme.dart';
-import 'package:aulasmart_front_end/views/login_view.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -13,10 +15,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'AulaSmart',
       theme: AppTheme.light(),
+      routerConfig: routerProvider,
     );
   }
 }

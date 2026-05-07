@@ -1,30 +1,63 @@
 import 'package:aulasmart_front_end/themes/app_colors.dart';
+import 'package:aulasmart_front_end/views/admin/admin_users_view.dart';
 import 'package:aulasmart_front_end/views/home_view.dart';
 import 'package:aulasmart_front_end/views/perfil_view.dart';
 import 'package:aulasmart_front_end/views/reportes_view.dart';
 import 'package:aulasmart_front_end/views/reservas_view.dart';
 import 'package:aulasmart_front_end/widgets/app_bottom_nav.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AppShellView extends StatefulWidget {
+class AppShellView extends ConsumerStatefulWidget {
   const AppShellView({super.key});
 
   @override
-  State<AppShellView> createState() => _AppShellViewState();
+  ConsumerState<AppShellView> createState() => _AppShellViewState();
 }
 
-class _AppShellViewState extends State<AppShellView> {
+class _AppShellViewState extends ConsumerState<AppShellView> {
   int _currentIndex = 0;
+  List<NavItemData> _navItems = [];
+  bool _loading = true;
 
-  late final List<Widget> _pages = const [
-    HomeView(),
-    ReservasView(),
-    ReportesView(),
-    PerfilView(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadUserRole();
+  }
+
+  Future<void> _loadUserRole() async {
+    // Vista obligatoria para todos
+    final items = [
+      const NavItemData(
+          label: 'Inicio', icon: Icons.grid_view_rounded, page: HomeView()),
+      const NavItemData(
+          label: 'Reservas',
+          icon: Icons.calendar_month_outlined,
+          page: ReservasView()),
+      const NavItemData(
+          label: 'Reportes',
+          icon: Icons.warning_amber_rounded,
+          page: ReportesView()),
+      const NavItemData(
+          label: 'Usuarios',
+          icon: Icons.people_alt_rounded,
+          page: AdminUsersView()),
+      const NavItemData(
+          label: 'Perfil', icon: Icons.person_outline, page: PerfilView()),
+    ];
+
+    setState(() {
+      _navItems = items;
+      _loading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
@@ -33,13 +66,11 @@ class _AppShellViewState extends State<AppShellView> {
           child: Column(
             children: [
               Expanded(
-                child: IndexedStack(
-                  index: _currentIndex,
-                  children: _pages,
-                ),
+                child: _navItems[_currentIndex].page,
               ),
               AppBottomNav(
                 currentIndex: _currentIndex,
+                items: _navItems,
                 onTap: (value) {
                   setState(() {
                     _currentIndex = value;
