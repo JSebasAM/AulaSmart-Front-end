@@ -12,6 +12,17 @@ class Aula {
   final String nombreTipoAula;
   final bool requiereAutorizacion;
 
+  String get nombre => nombreAula;
+  String get edificio => nombreEdificio;
+  String get piso => "1"; // Valor por defecto
+  bool get tieneWifi => true; // Valor por defecto
+  bool get tieneVideo => true; // Valor por defecto
+  String get ubicacion => nombreDependencia;
+  String get categoria => nombreTipoAula;
+  bool get estaLibre => true; // Valor por defecto
+  String get estado => estaLibre ? 'Disponible' : 'Ocupada';
+  String get imagenUrl => 'https://via.placeholder.com/150'; // Valor por defecto
+
   Aula({
     required this.id,
     required this.codigoAula,

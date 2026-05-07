@@ -9,6 +9,14 @@ class Reserva {
   final String codigoPrograma;
   final String grupo;
 
+  bool get estaPendiente => estado.toLowerCase() == 'pendiente';
+  String get titulo => 'Reserva Aula $codigoAula';
+  String get aula => 'Aula $codigoAula';
+  String get fecha => '${horaInicio.day}/${horaInicio.month}/${horaInicio.year}';
+  String get horario => '${horaInicio.hour}:${horaInicio.minute.toString().padLeft(2, "0")} - ${horaFin.hour}:${horaFin.minute.toString().padLeft(2, "0")}';
+  int get asistentes => 30; // Valor por defecto
+  String get descripcion => 'Reserva para el grupo $grupo'; // Valor por defecto
+
   Reserva({
     required this.id,
     required this.codigoAula,

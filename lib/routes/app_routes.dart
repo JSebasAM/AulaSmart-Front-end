@@ -1,8 +1,10 @@
-import 'package:aulasmart_front_end/views/home_view.dart';
+import 'package:aulasmart_front_end/views/app_shell_view.dart';
+import 'package:aulasmart_front_end/views/evidence_view.dart';
 import 'package:aulasmart_front_end/views/login_view.dart';
 import 'package:go_router/go_router.dart';
 
 final GoRouter routerProvider = GoRouter(
+  initialLocation: '/login',
   routes: [
     GoRoute(
       path: '/login',
@@ -10,7 +12,11 @@ final GoRouter routerProvider = GoRouter(
     ),
     GoRoute(
       path: '/home',
-      builder: (_, _) => const HomeView(),
+      builder: (_, _) => const AppShellView(),
+    ),
+    GoRoute(
+      path: '/evidence',
+      builder: (_, _) => const EvidenceView(),
     ),
   ],
 );
