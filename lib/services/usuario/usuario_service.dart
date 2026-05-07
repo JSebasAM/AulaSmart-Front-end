@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'base_service.dart';
-import '../models/usuario.dart';
-import 'dio_client.dart';
+import '../base_service.dart';
+import '../../models/usuario.dart';
+import '../dio_client.dart';
 
 class UsuarioService extends BaseService {
   UsuarioService(Dio dio) : super(dio, ApiUrls.usuarios);
