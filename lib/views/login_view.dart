@@ -1,25 +1,23 @@
-import 'package:aulasmart_front_end/models/usuario.dart';
-import 'package:aulasmart_front_end/routes/app_routes.dart';
-import 'package:aulasmart_front_end/services/auth_service.dart';
+import 'package:aulasmart_front_end/services/auth/auth_notifier.dart';
+import 'package:aulasmart_front_end/services/auth/auth_state.dart';
 import 'package:aulasmart_front_end/themes/app_colors.dart';
 import 'package:aulasmart_front_end/widgets/auth_text_field.dart';
 import 'package:aulasmart_front_end/widgets/primary_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-class LoginView extends StatefulWidget {
+class LoginView extends ConsumerStatefulWidget {
   const LoginView({super.key});
 
   @override
-  State<LoginView> createState() => _LoginViewState();
+  ConsumerState<LoginView> createState() => _LoginViewState();
 }
 
-class _LoginViewState extends State<LoginView> {
+class _LoginViewState extends ConsumerState<LoginView> {
   final _codigoController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _authService = AuthService();
-
   bool _hidePassword = true;
-  bool _loading = false;
 
   @override
   void dispose() {
@@ -28,7 +26,7 @@ class _LoginViewState extends State<LoginView> {
     super.dispose();
   }
 
-  Future<void> _enterApp() async {
+  void _enterApp() {
     final codigo = _codigoController.text.trim();
     final password = _passwordController.text.trim();
 
@@ -37,24 +35,7 @@ class _LoginViewState extends State<LoginView> {
       return;
     }
 
-    setState(() => _loading = true);
-    final result = await _authService.login(
-      User(
-        codigo: codigo,
-        password: password,
-      ),
-    );
-
-    if (!mounted) return;
-
-    setState(() => _loading = false);
-    if (!result.success) {
-      _showMessage(result.message);
-      return;
-    }
-
-    _showMessage(result.message, isError: false);
-    Navigator.pushReplacementNamed(context, AppRoutes.app);
+    ref.read(authNotifierProvider.notifier).login(codigo, password);
   }
 
   void _showMessage(String message, {bool isError = true}) {
@@ -70,6 +51,18 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<AuthState>(authNotifierProvider, (previous, next) {
+      if (next is AuthError) {
+        _showMessage(next.message);
+      } else if (next is AuthSuccess) {
+        _showMessage('Login exitoso', isError: false);
+        context.go('/home');
+      }
+    });
+
+    final authState = ref.watch(authNotifierProvider);
+    final isLoading = authState is AuthLoading;
+
     final mediaSize = MediaQuery.sizeOf(context);
     final panelWidth = mediaSize.width < 448 ? mediaSize.width - 32 : 416.0;
 
@@ -162,7 +155,7 @@ class _LoginViewState extends State<LoginView> {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      if (_loading)
+                      if (isLoading)
                         const SizedBox(
                           height: 56,
                           child: Center(

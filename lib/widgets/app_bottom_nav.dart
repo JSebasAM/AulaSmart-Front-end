@@ -1,25 +1,32 @@
 import 'package:aulasmart_front_end/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 
+class NavItemData {
+  final String label;
+  final IconData icon;
+  final Widget page;
+
+  const NavItemData({
+    required this.label,
+    required this.icon,
+    required this.page,
+  });
+}
+
 class AppBottomNav extends StatelessWidget {
   final int currentIndex;
+  final List<NavItemData> items;
   final ValueChanged<int> onTap;
 
   const AppBottomNav({
     super.key,
     required this.currentIndex,
+    required this.items,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    const labels = ['Inicio', 'Reservas', 'Reportes', 'Perfil'];
-    const icons = [
-      Icons.grid_view_rounded,
-      Icons.calendar_month_outlined,
-      Icons.warning_amber_rounded,
-      Icons.person_outline,
-    ];
 
     return SafeArea(
       minimum: const EdgeInsets.fromLTRB(14, 0, 14, 10),
@@ -39,8 +46,9 @@ class AppBottomNav extends StatelessWidget {
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: List.generate(labels.length, (index) {
+          children: List.generate(items.length, (index) {
             final isActive = index == currentIndex;
+            final item = items[index];
 
             return GestureDetector(
               onTap: () => onTap(index),
@@ -59,13 +67,13 @@ class AppBottomNav extends StatelessWidget {
                           : null,
                     ),
                     child: Icon(
-                      icons[index],
+                      item.icon,
                       color: isActive ? Colors.white : AppColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    labels[index],
+                    item.label,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: isActive ? AppColors.primaryDark : AppColors.textSecondary,
