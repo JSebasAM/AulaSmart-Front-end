@@ -3,31 +3,29 @@ import '../../models/usuario.dart';
 import 'usuario_service.dart';
 
 class UsuarioNotifier extends AsyncNotifier<List<User>> {
-  late final UsuarioService _service;
-
   @override
   Future<List<User>> build() async {
-    _service = ref.watch(usuarioServiceProvider);
-    return _service.getAll();
+    // Escuchamos el servicio y obtenemos todos los usuarios
+    return ref.watch(usuarioServiceProvider).getAll();
   }
 
   Future<void> refresh() async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(() => _service.getAll());
+    state = await AsyncValue.guard(() => ref.read(usuarioServiceProvider).getAll());
   }
 
   Future<void> create(Map<String, dynamic> body) async {
-    await _service.create(body);
+    await ref.read(usuarioServiceProvider).create(body);
     await refresh();
   }
 
-  Future<void> editar(int id, Map<String, dynamic> body) async {
-    await _service.update(id, body);
+  Future<void> editar(String id, Map<String, dynamic> body) async {
+    await ref.read(usuarioServiceProvider).update(id, body);
     await refresh();
   }
 
-  Future<void> remove(int id) async {
-    await _service.remove(id);
+  Future<void> remove(String id) async {
+    await ref.read(usuarioServiceProvider).remove(id);
     await refresh();
   }
 }

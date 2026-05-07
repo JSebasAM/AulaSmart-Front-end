@@ -18,13 +18,13 @@ class User {
   // Método para convertir un JSON a un objeto User
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      codigo: json['codigo'],
-      nombre: json['nombre'],
-      apellido: json['apellido'],
-      email: json['email'],
-      password: json['password'],
-      rol: json['rol'],
-    ); 
+      codigo: (json['codigo'] ?? '').toString(),
+      nombre: json['nombre'] ?? '',
+      apellido: json['apellido'] ?? '',
+      email: json['email'] ?? '',
+      password: json['password'] ?? '',
+      rol: json['rol'] ?? '',
+    );
   }
   // Método para convertir un objeto User a JSON
   Map<String, dynamic> toJson() {

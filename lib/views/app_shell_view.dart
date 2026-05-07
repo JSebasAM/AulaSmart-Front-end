@@ -1,4 +1,5 @@
 import 'package:aulasmart_front_end/themes/app_colors.dart';
+import 'package:aulasmart_front_end/views/admin/admin_users_view.dart';
 import 'package:aulasmart_front_end/views/home_view.dart';
 import 'package:aulasmart_front_end/views/perfil_view.dart';
 import 'package:aulasmart_front_end/views/reportes_view.dart';
@@ -6,7 +7,6 @@ import 'package:aulasmart_front_end/views/reservas_view.dart';
 import 'package:aulasmart_front_end/widgets/app_bottom_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:aulasmart_front_end/services/storage_service.dart';
 
 class AppShellView extends ConsumerStatefulWidget {
   const AppShellView({super.key});
@@ -27,28 +27,25 @@ class _AppShellViewState extends ConsumerState<AppShellView> {
   }
 
   Future<void> _loadUserRole() async {
-    final storage = ref.read(storageServiceProvider);
-    final userInfo = await storage.getUserInfo();
-    final rol = userInfo?['rol'] as String? ?? '';
-
     // Vista obligatoria para todos
     final items = [
-      const NavItemData(label: 'Inicio', icon: Icons.grid_view_rounded, page: HomeView()),
+      const NavItemData(
+          label: 'Inicio', icon: Icons.grid_view_rounded, page: HomeView()),
+      const NavItemData(
+          label: 'Reservas',
+          icon: Icons.calendar_month_outlined,
+          page: ReservasView()),
+      const NavItemData(
+          label: 'Reportes',
+          icon: Icons.warning_amber_rounded,
+          page: ReportesView()),
+      const NavItemData(
+          label: 'Usuarios',
+          icon: Icons.people_alt_rounded,
+          page: AdminUsersView()),
+      const NavItemData(
+          label: 'Perfil', icon: Icons.person_outline, page: PerfilView()),
     ];
-
-    // Lógica RBAC (Control de Acceso Basado en Roles)
-    final r = rol.toLowerCase();
-    
-    if (r == 'docente' || r == 'administrativo') {
-      items.add(const NavItemData(label: 'Reservas', icon: Icons.calendar_month_outlined, page: ReservasView()));
-    }
-
-    if (r == 'soporte' || r == 'administrativo') {
-      items.add(const NavItemData(label: 'Reportes', icon: Icons.warning_amber_rounded, page: ReportesView()));
-    }
-
-    // Vista obligatoria para todos
-    items.add(const NavItemData(label: 'Perfil', icon: Icons.person_outline, page: PerfilView()));
 
     setState(() {
       _navItems = items;
@@ -69,10 +66,7 @@ class _AppShellViewState extends ConsumerState<AppShellView> {
           child: Column(
             children: [
               Expanded(
-                child: IndexedStack(
-                  index: _currentIndex,
-                  children: _navItems.map((e) => e.page).toList(),
-                ),
+                child: _navItems[_currentIndex].page,
               ),
               AppBottomNav(
                 currentIndex: _currentIndex,

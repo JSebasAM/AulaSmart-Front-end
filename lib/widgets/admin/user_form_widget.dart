@@ -1,3 +1,4 @@
+import 'package:aulasmart_front_end/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import '../auth_text_field.dart';
 import '../../widgets/primary_button.dart';
@@ -38,7 +39,7 @@ class _UserFormWidgetState extends State<UserFormWidget> {
         TextEditingController(text: widget.initialData?['email'] ?? '');
     passwordController =
         TextEditingController(text: widget.initialData?['password'] ?? '');
-    selectedRol = widget.initialData?['rol'] ?? 'estudiante';
+    selectedRol = widget.initialData?['rol'] ?? 'Estudiante';
   }
 
   @override
@@ -63,83 +64,88 @@ class _UserFormWidgetState extends State<UserFormWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AuthTextField(
             label: 'Nombre',
-            hintText: 'Ingresa el nombre',
+            hintText: 'Ej. Juan',
             controller: nombreController,
-            icon: Icons.person,
+            icon: Icons.person_rounded,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           AuthTextField(
             label: 'Apellido',
-            hintText: 'Ingresa el apellido',
+            hintText: 'Ej. Pérez',
             controller: apellidoController,
-            icon: Icons.person_outline,
+            icon: Icons.person_outline_rounded,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           AuthTextField(
             label: 'Email',
-            hintText: 'correo@ejemplo.com',
+            hintText: 'correo@estudiante.com',
             controller: emailController,
-            icon: Icons.email,
+            icon: Icons.email_rounded,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           AuthTextField(
             label: 'Contraseña',
-            hintText: 'Ingresa una contraseña',
+            hintText: 'Mínimo 8 caracteres',
             controller: passwordController,
-            icon: Icons.lock,
+            icon: Icons.lock_rounded,
             obscureText: true,
           ),
           const SizedBox(height: 20),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Rol',
-                style: TextStyle(
-                  color: Color(0xFF28356F),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFFE5E7EB)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: DropdownButton<String>(
-                  value: selectedRol,
-                  isExpanded: true,
-                  underline: const SizedBox(),
-                  items: const [
-                    DropdownMenuItem(value: 'estudiante', child: Text('Estudiante')),
-                    DropdownMenuItem(value: 'profesor', child: Text('Profesor')),
-                    DropdownMenuItem(value: 'admin', child: Text('Administrador')),
-                  ],
-                  onChanged: (value) {
-                    setState(() {
-                      selectedRol = value ?? 'estudiante';
-                    });
-                  },
-                ),
-              ),
-            ],
+          const Text(
+            'Rol del usuario',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          const SizedBox(height: 30),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: selectedRol,
+                isExpanded: true,
+                icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                    color: AppColors.primary),
+                dropdownColor: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                items: const [
+                  DropdownMenuItem(value: 'Estudiante', child: Text('Estudiante')),
+                  DropdownMenuItem(value: 'Docente', child: Text('Docente')),
+                  DropdownMenuItem(value: 'Administrativo', child: Text('Administrativo')),
+                  DropdownMenuItem(value: 'Monitor', child: Text('Monitor')),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    selectedRol = value ?? 'Estudiante';
+                  });
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
           SizedBox(
             width: double.infinity,
+            height: 55,
             child: PrimaryButton(
               label: widget.submitButtonLabel,
               onPressed: _submitForm,
             ),
           ),
+          const SizedBox(height: 16),
         ],
       ),
     );

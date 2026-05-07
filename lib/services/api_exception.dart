@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 class ApiException {
 
@@ -25,9 +26,28 @@ class ApiException {
       // Manejo de errores de respuesta del servidor
         default:
         final statusCode = e.response?.statusCode;
-        final message    = e.response?.data?['message']
-                        ?? e.response?.data?['error']
-                        ?? 'Error inesperado';
+        
+        if (kDebugMode) {
+          print('API_ERROR_STATUS: $statusCode');
+          print('API_ERROR_DATA: ${e.response?.data}');
+        }
+
+        String message = 'Error inesperado';
+        
+        if (e.response?.data is Map) {
+          message = e.response?.data['message']?.toString() 
+                 ?? e.response?.data['error']?.toString() 
+                 ?? 'Error inesperado';
+        } else if (e.response?.data is String) {
+          message = e.response?.data;
+        }
+
+        if (statusCode == 402) {
+          message = 'Pago requerido o cuota excedida (402)';
+        } else if (statusCode == 403) {
+          message = 'Acceso denegado (403)';
+        }
+        
         return ApiException(message: message, statusCode: statusCode);
     }
   }

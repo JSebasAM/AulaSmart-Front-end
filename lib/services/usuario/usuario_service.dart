@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../base_service.dart';
@@ -10,41 +11,51 @@ class UsuarioService extends BaseService {
   // Métodos específicos para el recurso de usuarios
   Future<List<User>> getAll() async {
     return await get<List<User>>(
-      '${ApiUrls.usuarios}/usuarios',
+      '${ApiUrls.usuarios}/usuario-service/usuarios',
       parser: (data) {
-        if (data is List) {
-          return data.map((e) => User.fromJson(e as Map<String, dynamic>)).toList();
+        if (kDebugMode) {
+          print('USUARIO_SERVICE_DATA: $data');
         }
-        return <User>[];
+        List<dynamic> list = [];
+        if (data is List) {
+          list = data;
+        } else if (data is Map) {
+          // Intentar extraer la lista de campos comunes
+          list = data['data'] ?? data['usuarios'] ?? data['content'] ?? [];
+        }
+
+        return list
+            .map((e) => User.fromJson(e as Map<String, dynamic>))
+            .toList();
       },
     );
   }
 
-  Future<User> getById(int id) async {
+  Future<User> getById(String id) async {
     return await get<User>(
-      '${ApiUrls.usuarios}/usuarios/$id',
+      '${ApiUrls.usuarios}/usuario-service/usuarios/$id',
       parser: (data) => User.fromJson(data as Map<String, dynamic>),
     );
   }
 
   Future<User> create(Map<String, dynamic> payload) async {
     return await post<User>(
-      '${ApiUrls.usuarios}/usuarios',
+      '${ApiUrls.usuarios}/usuario-service/usuarios',
       data: payload,
       parser: (data) => User.fromJson(data as Map<String, dynamic>),
     );
   }
 
-  Future<User> update(int id, Map<String, dynamic> payload) async {
+  Future<User> update(String id, Map<String, dynamic> payload) async {
     return await put<User>(
-      '${ApiUrls.usuarios}/usuarios/$id',
+      '${ApiUrls.usuarios}/usuario-service/usuarios/$id',
       data: payload,
       parser: (data) => User.fromJson(data as Map<String, dynamic>),
     );
   }
 
-  Future<void> remove(int id) async {
-    await delete('${ApiUrls.usuarios}/usuarios/$id');
+  Future<void> remove(String id) async {
+    await delete('${ApiUrls.usuarios}/usuario-service/usuarios/$id');
   }
 }
 

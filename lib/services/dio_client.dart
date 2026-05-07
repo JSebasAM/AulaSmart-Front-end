@@ -1,6 +1,7 @@
 
 import 'package:aulasmart_front_end/views/new_report_modal_view.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'storage_service.dart';
@@ -33,8 +34,12 @@ class _AuthInterceptor extends QueuedInterceptor {
   Future<void> onRequest(
     RequestOptions options,
     RequestInterceptorHandler handler,
-  )async{
+  ) async {
     final token = await _storage.accessToken;
+    if (kDebugMode) {
+      print('INTERCEPTOR_REQUEST: ${options.uri}');
+      print('INTERCEPTOR_HAS_TOKEN: ${token != null}');
+    }
     if (token != null) {
       options.headers['Authorization'] = 'Bearer $token';
     }
