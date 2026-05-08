@@ -7,12 +7,14 @@ class NavItemData {
   final IconData icon;
   final Widget page;
   final List<NavSubItem>? subItems;
+  final bool showInNavBar;
 
   const NavItemData({
     required this.label,
     required this.icon,
     required this.page,
     this.subItems,
+    this.showInNavBar = true,
   });
 }
 
@@ -62,10 +64,13 @@ class AppBottomNav extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           physics: const BouncingScrollPhysics(),
           child: Row(
-            children: List.generate(items.length, (index) {
-              final isActive = index == currentIndex;
-              final item = items[index];
-              final isLast = index == items.length - 1;
+            children: items.asMap().entries.where((e) => e.value.showInNavBar).map((entry) {
+              final index = entry.key;
+              final item = entry.value;
+              
+              // Determinar si es el último ítem visible para el padding
+              final visibleItems = items.where((i) => i.showInNavBar).toList();
+              final isLast = item == visibleItems.last;
 
               Widget button;
 
@@ -82,7 +87,9 @@ class AppBottomNav extends StatelessWidget {
                   child: SplitButtonM3E<int>(
                     size: SplitButtonM3ESize.md,
                     shape: SplitButtonM3EShape.round,
-                    emphasis: isActive ? SplitButtonM3EEmphasis.filled : SplitButtonM3EEmphasis.tonal,
+                    emphasis: index == currentIndex || item.subItems!.any((s) => s.index == currentIndex) 
+                        ? SplitButtonM3EEmphasis.filled 
+                        : SplitButtonM3EEmphasis.tonal,
                     label: item.label,
                     leadingIcon: item.icon,
                     onPressed: () => onTap(index),
@@ -107,14 +114,14 @@ class AppBottomNav extends StatelessWidget {
                   ),
                 );
               } else {
-                button = _buildStandardButton(item, isActive, index);
+                button = _buildStandardButton(item, index == currentIndex, index);
               }
 
               return Padding(
                 padding: EdgeInsets.only(right: isLast ? 0 : 8.0),
                 child: button,
               );
-            }),
+            }).toList(),
           ),
         ),
       ),

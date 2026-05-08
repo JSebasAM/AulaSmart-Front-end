@@ -7,11 +7,13 @@ import '../../widgets/admin/user_form_widget.dart';
 
 class AdminUserFormView extends ConsumerStatefulWidget {
   final User? user;
+  final String? fixedRole;
   final VoidCallback onSaved;
 
   const AdminUserFormView({
     super.key,
     this.user,
+    this.fixedRole,
     required this.onSaved,
   });
 
@@ -83,8 +85,8 @@ class _AdminUserFormViewState extends ConsumerState<AdminUserFormView> {
                   children: [
                     Text(
                       widget.user != null
-                          ? 'Editar Usuario'
-                          : 'Nuevo Usuario',
+                          ? 'Editar ${widget.fixedRole ?? 'Usuario'}'
+                          : 'Nuevo ${widget.fixedRole ?? 'Usuario'}',
                       style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
@@ -108,6 +110,7 @@ class _AdminUserFormViewState extends ConsumerState<AdminUserFormView> {
                   child: UserFormWidget(
                     onSubmit: () {},
                     onFormSubmit: _handleFormSubmit,
+                    fixedRole: widget.fixedRole,
                     submitButtonLabel:
                         widget.user != null ? 'Guardar Cambios' : 'Crear Usuario',
                     initialData: widget.user != null

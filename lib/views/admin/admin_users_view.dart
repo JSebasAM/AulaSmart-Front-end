@@ -8,7 +8,8 @@ import '../../widgets/primary_button.dart';
 import 'admin_user_form_view.dart';
 
 class AdminUsersView extends ConsumerStatefulWidget {
-  const AdminUsersView({super.key});
+  final String? roleFilter;
+  const AdminUsersView({super.key, this.roleFilter});
 
   @override
   ConsumerState<AdminUsersView> createState() => _AdminUsersViewState();
@@ -32,6 +33,7 @@ class _AdminUsersViewState extends ConsumerState<AdminUsersView> {
           ),
           child: AdminUserFormView(
             user: user,
+            fixedRole: widget.roleFilter,
             onSaved: () => Navigator.pop(context),
           ),
         ),
@@ -79,9 +81,9 @@ class _AdminUsersViewState extends ConsumerState<AdminUsersView> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text(
-          'Gestión de Usuarios',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          widget.roleFilter != null ? 'Gestión de ${widget.roleFilter}s' : 'Gestión de Usuarios',
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -164,6 +166,11 @@ class _AdminUsersViewState extends ConsumerState<AdminUsersView> {
                 child: usuariosAsync.when(
                   data: (usuarios) {
                     final filteredUsers = usuarios.where((u) {
+                      // Filtrar por rol si aplica
+                      if (widget.roleFilter != null && u.rol != widget.roleFilter) {
+                        return false;
+                      }
+
                       final nameMatch = u.nombre
                           .toLowerCase()
                           .contains(_searchQuery.toLowerCase());
