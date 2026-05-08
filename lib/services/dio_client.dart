@@ -1,5 +1,3 @@
-
-import 'package:aulasmart_front_end/views/new_report_modal_view.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

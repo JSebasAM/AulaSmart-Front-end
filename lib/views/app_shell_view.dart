@@ -40,9 +40,13 @@ class _AppShellViewState extends ConsumerState<AppShellView> {
           icon: Icons.warning_amber_rounded,
           page: ReportesView()),
       const NavItemData(
-          label: 'Usuarios',
-          icon: Icons.people_alt_rounded,
-          page: AdminUsersView()),
+        label: 'Admin',
+        icon: Icons.admin_panel_settings_rounded,
+        page: AdminUsersView(),
+        subItems: [
+          NavSubItem(label: 'Usuarios', icon: Icons.people_alt_rounded, index: 3),
+        ],
+      ),
       const NavItemData(
           label: 'Perfil', icon: Icons.person_outline, page: PerfilView()),
     ];
