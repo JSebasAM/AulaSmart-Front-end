@@ -8,6 +8,7 @@ class UserFormWidget extends StatefulWidget {
   final Function(Map<String, dynamic>) onFormSubmit;
   final String submitButtonLabel;
   final Map<String, dynamic>? initialData;
+  final String? fixedRole;
 
   const UserFormWidget({
     super.key,
@@ -15,6 +16,7 @@ class UserFormWidget extends StatefulWidget {
     required this.onFormSubmit,
     this.submitButtonLabel = 'Registrar',
     this.initialData,
+    this.fixedRole,
   });
 
   @override
@@ -39,7 +41,7 @@ class _UserFormWidgetState extends State<UserFormWidget> {
         TextEditingController(text: widget.initialData?['email'] ?? '');
     passwordController =
         TextEditingController(text: widget.initialData?['password'] ?? '');
-    selectedRol = widget.initialData?['rol'] ?? 'Estudiante';
+    selectedRol = widget.fixedRole ?? widget.initialData?['rol'] ?? 'Estudiante';
   }
 
   @override
@@ -98,44 +100,46 @@ class _UserFormWidgetState extends State<UserFormWidget> {
             obscureText: true,
           ),
           const SizedBox(height: 20),
-          const Text(
-            'Rol del usuario',
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: selectedRol,
-                isExpanded: true,
-                icon: const Icon(Icons.keyboard_arrow_down_rounded,
-                    color: AppColors.primary),
-                dropdownColor: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                items: const [
-                  DropdownMenuItem(value: 'Estudiante', child: Text('Estudiante')),
-                  DropdownMenuItem(value: 'Docente', child: Text('Docente')),
-                  DropdownMenuItem(value: 'Administrativo', child: Text('Administrativo')),
-                  DropdownMenuItem(value: 'Monitor', child: Text('Monitor')),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    selectedRol = value ?? 'Estudiante';
-                  });
-                },
+          if (widget.fixedRole == null) ...[
+            const Text(
+              'Rol del usuario',
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
               ),
             ),
-          ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: selectedRol,
+                  isExpanded: true,
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                      color: AppColors.primary),
+                  dropdownColor: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  items: const [
+                    DropdownMenuItem(value: 'Estudiante', child: Text('Estudiante')),
+                    DropdownMenuItem(value: 'Docente', child: Text('Docente')),
+                    DropdownMenuItem(value: 'Administrativo', child: Text('Administrativo')),
+                    DropdownMenuItem(value: 'Monitor', child: Text('Monitor')),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      selectedRol = value ?? 'Estudiante';
+                    });
+                  },
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 32),
           SizedBox(
             width: double.infinity,
