@@ -79,7 +79,6 @@ class _AdminUsersViewState extends ConsumerState<AdminUsersView> {
     final usuariosAsync = ref.watch(usuarioProvider);
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(
           widget.roleFilter != null ? 'Gestión de ${widget.roleFilter}s' : 'Gestión de Usuarios',
