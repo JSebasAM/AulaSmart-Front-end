@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../themes/app_colors.dart';
+import '../../themes/app_text_styles.dart';
 
 class AdminDashboardView extends StatelessWidget {
   const AdminDashboardView({super.key});
@@ -9,7 +10,7 @@ class AdminDashboardView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Panel Administrativo', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text('Panel Administrativo', style: AppTextStyles.sectionTitle.copyWith(fontSize: 22)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: AppColors.textPrimary,
@@ -22,18 +23,14 @@ class AdminDashboardView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Bienvenido, Administrador',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
+                  style: AppTextStyles.pageTitle.copyWith(fontSize: 24),
                 ),
                 const SizedBox(height: 8),
                 const Text(
                   'Selecciona una sección para gestionar el sistema.',
-                  style: TextStyle(color: AppColors.textSecondary),
+                  style: AppTextStyles.sectionBody,
                 ),
                 const SizedBox(height: 40),
                 Expanded(
@@ -110,11 +107,7 @@ class AdminDashboardView extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: AppColors.textPrimary,
-                ),
+                style: AppTextStyles.cardTitle,
               ),
             ],
           ),

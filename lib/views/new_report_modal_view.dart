@@ -1,6 +1,8 @@
 import 'package:aulasmart_front_end/themes/app_colors.dart';
+import 'package:aulasmart_front_end/themes/app_text_styles.dart';
 import 'package:aulasmart_front_end/widgets/carta_preview_widget.dart';
 import 'package:flutter/material.dart';
+
 
 class NewReportModalView extends StatefulWidget {
   final VoidCallback onClose;
@@ -141,24 +143,14 @@ class _NewReportModalViewState extends State<NewReportModalView> {
                           'Reportar Incidencia',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
-                            height: 1.1,
-                          ),
+                          style: AppTextStyles.cardTitle,
                         ),
                         const SizedBox(height: 2),
                         Text(
                           'Reporte general del campus',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.88),
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w500,
-                            height: 1.1,
-                          ),
+                          style: AppTextStyles.tinyLabel.copyWith(color: Colors.white.withValues(alpha: 0.88)),
                         ),
                       ],
                     ),
@@ -211,14 +203,13 @@ class _NewReportModalViewState extends State<NewReportModalView> {
                                   controller: _titleController,
                                   maxLines: 1,
                                   textAlignVertical: TextAlignVertical.center,
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     border: InputBorder.none,
                                     isDense: true,
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 17),
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
                                     hintText: 'Ej: Proyector no funciona correctamente',
-                                    hintStyle: TextStyle(
+                                    hintStyle: AppTextStyles.sectionBody.copyWith(
                                       color: AppColors.textSecondary,
-                                      fontSize: 15,
                                       height: 1.0,
                                     ),
                                   ),
@@ -263,10 +254,8 @@ class _NewReportModalViewState extends State<NewReportModalView> {
                                             textAlign: TextAlign.center,
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              color: AppColors.textPrimary,
+                                            style: AppTextStyles.sectionTitle.copyWith(
                                               fontSize: 15,
-                                              fontWeight: FontWeight.w800,
                                               height: 1.0,
                                             ),
                                           ),
@@ -286,13 +275,12 @@ class _NewReportModalViewState extends State<NewReportModalView> {
                                     value: _selectedLocation,
                                     isExpanded: true,
                                     icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.textSecondary),
-                                    hint: const Text(
+                                    hint: Text(
                                       'Selecciona una ubicación...',
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
+                                      style: AppTextStyles.sectionBody.copyWith(
                                         color: AppColors.textSecondary,
-                                        fontSize: 15,
                                       ),
                                     ),
                                     items: _locations
@@ -303,8 +291,7 @@ class _NewReportModalViewState extends State<NewReportModalView> {
                                               location,
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                fontSize: 15,
+                                              style: AppTextStyles.sectionBody.copyWith(
                                                 color: AppColors.textPrimary,
                                               ),
                                             ),
@@ -324,28 +311,25 @@ class _NewReportModalViewState extends State<NewReportModalView> {
                                   controller: _descriptionController,
                                   maxLines: 4,
                                   textAlignVertical: TextAlignVertical.top,
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     border: InputBorder.none,
                                     isDense: true,
                                     contentPadding: EdgeInsets.fromLTRB(16, 16, 16, 16),
                                     hintText:
                                         'Describe detalladamente la situación. Esta información será utilizada para generar una carta formal...',
                                     hintMaxLines: 4,
-                                    hintStyle: TextStyle(
+                                    hintStyle: AppTextStyles.sectionBody.copyWith(
                                       color: AppColors.textSecondary,
-                                      fontSize: 15,
                                       height: 1.25,
                                     ),
                                   ),
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              const Text(
+                              Text(
                                 'Mínimo 30 caracteres para generar la carta formal',
-                                style: TextStyle(
+                                style: AppTextStyles.tinyLabel.copyWith(
                                   color: AppColors.textSecondary,
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w500,
                                   height: 1.1,
                                 ),
                               ),
@@ -380,12 +364,7 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: const TextStyle(
-        color: AppColors.textPrimary,
-        fontSize: 16,
-        fontWeight: FontWeight.w800,
-        height: 1.2,
-      ),
+      style: AppTextStyles.sectionTitle.copyWith(fontSize: 16),
     );
   }
 }
@@ -433,7 +412,7 @@ class _UploadPlaceholder extends StatelessWidget {
           style: BorderStyle.solid,
         ),
       ),
-      child: const Center(
+      child: Center(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: Column(
@@ -444,23 +423,13 @@ class _UploadPlaceholder extends StatelessWidget {
               Text(
                 'Toca para adjuntar evidencia fotográfica',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  height: 1.2,
-                ),
+                style: AppTextStyles.sectionTitle.copyWith(fontSize: 16),
               ),
               SizedBox(height: 8),
               Text(
                 'JPG, PNG o WEBP (máx. 5MB)',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  height: 1.1,
-                ),
+                style: AppTextStyles.smallLabel,
               ),
             ],
           ),
@@ -505,10 +474,8 @@ class _ActionButton extends StatelessWidget {
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: AppTextStyles.sectionTitle.copyWith(
               color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
               height: 1.15,
             ),
           ),

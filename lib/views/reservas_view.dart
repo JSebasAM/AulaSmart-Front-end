@@ -218,11 +218,7 @@ class _ReservaCard extends StatelessWidget {
             ),
             child: Text(
               data.descripcion,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
+              style: AppTextStyles.cardSubtitle.copyWith(color: AppColors.textPrimary),
             ),
           ),
         ],

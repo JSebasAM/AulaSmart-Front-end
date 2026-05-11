@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../themes/app_colors.dart';
+import '../themes/app_text_styles.dart';
 
 class ComingSoonView extends StatelessWidget {
   final String featureName;
@@ -38,28 +39,17 @@ class ComingSoonView extends StatelessWidget {
             const SizedBox(height: 32),
             Text(
               featureName,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
+              style: AppTextStyles.pageTitle.copyWith(fontSize: 24),
             ),
             const SizedBox(height: 12),
             const Text(
               'Esta sección está actualmente en desarrollo.',
-              style: TextStyle(
-                fontSize: 16,
-                color: AppColors.textSecondary,
-              ),
+              style: AppTextStyles.pageSubtitle,
             ),
             const SizedBox(height: 8),
             const Text(
               '¡Vuelve pronto para ver las novedades!',
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-                fontStyle: FontStyle.italic,
-              ),
+              style: AppTextStyles.sectionBody,
             ),
           ],
         ),

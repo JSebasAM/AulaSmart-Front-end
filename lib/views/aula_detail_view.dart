@@ -208,17 +208,13 @@ class _TopBar extends StatelessWidget {
               color: AppColors.surface.withValues(alpha: 0.16),
               borderRadius: BorderRadius.circular(999),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.surface, size: 14),
-                SizedBox(width: 4),
+                const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.surface, size: 14),
+                const SizedBox(width: 4),
                 Text(
                   'Volver',
-                  style: TextStyle(
-                    color: AppColors.surface,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: AppTextStyles.smallLabel.copyWith(color: AppColors.surface),
                 ),
               ],
             ),

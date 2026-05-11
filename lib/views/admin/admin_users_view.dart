@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/usuario.dart';
 import '../../services/usuario/usuario_notifier.dart';
 import '../../themes/app_colors.dart';
+import '../../themes/app_text_styles.dart';
 import '../../widgets/admin/user_card_widget.dart';
 import '../../widgets/primary_button.dart';
 import 'admin_user_form_view.dart';
@@ -82,7 +83,7 @@ class _AdminUsersViewState extends ConsumerState<AdminUsersView> {
       appBar: AppBar(
         title: Text(
           widget.roleFilter != null ? 'Gestión de ${widget.roleFilter}s' : 'Gestión de Usuarios',
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: AppTextStyles.sectionTitle.copyWith(fontSize: 22),
         ),
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -90,7 +91,7 @@ class _AdminUsersViewState extends ConsumerState<AdminUsersView> {
         centerTitle: false,
       ),
       body: Container(
-        decoration: BoxDecoration(gradient: AppColors.pageGradient),
+        decoration: const BoxDecoration(gradient: AppColors.pageGradient),
         child: SafeArea(
           child: Column(
             children: [
@@ -121,10 +122,8 @@ class _AdminUsersViewState extends ConsumerState<AdminUsersView> {
                                   setState(() => _searchQuery = value),
                               decoration: InputDecoration(
                                 hintText: 'Buscar por nombre o correo...',
-                                hintStyle: TextStyle(
-                                  color:
-                                      AppColors.textSecondary.withOpacity(0.5),
-                                  fontSize: 14,
+                                hintStyle: AppTextStyles.cardSubtitle.copyWith(
+                                  color: AppColors.textSecondary.withOpacity(0.5),
                                 ),
                                 prefixIcon: const Icon(Icons.search,
                                     color: AppColors.primary),
@@ -236,18 +235,14 @@ class _AdminUsersViewState extends ConsumerState<AdminUsersView> {
             _searchQuery.isEmpty
                 ? 'No hay usuarios registrados'
                 : 'No se encontraron resultados',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
+            style: AppTextStyles.sectionTitle.copyWith(fontSize: 18),
           ),
           const SizedBox(height: 8),
           Text(
             _searchQuery.isEmpty
                 ? 'Comienza agregando un nuevo usuario'
                 : 'Intenta con otros términos de búsqueda',
-            style: const TextStyle(color: AppColors.textSecondary),
+            style: AppTextStyles.sectionBody,
           ),
         ],
       ),

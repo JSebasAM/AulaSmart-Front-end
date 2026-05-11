@@ -4,7 +4,6 @@ import 'package:aulasmart_front_end/views/app_shell_view.dart';
 import 'package:aulasmart_front_end/views/coming_soon_view.dart';
 import 'package:aulasmart_front_end/views/evidence_view.dart';
 import 'package:aulasmart_front_end/views/login_view.dart';
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 final GoRouter routerProvider = GoRouter(
@@ -13,7 +12,7 @@ final GoRouter routerProvider = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      redirect: (_, __) => '/home',
+      redirect: (_, _) => '/home',
     ),
     GoRoute(
       path: '/login',

@@ -271,21 +271,13 @@ class _MiniStat extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             value,
-            style: const TextStyle(
-              color: AppColors.primaryDark,
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-            ),
+            style: AppTextStyles.cardTitle.copyWith(fontSize: 16),
           ),
           const SizedBox(height: 2),
           Text(
             label,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTextStyles.smallLabel,
           ),
         ],
       ),
@@ -368,20 +360,12 @@ class _ProfileOptionTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
-                      color: color,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: AppTextStyles.cardTitle.copyWith(color: color, fontSize: 15),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     subtitle,
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: AppTextStyles.cardSubtitle,
                   ),
                 ],
               ),
