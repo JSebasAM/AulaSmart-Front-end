@@ -227,11 +227,10 @@ class _ReportesViewState extends State<ReportesView> {
                                       borderRadius: BorderRadius.circular(20),
                                       border: Border.all(color: const Color(0xFFA6B4FF)),
                                     ),
-                                    child: const Text(
+                                    child: Text(
                                       '●  Toca un edificio para seleccionar',
-                                      style: TextStyle(
+                                      style: AppTextStyles.smallLabel.copyWith(
                                         color: AppColors.primaryDark,
-                                        fontWeight: FontWeight.w600,
                                         fontSize: 11,
                                       ),
                                       maxLines: 1,
@@ -371,7 +370,7 @@ class _BuildingChip extends StatelessWidget {
           children: [
             Text(
               code,
-              style: const TextStyle(
+              style: AppTextStyles.smallLabel.copyWith(
                 color: Colors.white,
                 fontSize: 12,
                 fontWeight: FontWeight.w800,
@@ -379,10 +378,8 @@ class _BuildingChip extends StatelessWidget {
             ),
             Text(
               subtitle,
-              style: const TextStyle(
-                color: Color(0xFFEAF0FF),
-                fontSize: 9,
-                fontWeight: FontWeight.w600,
+              style: AppTextStyles.tinyLabel.copyWith(
+                color: const Color(0xFFEAF0FF),
               ),
             ),
           ],

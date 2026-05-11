@@ -29,7 +29,7 @@ class ApiException {
         
         if (kDebugMode) {
           print('API_ERROR_STATUS: $statusCode');
-          print('API_ERROR_DATA: ${e.response?.data}');
+          print('API_ERROR_DATA: ${e.response?.headers}');
         }
 
         String message = 'Error inesperado';

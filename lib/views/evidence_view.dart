@@ -1,5 +1,6 @@
 import 'package:aulasmart_front_end/services/storage_service.dart';
 import 'package:aulasmart_front_end/themes/app_colors.dart';
+import 'package:aulasmart_front_end/themes/app_text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -44,7 +45,7 @@ class _EvidenceViewState extends ConsumerState<EvidenceView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Evidencia (Debugging UI)'),
+        title: Text('Evidencia (Debugging UI)', style: AppTextStyles.sectionTitle.copyWith(color: Colors.white)),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
@@ -55,15 +56,15 @@ class _EvidenceViewState extends ConsumerState<EvidenceView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
+                  Text(
                     'Datos de Shared Preferences (Usuario):',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: AppTextStyles.sectionTitle,
                   ),
                   const SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.grey[200],
+                      color: AppColors.surfaceVariant,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -72,9 +73,9 @@ class _EvidenceViewState extends ConsumerState<EvidenceView> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const Text(
+                  Text(
                     'Datos de Flutter Secure Storage (Token):',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: AppTextStyles.sectionTitle,
                   ),
                   const SizedBox(height: 8),
                   Container(

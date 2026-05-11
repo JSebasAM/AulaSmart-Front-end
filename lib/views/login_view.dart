@@ -1,6 +1,7 @@
 import 'package:aulasmart_front_end/services/auth/auth_notifier.dart';
 import 'package:aulasmart_front_end/services/auth/auth_state.dart';
 import 'package:aulasmart_front_end/themes/app_colors.dart';
+import 'package:aulasmart_front_end/themes/app_text_styles.dart';
 import 'package:aulasmart_front_end/widgets/auth_text_field.dart';
 import 'package:aulasmart_front_end/widgets/primary_button.dart';
 import 'package:flutter/material.dart';
@@ -114,23 +115,13 @@ class _LoginViewState extends ConsumerState<LoginView> {
                       const Text(
                         'Bienvenido',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 31,
-                          fontWeight: FontWeight.w800,
-                          height: 1.1,
-                        ),
+                        style: AppTextStyles.pageTitle,
                       ),
                       const SizedBox(height: 10),
                       const Text(
                         'Ingresa a tu cuenta de AulaSmart',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500,
-                          height: 1.2,
-                        ),
+                        style: AppTextStyles.pageSubtitle,
                       ),
                       const SizedBox(height: 30),
                       AuthTextField(

@@ -1,6 +1,5 @@
 import 'package:aulasmart_front_end/themes/app_colors.dart';
 import 'package:flutter/material.dart';
-import 'package:split_button_m3e/split_button_m3e.dart';
 
 class NavItemData {
   final String label;
@@ -72,50 +71,7 @@ class AppBottomNav extends StatelessWidget {
               final visibleItems = items.where((i) => i.showInNavBar).toList();
               final isLast = item == visibleItems.last;
 
-              Widget button;
-
-              if (item.subItems != null && item.subItems!.isNotEmpty) {
-                button = Theme(
-                  data: Theme.of(context).copyWith(
-                    colorScheme: ColorScheme.fromSeed(
-                      seedColor: AppColors.primary,
-                      primary: AppColors.primary,
-                      onPrimary: Colors.white,
-                      secondaryContainer: AppColors.surfaceVariant,
-                    ),
-                  ),
-                  child: SplitButtonM3E<int>(
-                    size: SplitButtonM3ESize.md,
-                    shape: SplitButtonM3EShape.round,
-                    emphasis: index == currentIndex || item.subItems!.any((s) => s.index == currentIndex) 
-                        ? SplitButtonM3EEmphasis.filled 
-                        : SplitButtonM3EEmphasis.tonal,
-                    label: item.label,
-                    leadingIcon: item.icon,
-                    onPressed: () => onTap(index),
-                    items: item.subItems!.map((sub) => SplitButtonM3EItem<int>(
-                      value: sub.index,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(sub.icon, size: 20, color: AppColors.primary),
-                          const SizedBox(width: 12),
-                          Text(
-                            sub.label,
-                            style: const TextStyle(
-                              color: AppColors.textPrimary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )).toList(),
-                    onSelected: (v) => onTap(v),
-                  ),
-                );
-              } else {
-                button = _buildStandardButton(item, index == currentIndex, index);
-              }
+              final button = _buildStandardButton(item, index == currentIndex, index);
 
               return Padding(
                 padding: EdgeInsets.only(right: isLast ? 0 : 8.0),

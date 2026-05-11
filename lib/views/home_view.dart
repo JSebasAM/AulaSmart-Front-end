@@ -112,7 +112,7 @@ class _HomeViewState extends State<HomeView> {
               ),
               const SizedBox(height: 4),
               Text(
-                'Juan 👋',
+                'Buenos días,Juan 👋',
                 style: AppTextStyles.sectionTitle.copyWith(fontSize: 28),
               ),
               const SizedBox(height: 8),

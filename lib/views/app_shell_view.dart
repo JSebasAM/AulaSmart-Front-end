@@ -1,5 +1,5 @@
 import 'package:aulasmart_front_end/themes/app_colors.dart';
-import 'package:aulasmart_front_end/views/admin/admin_users_view.dart';
+import 'package:aulasmart_front_end/views/admin/admin_dashboard_view.dart';
 import 'package:aulasmart_front_end/views/home_view.dart';
 import 'package:aulasmart_front_end/views/perfil_view.dart';
 import 'package:aulasmart_front_end/views/reportes_view.dart';
@@ -27,7 +27,6 @@ class _AppShellViewState extends ConsumerState<AppShellView> {
   }
 
   Future<void> _loadUserRole() async {
-    // Vista obligatoria para todos
     final items = [
       const NavItemData(
           label: 'Inicio', icon: Icons.grid_view_rounded, page: HomeView()),
@@ -42,19 +41,10 @@ class _AppShellViewState extends ConsumerState<AppShellView> {
       const NavItemData(
           label: 'Perfil', icon: Icons.person_outline, page: PerfilView()),
       const NavItemData(
-        label: 'Admin',
+        label: 'Gestión',
         icon: Icons.admin_panel_settings_rounded,
-        page: AdminUsersView(),
-        subItems: [
-          NavSubItem(label: 'Usuarios', icon: Icons.people_alt_rounded, index: 4),
-          NavSubItem(label: 'Docentes', icon: Icons.badge_rounded, index: 5),
-          NavSubItem(label: 'Estudiantes', icon: Icons.school_rounded, index: 6),
-        ],
+        page: AdminDashboardView(),
       ),
-      const NavItemData(
-          label: 'Docentes', icon: Icons.badge_rounded, page: AdminUsersView(roleFilter: 'Docente'), showInNavBar: false),
-      const NavItemData(
-          label: 'Estudiantes', icon: Icons.school_rounded, page: AdminUsersView(roleFilter: 'Estudiante'), showInNavBar: false),
     ];
 
     setState(() {

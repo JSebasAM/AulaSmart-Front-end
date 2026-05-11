@@ -1,4 +1,5 @@
 import 'package:aulasmart_front_end/themes/app_colors.dart';
+import 'package:aulasmart_front_end/themes/app_text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/usuario.dart';
@@ -87,12 +88,7 @@ class _AdminUserFormViewState extends ConsumerState<AdminUserFormView> {
                       widget.user != null
                           ? 'Editar ${widget.fixedRole ?? 'Usuario'}'
                           : 'Nuevo ${widget.fixedRole ?? 'Usuario'}',
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
-                        letterSpacing: -0.5,
-                      ),
+                      style: AppTextStyles.sectionTitle.copyWith(fontSize: 22),
                     ),
                     IconButton(
                       onPressed: () => Navigator.pop(context),

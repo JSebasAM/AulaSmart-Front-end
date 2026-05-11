@@ -109,36 +109,6 @@ class _UserFormWidgetState extends State<UserFormWidget> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: selectedRol,
-                  isExpanded: true,
-                  icon: const Icon(Icons.keyboard_arrow_down_rounded,
-                      color: AppColors.primary),
-                  dropdownColor: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  items: const [
-                    DropdownMenuItem(value: 'Estudiante', child: Text('Estudiante')),
-                    DropdownMenuItem(value: 'Docente', child: Text('Docente')),
-                    DropdownMenuItem(value: 'Administrativo', child: Text('Administrativo')),
-                    DropdownMenuItem(value: 'Monitor', child: Text('Monitor')),
-                  ],
-                  onChanged: (value) {
-                    setState(() {
-                      selectedRol = value ?? 'Estudiante';
-                    });
-                  },
-                ),
-              ),
-            ),
           ],
           const SizedBox(height: 32),
           SizedBox(
