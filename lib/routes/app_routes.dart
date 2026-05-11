@@ -4,6 +4,7 @@ import 'package:aulasmart_front_end/views/app_shell_view.dart';
 import 'package:aulasmart_front_end/views/coming_soon_view.dart';
 import 'package:aulasmart_front_end/views/evidence_view.dart';
 import 'package:aulasmart_front_end/views/login_view.dart';
+import 'package:aulasmart_front_end/features/aulas/presentation/views/aulas_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final GoRouter routerProvider = GoRouter(
@@ -48,7 +49,7 @@ final GoRouter routerProvider = GoRouter(
     ),
     GoRoute(
       path: '/admin/aulas',
-      builder: (_, _) => const ComingSoonView(featureName: 'Gestión de Aulas'),
+      builder: (_, _) => const AulasScreen(),
     ),
   ],
 );

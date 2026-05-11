@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'storage_service.dart';
 
 class ApiUrls {
+  static String get auth        => dotenv.env['API_AUTH'] ?? 'http://localhost:8081/api/v1';
   static String get usuarios    => dotenv.env['API_USUARIOS'] ?? 'http://localhost:8081/api/v1';
   static String get reservas    => dotenv.env['API_RESERVAS'] ?? 'http://localhost:8082/api/v1';
   static String get aulas       => dotenv.env['API_AULAS'] ?? 'http://localhost:8083/api/v1';

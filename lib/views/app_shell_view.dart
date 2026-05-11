@@ -1,6 +1,6 @@
 import 'package:aulasmart_front_end/themes/app_colors.dart';
 import 'package:aulasmart_front_end/views/admin/admin_dashboard_view.dart';
-import 'package:aulasmart_front_end/views/home_view.dart';
+import 'package:aulasmart_front_end/features/aulas/presentation/views/aulas_screen.dart';
 import 'package:aulasmart_front_end/views/perfil_view.dart';
 import 'package:aulasmart_front_end/views/reportes_view.dart';
 import 'package:aulasmart_front_end/views/reservas_view.dart';
@@ -29,7 +29,7 @@ class _AppShellViewState extends ConsumerState<AppShellView> {
   Future<void> _loadUserRole() async {
     final items = [
       const NavItemData(
-          label: 'Inicio', icon: Icons.grid_view_rounded, page: HomeView()),
+          label: 'Aulas', icon: Icons.grid_view_rounded, page: AulasScreen()),
       const NavItemData(
           label: 'Reservas',
           icon: Icons.calendar_month_outlined,
