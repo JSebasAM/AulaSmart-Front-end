@@ -1,6 +1,5 @@
 import 'package:aulasmart_front_end/themes/app_colors.dart';
 import 'package:aulasmart_front_end/views/admin/admin_dashboard_view.dart';
-import 'package:aulasmart_front_end/views/admin/admin_users_view.dart';
 import 'package:aulasmart_front_end/views/home_view.dart';
 import 'package:aulasmart_front_end/views/perfil_view.dart';
 import 'package:aulasmart_front_end/views/reportes_view.dart';

@@ -1,6 +1,5 @@
 import 'package:aulasmart_front_end/themes/app_colors.dart';
 import 'package:flutter/material.dart';
-import 'package:split_button_m3e/split_button_m3e.dart';
 
 class NavItemData {
   final String label;
