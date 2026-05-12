@@ -6,6 +6,7 @@ import 'package:aulasmart_front_end/widgets/auth_text_field.dart';
 import 'package:aulasmart_front_end/widgets/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:math' as math;
 import 'package:go_router/go_router.dart';
 
 class LoginView extends ConsumerStatefulWidget {
@@ -74,7 +75,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
             child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: mediaSize.height - 60),
+              constraints: BoxConstraints(minHeight: math.max(0, mediaSize.height - 60)),
               child: Center(
                 child: Container(
                   width: panelWidth,

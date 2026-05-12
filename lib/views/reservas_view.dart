@@ -132,12 +132,16 @@ class _ReservaCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        gradient: LinearGradient(
+          colors: [AppColors.surface, AppColors.surface.withOpacity(0.95)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(18),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x28111118),
-            blurRadius: 20,
+            color: Color(0x22000000),
+            blurRadius: 14,
             offset: Offset(0, 8),
           ),
         ],
@@ -148,6 +152,21 @@ class _ReservaCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Leading time circle
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  '${data.horaInicio.hour.toString().padLeft(2, '0')}:${data.horaInicio.minute.toString().padLeft(2, '0')}',
+                  style: AppTextStyles.smallLabel.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   data.titulo,

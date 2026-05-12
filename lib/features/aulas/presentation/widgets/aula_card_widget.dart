@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/aula_entity.dart';
+import '../views/aula_detail_screen.dart';
 
 class AulaCardWidget extends StatelessWidget {
   final AulaEntity aula;
@@ -34,7 +35,7 @@ class AulaCardWidget extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: () {
-              // TODO: Acción al tocar la tarjeta (ir a detalles o reserva)
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) => AulaDetailScreen(aula: aula)));
             },
             child: Padding(
               padding: const EdgeInsets.all(20.0),

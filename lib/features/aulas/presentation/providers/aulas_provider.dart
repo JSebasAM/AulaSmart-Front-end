@@ -56,5 +56,37 @@ class CategoriaFiltro extends _$CategoriaFiltro {
 // Estado local para la query de búsqueda (no requiere codegen)
 final searchQueryProvider = StateProvider<String>((ref) => '');
 
-// Filtro por bloque (nombre). Usamos StateProvider para evitar regenerar código.
+// Filtro por bloque (nombre).
 final bloqueFiltroProvider = StateProvider<String>((ref) => 'Todos');
+
+@riverpod
+List<AulaEntity> aulasFiltradas(Ref ref) {
+  // 1. Escuchamos la lista original de aulas
+  final aulasAsync = ref.watch(aulasProvider);
+  
+  // 2. Escuchamos los criterios de filtrado
+  final categoria = ref.watch(categoriaFiltroProvider);
+  final bloque = ref.watch(bloqueFiltroProvider);
+  final search = ref.watch(searchQueryProvider);
+
+  // Si aún están cargando o hubo error, devolvemos lista vacía
+  final todasLasAulas = aulasAsync.value ?? [];
+
+  // 3. Aplicamos la lógica de filtrado
+  return todasLasAulas.where((aula) {
+    // Filtro por Tipo de Aula
+    final matchesCategoria = categoria == 'Todas' || 
+                             aula.tipoAula.nombre.toLowerCase() == categoria.toLowerCase();
+    
+    // Filtro por Bloque
+    final matchesBloque = bloque == 'Todos' || 
+                          aula.bloque.nombre.toLowerCase() == bloque.toLowerCase();
+    
+    // Filtro por texto de búsqueda
+    final matchesSearch = search.isEmpty || 
+                          aula.nombreAula.toLowerCase().contains(search.toLowerCase());
+
+    // El aula debe cumplir los TRES filtros
+    return matchesCategoria && matchesBloque && matchesSearch;
+  }).toList();
+}

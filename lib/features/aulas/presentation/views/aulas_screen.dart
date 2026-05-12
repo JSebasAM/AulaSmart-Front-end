@@ -34,20 +34,8 @@ class AulasScreen extends ConsumerWidget {
           bloques.addAll(aulas.map((a) => a.bloque.nombre).toSet().toList());
           final bloqueSeleccionada = ref.watch(bloqueFiltroProvider);
 
-            // Filtrar aulas según selección
-            final searchQuery = ref.watch(searchQueryProvider);
-            var aulasFiltradasBase = categoriaSeleccionada == 'Todas'
-              ? aulas
-              : aulas.where((a) => a.tipoAula.nombre == categoriaSeleccionada).toList();
-            // Aplicar filtro por bloque si está seleccionado
-            final bloqueSeleccionadaNow = ref.watch(bloqueFiltroProvider);
-            if (bloqueSeleccionadaNow != 'Todos') {
-              aulasFiltradasBase = aulasFiltradasBase.where((a) => a.bloque.nombre == bloqueSeleccionadaNow).toList();
-            }
-            // Filtrar por búsqueda de nombre (case-insensitive)
-            final aulasFiltradas = searchQuery.trim().isEmpty
-              ? aulasFiltradasBase
-              : aulasFiltradasBase.where((a) => a.nombreAula.toLowerCase().contains(searchQuery.toLowerCase())).toList();
+          // Usamos el nuevo Provider que creamos para obtener la lista ya filtrada
+          final aulasFiltradas = ref.watch(aulasFiltradasProvider);
 
           return RefreshIndicator(
             onRefresh: () => ref.read(aulasProvider.notifier).refresh(),

@@ -152,3 +152,49 @@ abstract class _$CategoriaFiltro extends $Notifier<String> {
     element.handleCreate(ref, build);
   }
 }
+
+@ProviderFor(aulasFiltradas)
+final aulasFiltradasProvider = AulasFiltradasProvider._();
+
+final class AulasFiltradasProvider
+    extends
+        $FunctionalProvider<
+          List<AulaEntity>,
+          List<AulaEntity>,
+          List<AulaEntity>
+        >
+    with $Provider<List<AulaEntity>> {
+  AulasFiltradasProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'aulasFiltradasProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$aulasFiltradasHash();
+
+  @$internal
+  @override
+  $ProviderElement<List<AulaEntity>> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  List<AulaEntity> create(Ref ref) {
+    return aulasFiltradas(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(List<AulaEntity> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<List<AulaEntity>>(value),
+    );
+  }
+}
+
+String _$aulasFiltradasHash() => r'8dbbd9ab399f8fd68e5bddf2a73031203d46904b';

@@ -11,7 +11,6 @@ class AulaRepositoryImpl implements IAulaRepository {
   @override
   Future<List<AulaEntity>> getAulas() async {
     try {
-      // TODO: Reemplazar por la ruta final de tu backend
       final response = await dio.get('/aula-service/aulas');
 
       if (response.statusCode == 200) {
@@ -19,10 +18,10 @@ class AulaRepositoryImpl implements IAulaRepository {
         final List<dynamic> data = response.data['aulas'];
         return data.map((json) => AulaModel.fromJson(json)).toList();
       } else {
-        throw Exception('Error HTTP: \${response.statusCode}');
+        throw Exception('Error HTTP: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      throw Exception('Error de conexión al obtener aulas: \${e.message}');
+      throw Exception('Error de conexión al obtener aulas: ${e.message}');
     } catch (e) {
       throw Exception('Error inesperado parseando aulas: \$e');
     }
