@@ -12,7 +12,7 @@ class AulaRepositoryImpl implements IAulaRepository {
   Future<List<AulaEntity>> getAulas() async {
     try {
       // TODO: Reemplazar por la ruta final de tu backend
-      final response = await dio.get('/api/v1/aulas');
+      final response = await dio.get('/aula-service/aulas');
 
       if (response.statusCode == 200) {
         // En base a la respuesta proporcionada: { "aulas": [...] }

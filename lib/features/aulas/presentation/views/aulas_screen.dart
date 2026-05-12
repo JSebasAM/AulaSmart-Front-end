@@ -29,22 +29,100 @@ class AulasScreen extends ConsumerWidget {
           // Extraer categorías únicas para los filtros dinámicos
           final categorias = ['Todas'];
           categorias.addAll(aulas.map((a) => a.tipoAula.nombre).toSet().toList());
+          // Extraer bloques únicos
+          final bloques = ['Todos'];
+          bloques.addAll(aulas.map((a) => a.bloque.nombre).toSet().toList());
+          final bloqueSeleccionada = ref.watch(bloqueFiltroProvider);
 
-          // Filtrar aulas según selección
-          final aulasFiltradas = categoriaSeleccionada == 'Todas'
+            // Filtrar aulas según selección
+            final searchQuery = ref.watch(searchQueryProvider);
+            var aulasFiltradasBase = categoriaSeleccionada == 'Todas'
               ? aulas
               : aulas.where((a) => a.tipoAula.nombre == categoriaSeleccionada).toList();
+            // Aplicar filtro por bloque si está seleccionado
+            final bloqueSeleccionadaNow = ref.watch(bloqueFiltroProvider);
+            if (bloqueSeleccionadaNow != 'Todos') {
+              aulasFiltradasBase = aulasFiltradasBase.where((a) => a.bloque.nombre == bloqueSeleccionadaNow).toList();
+            }
+            // Filtrar por búsqueda de nombre (case-insensitive)
+            final aulasFiltradas = searchQuery.trim().isEmpty
+              ? aulasFiltradasBase
+              : aulasFiltradasBase.where((a) => a.nombreAula.toLowerCase().contains(searchQuery.toLowerCase())).toList();
 
           return RefreshIndicator(
             onRefresh: () => ref.read(aulasProvider.notifier).refresh(),
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
-                // Barra de filtros horizontal
+                // Sección Título Categorías
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 8.0, bottom: 16.0),
-                    child: _buildFilterBar(context, ref, categorias, categoriaSeleccionada),
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+                    child: Text(
+                      'Categorías',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+
+                // Campo de búsqueda
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                    child: TextField(
+                      onChanged: (v) => ref.read(searchQueryProvider.notifier).state = v,
+                      decoration: InputDecoration(
+                        hintText: 'Buscar aula...',
+                        prefixIcon: const Icon(Icons.search),
+                        filled: true,
+                        fillColor: Theme.of(context).colorScheme.surfaceVariant,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Barra de filtros horizontal
+                SliverToBoxAdapter(
+                          child: Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: _buildFilterBar(context, ref, categorias, categoriaSeleccionada),
+                        ),
+                      ),
+
+                      // Barra de filtros por bloque
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 16.0),
+                          child: _buildBloqueBar(context, ref, bloques, bloqueSeleccionada),
+                        ),
+                ),
+
+                // Título Aulas Disponibles y contador
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Aulas Disponibles',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surfaceVariant,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            '${aulasFiltradas.length} aulas',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 
@@ -103,6 +181,43 @@ class AulasScreen extends ConsumerWidget {
             onSelected: (selected) {
               if (selected) {
                 ref.read(categoriaFiltroProvider.notifier).setCategoria(cat);
+              }
+            },
+            labelStyle: TextStyle(
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+              color: isSelected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
+            ),
+            backgroundColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            selectedColor: colorScheme.primary,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            side: BorderSide.none,
+            showCheckmark: false,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildBloqueBar(BuildContext context, WidgetRef ref, List<String> bloques, String seleccionActual) {
+    return SizedBox(
+      height: 40,
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        scrollDirection: Axis.horizontal,
+        itemCount: bloques.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final b = bloques[index];
+          final isSelected = b == seleccionActual;
+          final colorScheme = Theme.of(context).colorScheme;
+
+          return ChoiceChip(
+            label: Text(b),
+            selected: isSelected,
+            onSelected: (selected) {
+              if (selected) {
+                ref.read(bloqueFiltroProvider.notifier).state = b;
               }
             },
             labelStyle: TextStyle(
