@@ -28,20 +28,16 @@ class _UserFormWidgetState extends State<UserFormWidget> {
   late TextEditingController apellidoController;
   late TextEditingController emailController;
   late TextEditingController passwordController;
-  String selectedRol = 'estudiante';
+  String selectedRol = 'Estudiante';
+  bool _hidePassword = true;
 
   @override
   void initState() {
     super.initState();
-    nombreController =
-        TextEditingController(text: widget.initialData?['nombre'] ?? '');
-    apellidoController =
-        TextEditingController(text: widget.initialData?['apellido'] ?? '');
-    emailController =
-        TextEditingController(text: widget.initialData?['email'] ?? '');
-    passwordController =
-        TextEditingController(text: widget.initialData?['password'] ?? '');
-    selectedRol = widget.fixedRole ?? widget.initialData?['rol'] ?? 'Estudiante';
+    nombreController = TextEditingController(text: widget.initialData?['nombre'] ?? '');
+    apellidoController = TextEditingController(text: widget.initialData?['apellido'] ?? '');
+    emailController = TextEditingController(text: widget.initialData?['email'] ?? '');
+    passwordController = TextEditingController(text: widget.initialData?['password'] ?? '');
   }
 
   @override
@@ -59,7 +55,7 @@ class _UserFormWidgetState extends State<UserFormWidget> {
       'apellido': apellidoController.text,
       'email': emailController.text,
       'password': passwordController.text,
-      'rol': selectedRol,
+      'rol': widget.fixedRole,
     };
     widget.onFormSubmit(formData);
   }
@@ -97,19 +93,16 @@ class _UserFormWidgetState extends State<UserFormWidget> {
             hintText: 'Mínimo 8 caracteres',
             controller: passwordController,
             icon: Icons.lock_rounded,
-            obscureText: true,
-          ),
-          const SizedBox(height: 20),
-          if (widget.fixedRole == null) ...[
-            const Text(
-              'Rol del usuario',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
+            obscureText: _hidePassword,
+            suffixIcon: IconButton(
+              icon: Icon(
+                _hidePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                color: AppColors.textSecondary,
               ),
+              onPressed: () => setState(() => _hidePassword = !_hidePassword),
             ),
-          ],
+          ),
+
           const SizedBox(height: 32),
           SizedBox(
             width: double.infinity,
