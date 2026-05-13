@@ -32,42 +32,20 @@ class AdminDashboardView extends StatelessWidget {
                   'Selecciona una sección para gestionar el sistema.',
                   style: AppTextStyles.sectionBody,
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 32),
                 Expanded(
-                  child: GridView.count(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    children: [
-                      _buildSummaryCard(
-                        context,
-                        title: 'Docentes',
-                        icon: Icons.badge_rounded,
-                        color: AppColors.primary,
-                        route: '/admin/docentes',
-                      ),
-                      _buildSummaryCard(
-                        context,
-                        title: 'Estudiantes',
-                        icon: Icons.school_rounded,
-                        color: AppColors.info,
-                        route: '/admin/estudiantes',
-                      ),
-                      _buildSummaryCard(
-                        context,
-                        title: 'Incidencias',
-                        icon: Icons.warning_amber_rounded,
-                        color: AppColors.danger,
-                        route: '/admin/incidencias',
-                      ),
-                      _buildSummaryCard(
-                        context,
-                        title: 'Aulas',
-                        icon: Icons.meeting_room_rounded,
-                        color: AppColors.success,
-                        route: '/admin/aulas',
-                      ),
-                    ],
+                  child: ListView.separated(
+                    itemCount: 4,
+                    separatorBuilder: (_, _) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final sections = [
+                        _SectionData('Usuarios', Icons.badge_rounded, AppColors.primary, '/admin/usuarios'),
+                        _SectionData('Incidencias', Icons.warning_amber_rounded, AppColors.danger, '/admin/incidencias'),
+                        _SectionData('Aulas', Icons.meeting_room_rounded, AppColors.success, '/admin/aulas'),
+                        _SectionData('Reservas', Icons.calendar_today_rounded, AppColors.info, '/admin/reservas'),
+                      ];
+                      return _buildSectionCard(context, sections[index]);
+                    },
                   ),
                 ),
               ],
@@ -78,41 +56,47 @@ class AdminDashboardView extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryCard(BuildContext context, {
-    required String title,
-    required IconData icon,
-    required Color color,
-    required String route,
-  }) {
+  Widget _buildSectionCard(BuildContext context, _SectionData section) {
     return Card(
-      elevation: 4,
-      shadowColor: color.withOpacity(0.2),
+      elevation: 2,
+      shadowColor: section.color.withOpacity(0.15),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: InkWell(
-        onTap: () => context.push(route),
+        onTap: () => context.push(section.route),
         borderRadius: BorderRadius.circular(20),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: section.color.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, size: 32, color: color),
+                child: Icon(section.icon, size: 28, color: section.color),
               ),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: AppTextStyles.cardTitle,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  section.title,
+                  style: AppTextStyles.cardTitle.copyWith(fontSize: 17),
+                ),
               ),
+              Icon(Icons.chevron_right_rounded, color: section.color.withOpacity(0.6), size: 28),
             ],
           ),
         ),
       ),
     );
   }
+}
+
+class _SectionData {
+  final String title;
+  final IconData icon;
+  final Color color;
+  final String route;
+
+  const _SectionData(this.title, this.icon, this.color, this.route);
 }

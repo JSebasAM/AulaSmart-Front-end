@@ -33,7 +33,7 @@ class ReservaEntity {
     final idVal = (json['id'] ?? json['idReserva'] ?? json['id_reserva'])?.toString() ?? '';
     final codigoAulaRaw = json['codigo_aula'] ?? json['codigoAula'];
     final codigoAulaVal = codigoAulaRaw is int
-        ? codigoAulaRaw as int
+        ? codigoAulaRaw
         : int.tryParse((codigoAulaRaw ?? '').toString()) ?? 0;
     final horaInicioRaw = (json['hora_inicio'] ?? json['horaInicio'] ?? '').toString();
     final horaFinRaw = (json['hora_fin'] ?? json['horaFin'] ?? '').toString();
@@ -42,7 +42,7 @@ class ReservaEntity {
 
     final idSolicitanteRaw = json['id_solicitante'] ?? json['idSolicitante'];
     final idSolicitanteVal = idSolicitanteRaw is int
-        ? idSolicitanteRaw as int
+        ? idSolicitanteRaw
         : int.tryParse((idSolicitanteRaw ?? '0').toString()) ?? 0;
 
     final rolSolicitanteVal = (json['rol_solicitante'] ?? json['rolSolicitante'] ?? '').toString();
