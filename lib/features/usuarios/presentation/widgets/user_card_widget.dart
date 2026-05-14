@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../models/usuario.dart';
-import '../../themes/app_colors.dart';
+import '../../domain/entities/usuario_entity.dart';
+import '../../../../themes/app_colors.dart';
 
 class UserCardWidget extends StatelessWidget {
-  final User user;
+  final UsuarioEntity user;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
@@ -43,7 +43,6 @@ class UserCardWidget extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  // Avatar con iniciales
                   Container(
                     width: 48,
                     height: 48,
@@ -63,7 +62,6 @@ class UserCardWidget extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  // Información del usuario
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,7 +87,6 @@ class UserCardWidget extends StatelessWidget {
                       ],
                     ),
                   ),
-                  // Botón de acciones
                   PopupMenuButton<String>(
                     onSelected: (value) {
                       if (value == 'edit') onEdit();
@@ -140,17 +137,29 @@ class UserCardWidget extends StatelessWidget {
     Color textColor;
 
     switch (rol.toLowerCase()) {
-      case 'admin':
+      case 'administrador':
         badgeColor = AppColors.danger.withOpacity(0.1);
         textColor = AppColors.danger;
         break;
-      case 'profesor':
+      case 'docente':
         badgeColor = AppColors.info.withOpacity(0.1);
         textColor = AppColors.info;
         break;
-      default:
+      case 'estudiante':
         badgeColor = AppColors.success.withOpacity(0.1);
         textColor = AppColors.success;
+        break;
+       case 'monitor':
+        badgeColor = AppColors.neutral.withOpacity(0.1);
+        textColor = AppColors.neutral;
+        break;
+       case 'administrativo':
+        badgeColor = AppColors.warning.withOpacity(0.1);
+        textColor = AppColors.warning;
+        break;
+      default:
+        badgeColor = AppColors.neutral.withOpacity(0.1);
+        textColor = AppColors.neutral;
     }
 
     return Container(

@@ -5,7 +5,7 @@ import '../../domain/entities/aula_entity.dart';
 import 'package:aulasmart_front_end/features/reservas/presentation/providers/reservas_provider.dart';
 import 'package:aulasmart_front_end/features/reservas/domain/entities/reserva_entity.dart';
 import 'package:aulasmart_front_end/features/reservas/presentation/widgets/reserva_form_sheet.dart';
-import 'package:aulasmart_front_end/services/auth/user_role_provider.dart';
+import 'package:aulasmart_front_end/features/auth/presentation/providers/user_role_provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class AulaDetailScreen extends ConsumerStatefulWidget {

@@ -1,5 +1,5 @@
-import 'package:aulasmart_front_end/services/auth/auth_notifier.dart';
-import 'package:aulasmart_front_end/services/auth/auth_state.dart';
+import 'package:aulasmart_front_end/features/auth/presentation/providers/auth_provider.dart';
+import 'package:aulasmart_front_end/features/auth/presentation/providers/auth_state.dart';
 import 'package:aulasmart_front_end/themes/app_colors.dart';
 import 'package:aulasmart_front_end/themes/app_text_styles.dart';
 import 'package:aulasmart_front_end/widgets/auth_text_field.dart';
@@ -37,7 +37,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
       return;
     }
 
-    ref.read(authNotifierProvider.notifier).login(codigo, password);
+    ref.read(authProvider.notifier).login(codigo, password);
   }
 
   void _showMessage(String message, {bool isError = true}) {
@@ -53,7 +53,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<AuthState>(authNotifierProvider, (previous, next) {
+    ref.listen<AuthState>(authProvider, (previous, next) {
       if (next is AuthError) {
         _showMessage(next.message);
       } else if (next is AuthSuccess) {
@@ -62,7 +62,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
       }
     });
 
-    final authState = ref.watch(authNotifierProvider);
+    final authState = ref.watch(authProvider);
     final isLoading = authState is AuthLoading;
 
     final mediaSize = MediaQuery.sizeOf(context);
@@ -139,11 +139,11 @@ class _LoginViewState extends ConsumerState<LoginView> {
                         icon: Icons.lock_outline_rounded,
                         obscureText: _hidePassword,
                         suffixIcon: IconButton(
-                          onPressed: () => setState(() => _hidePassword = !_hidePassword),
                           icon: Icon(
                             _hidePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
                             color: AppColors.textSecondary,
                           ),
+                          onPressed: () => setState(() => _hidePassword = !_hidePassword),              
                         ),
                       ),
                       const SizedBox(height: 24),

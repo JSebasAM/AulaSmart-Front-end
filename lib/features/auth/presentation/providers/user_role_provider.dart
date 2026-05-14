@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:aulasmart_front_end/services/auth/auth_state.dart';
-import 'package:aulasmart_front_end/services/auth/auth_notifier.dart';
+import 'package:aulasmart_front_end/features/auth/presentation/providers/auth_state.dart';
+import 'package:aulasmart_front_end/features/auth/presentation/providers/auth_provider.dart';
 import 'package:aulasmart_front_end/services/storage_service.dart';
 
 final currentUserRoleProvider = FutureProvider<String>((ref) async {
-  final authState = ref.watch(authNotifierProvider);
+  final authState = ref.watch(authProvider);
   if (authState is AuthSuccess) {
     return (authState.userInfo['rol'] ?? '').toString().toLowerCase();
   }
@@ -16,7 +16,7 @@ final currentUserRoleProvider = FutureProvider<String>((ref) async {
 });
 
 final currentUserIdProvider = FutureProvider<int>((ref) async {
-  final authState = ref.watch(authNotifierProvider);
+  final authState = ref.watch(authProvider);
   if (authState is AuthSuccess) {
     final id = authState.userInfo['id'];
     if (id is int) return id;

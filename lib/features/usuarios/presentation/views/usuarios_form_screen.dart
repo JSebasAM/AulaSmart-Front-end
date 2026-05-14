@@ -2,12 +2,12 @@ import 'package:aulasmart_front_end/themes/app_colors.dart';
 import 'package:aulasmart_front_end/themes/app_text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../models/usuario.dart';
-import '../../services/usuario/usuario_notifier.dart';
-import '../../widgets/admin/user_form_widget.dart';
+import '../../domain/entities/usuario_entity.dart';
+import '../providers/usuarios_provider.dart';
+import '../widgets/user_form_widget.dart';
 
 class AdminUserFormView extends ConsumerStatefulWidget {
-  final User? user;
+  final UsuarioEntity? user;
   final String? fixedRole;
   final VoidCallback onSaved;
 
@@ -29,13 +29,11 @@ class _AdminUserFormViewState extends ConsumerState<AdminUserFormView> {
     setState(() => _isLoading = true);
 
     try {
-      final notifier = ref.read(usuarioProvider.notifier);
+      final notifier = ref.read(usuariosProvider.notifier);
 
       if (widget.user != null) {
-        // Editar usuario existente
         await notifier.editar(widget.user!.codigo, formData);
       } else {
-        // Crear nuevo usuario
         await notifier.create(formData);
       }
 

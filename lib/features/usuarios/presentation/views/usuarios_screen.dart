@@ -1,12 +1,11 @@
+import 'package:aulasmart_front_end/themes/app_colors.dart';
+import 'package:aulasmart_front_end/themes/app_text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../models/usuario.dart';
-import '../../services/usuario/usuario_notifier.dart';
-import '../../themes/app_colors.dart';
-import '../../themes/app_text_styles.dart';
-import '../../widgets/admin/user_card_widget.dart';
-import '../../widgets/primary_button.dart';
-import 'admin_user_form_view.dart';
+import '../../domain/entities/usuario_entity.dart';
+import '../providers/usuarios_provider.dart';
+import '../widgets/user_card_widget.dart';
+import 'usuarios_form_screen.dart';
 
 class AdminUsersView extends ConsumerStatefulWidget {
   final String? roleFilter;
@@ -18,9 +17,26 @@ class AdminUsersView extends ConsumerStatefulWidget {
 
 class _AdminUsersViewState extends ConsumerState<AdminUsersView> {
   final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
 
-  void _showFormDialog(BuildContext context, {User? user}) {
+  static const _roles = ['Todos', 'Estudiante', 'Docente', 'Administrativo', 'Administrador', 'Monitor'];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.roleFilter != null) {
+      Future.microtask(() {
+        ref.read(usuarioFiltroRolProvider.notifier).setRol(widget.roleFilter!);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _showFormDialog(BuildContext context, {UsuarioEntity? user}) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -42,7 +58,7 @@ class _AdminUsersViewState extends ConsumerState<AdminUsersView> {
     );
   }
 
-  void _confirmDelete(User user) {
+  void _confirmDelete(UsuarioEntity user) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -58,7 +74,7 @@ class _AdminUsersViewState extends ConsumerState<AdminUsersView> {
           ),
           ElevatedButton(
             onPressed: () async {
-              await ref.read(usuarioProvider.notifier).remove(user.codigo);
+              await ref.read(usuariosProvider.notifier).remove(user.codigo);
               if (mounted) Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
@@ -77,7 +93,10 @@ class _AdminUsersViewState extends ConsumerState<AdminUsersView> {
 
   @override
   Widget build(BuildContext context) {
-    final usuariosAsync = ref.watch(usuarioProvider);
+    final usuariosAsync = ref.watch(usuariosProvider);
+    final filtrados = ref.watch(usuariosFiltradosProvider);
+    final rolSeleccionado = ref.watch(usuarioFiltroRolProvider);
+    final paginasState = ref.watch(usuariosPaginadosProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -95,9 +114,8 @@ class _AdminUsersViewState extends ConsumerState<AdminUsersView> {
         child: SafeArea(
           child: Column(
             children: [
-              // Barra de búsqueda y botón nuevo
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                 child: Column(
                   children: [
                     Row(
@@ -119,7 +137,7 @@ class _AdminUsersViewState extends ConsumerState<AdminUsersView> {
                             child: TextField(
                               controller: _searchController,
                               onChanged: (value) =>
-                                  setState(() => _searchQuery = value),
+                                  ref.read(searchQueryProvider.notifier).state = value,
                               decoration: InputDecoration(
                                 hintText: 'Buscar por nombre o correo...',
                                 hintStyle: AppTextStyles.cardSubtitle.copyWith(
@@ -127,6 +145,15 @@ class _AdminUsersViewState extends ConsumerState<AdminUsersView> {
                                 ),
                                 prefixIcon: const Icon(Icons.search,
                                     color: AppColors.primary),
+                                suffixIcon: _searchController.text.isNotEmpty
+                                    ? IconButton(
+                                        icon: const Icon(Icons.clear, size: 20),
+                                        onPressed: () {
+                                          _searchController.clear();
+                                          ref.read(searchQueryProvider.notifier).state = '';
+                                        },
+                                      )
+                                    : null,
                                 border: InputBorder.none,
                                 contentPadding: const EdgeInsets.symmetric(
                                     vertical: 15, horizontal: 20),
@@ -159,37 +186,60 @@ class _AdminUsersViewState extends ConsumerState<AdminUsersView> {
                   ],
                 ),
               ),
-              // Lista de usuarios
+              SizedBox(
+                height: 40,
+                child: ListView.separated(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _roles.length,
+                  separatorBuilder: (_, _) => const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    final rol = _roles[index];
+                    final isSelected = rol == rolSeleccionado;
+                    return ChoiceChip(
+                      label: Text(rol),
+                      selected: isSelected,
+                      onSelected: (_) {
+                        ref.read(usuarioFiltroRolProvider.notifier).setRol(rol);
+                        ref.read(usuariosPaginadosProvider.notifier).reiniciar();
+                      },
+                      labelStyle: TextStyle(
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                        color: isSelected ? Colors.white : AppColors.textSecondary,
+                      ),
+                      backgroundColor: Colors.white,
+                      selectedColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      side: BorderSide.none,
+                      showCheckmark: false,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 8),
               Expanded(
                 child: usuariosAsync.when(
-                  data: (usuarios) {
-                    final filteredUsers = usuarios.where((u) {
-                      // Filtrar por rol si aplica
-                      if (widget.roleFilter != null && u.rol != widget.roleFilter) {
-                        return false;
-                      }
+                  data: (_) {
+                    final visible = filtrados.take(paginasState).toList();
 
-                      final nameMatch = u.nombre
-                          .toLowerCase()
-                          .contains(_searchQuery.toLowerCase());
-                      final emailMatch = u.email
-                          .toLowerCase()
-                          .contains(_searchQuery.toLowerCase());
-                      return nameMatch || emailMatch;
-                    }).toList();
-
-                    if (filteredUsers.isEmpty) {
+                    if (filtrados.isEmpty) {
                       return _buildEmptyState();
                     }
 
                     return RefreshIndicator(
                       onRefresh: () =>
-                          ref.read(usuarioProvider.notifier).refresh(),
+                          ref.read(usuariosProvider.notifier).refresh(),
                       child: ListView.builder(
                         padding: const EdgeInsets.only(bottom: 80),
-                        itemCount: filteredUsers.length,
+                        itemCount: visible.length + (filtrados.length > paginasState ? 1 : 0),
                         itemBuilder: (context, index) {
-                          final user = filteredUsers[index];
+                          if (index >= visible.length) {
+                            return _buildCargarMasButton();
+                          }
+                          final user = visible[index];
                           return UserCardWidget(
                             user: user,
                             onEdit: () =>
@@ -213,7 +263,30 @@ class _AdminUsersViewState extends ConsumerState<AdminUsersView> {
     );
   }
 
+  Widget _buildCargarMasButton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: SizedBox(
+        width: double.infinity,
+        height: 48,
+        child: OutlinedButton.icon(
+          onPressed: () => ref.read(usuariosPaginadosProvider.notifier).cargarMas(),
+          icon: const Icon(Icons.expand_more, size: 22),
+          label: const Text('Cargar más'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.primary,
+            side: BorderSide(color: AppColors.primary.withOpacity(0.3)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildEmptyState() {
+    final search = ref.watch(searchQueryProvider);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -225,21 +298,21 @@ class _AdminUsersViewState extends ConsumerState<AdminUsersView> {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              _searchQuery.isEmpty ? Icons.people_outline : Icons.search_off,
+              search.isEmpty ? Icons.people_outline : Icons.search_off,
               size: 64,
               color: AppColors.primary,
             ),
           ),
           const SizedBox(height: 24),
           Text(
-            _searchQuery.isEmpty
+            search.isEmpty
                 ? 'No hay usuarios registrados'
                 : 'No se encontraron resultados',
             style: AppTextStyles.sectionTitle.copyWith(fontSize: 18),
           ),
           const SizedBox(height: 8),
           Text(
-            _searchQuery.isEmpty
+            search.isEmpty
                 ? 'Comienza agregando un nuevo usuario'
                 : 'Intenta con otros términos de búsqueda',
             style: AppTextStyles.sectionBody,
@@ -273,9 +346,20 @@ class _AdminUsersViewState extends ConsumerState<AdminUsersView> {
               style: const TextStyle(color: AppColors.textSecondary),
             ),
             const SizedBox(height: 24),
-            PrimaryButton(
-              label: 'Reintentar',
-              onPressed: () => ref.refresh(usuarioProvider),
+            SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: ElevatedButton(
+                onPressed: () => ref.refresh(usuariosProvider),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
+                child: const Text('Reintentar'),
+              ),
             ),
           ],
         ),

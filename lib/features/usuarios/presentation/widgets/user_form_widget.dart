@@ -1,7 +1,7 @@
 import 'package:aulasmart_front_end/themes/app_colors.dart';
 import 'package:flutter/material.dart';
-import '../auth_text_field.dart';
-import '../../widgets/primary_button.dart';
+import '../../../../widgets/auth_text_field.dart';
+import '../../../../widgets/primary_button.dart';
 
 class UserFormWidget extends StatefulWidget {
   final VoidCallback onSubmit;
@@ -28,19 +28,16 @@ class _UserFormWidgetState extends State<UserFormWidget> {
   late TextEditingController apellidoController;
   late TextEditingController emailController;
   late TextEditingController passwordController;
-  String selectedRol = 'estudiante';
+  String selectedRol = 'Estudiante';
+  bool _hidePassword = true;
 
   @override
   void initState() {
     super.initState();
-    nombreController =
-        TextEditingController(text: widget.initialData?['nombre'] ?? '');
-    apellidoController =
-        TextEditingController(text: widget.initialData?['apellido'] ?? '');
-    emailController =
-        TextEditingController(text: widget.initialData?['email'] ?? '');
-    passwordController =
-        TextEditingController(text: widget.initialData?['password'] ?? '');
+    nombreController = TextEditingController(text: widget.initialData?['nombre'] ?? '');
+    apellidoController = TextEditingController(text: widget.initialData?['apellido'] ?? '');
+    emailController = TextEditingController(text: widget.initialData?['email'] ?? '');
+    passwordController = TextEditingController(text: widget.initialData?['password'] ?? '');
     selectedRol = widget.fixedRole ?? widget.initialData?['rol'] ?? 'Estudiante';
   }
 
@@ -59,7 +56,7 @@ class _UserFormWidgetState extends State<UserFormWidget> {
       'apellido': apellidoController.text,
       'email': emailController.text,
       'password': passwordController.text,
-      'rol': selectedRol,
+      'rol': widget.fixedRole ?? selectedRol,
     };
     widget.onFormSubmit(formData);
   }
@@ -97,16 +94,56 @@ class _UserFormWidgetState extends State<UserFormWidget> {
             hintText: 'Mínimo 8 caracteres',
             controller: passwordController,
             icon: Icons.lock_rounded,
-            obscureText: true,
+            obscureText: _hidePassword,
+            suffixIcon: IconButton(
+              icon: Icon(
+                _hidePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                color: AppColors.textSecondary,
+              ),
+              onPressed: () => setState(() => _hidePassword = !_hidePassword),
+            ),
           ),
-          const SizedBox(height: 20),
           if (widget.fixedRole == null) ...[
+            const SizedBox(height: 20),
             const Text(
               'Rol del usuario',
               style: TextStyle(
                 color: AppColors.textPrimary,
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.neutral.withOpacity(0.2)),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: selectedRol,
+                  isExpanded: true,
+                  icon: const Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'Estudiante', child: Text('Estudiante')),
+                    DropdownMenuItem(value: 'Docente', child: Text('Docente')),
+                    DropdownMenuItem(value: 'Administrativo', child: Text('Administrativo')),
+                    DropdownMenuItem(value: 'Administrador', child: Text('Administrador')),
+                    DropdownMenuItem(value: 'Monitor', child: Text('Monitor')),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => selectedRol = value);
+                    }
+                  },
+                ),
               ),
             ),
           ],
