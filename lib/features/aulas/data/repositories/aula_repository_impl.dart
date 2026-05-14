@@ -9,21 +9,27 @@ class AulaRepositoryImpl implements IAulaRepository {
   AulaRepositoryImpl({required this.dio});
 
   @override
-  Future<List<AulaEntity>> getAulas() async {
+  Future<List<AulaEntity>> getAulas({int? page, int? size}) async {
     try {
-      final response = await dio.get('/aula-service/aulas');
+      final queryParams = <String, dynamic>{};
+      if (page != null) queryParams['page'] = page;
+      if (size != null) queryParams['size'] = size;
+
+      final response = await dio.get(
+        '/aula-service/aulas',
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
 
       if (response.statusCode == 200) {
-        // En base a la respuesta proporcionada: { "aulas": [...] }
         final List<dynamic> data = response.data['aulas'];
         return data.map((json) => AulaModel.fromJson(json)).toList();
       } else {
         throw Exception('Error HTTP: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      throw Exception('Error de conexión al obtener aulas: ${e.message}');
+      throw Exception('Error de conexion al obtener aulas: ${e.message}');
     } catch (e) {
-      throw Exception('Error inesperado parseando aulas: \$e');
+      throw Exception('Error inesperado parseando aulas: $e');
     }
   }
 }

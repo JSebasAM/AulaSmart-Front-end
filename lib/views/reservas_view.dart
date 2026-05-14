@@ -1,42 +1,46 @@
-import 'package:aulasmart_front_end/models/reserva.dart';
-import 'package:aulasmart_front_end/services/reserva_service.dart';
+import 'package:aulasmart_front_end/features/reservas/domain/entities/reserva_entity.dart';
+import 'package:aulasmart_front_end/features/reservas/presentation/providers/reservas_provider.dart';
 import 'package:aulasmart_front_end/themes/app_colors.dart';
 import 'package:aulasmart_front_end/themes/app_text_styles.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ReservasView extends StatefulWidget {
+class ReservasView extends ConsumerStatefulWidget {
   const ReservasView({super.key});
 
   @override
-  State<ReservasView> createState() => _ReservasViewState();
+  ConsumerState<ReservasView> createState() => _ReservasViewState();
 }
 
-class _ReservasViewState extends State<ReservasView> {
-  final ReservaService _reservaService = ReservaService();
-  late final Future<List<Reserva>> _futureReservas;
-
-  @override
-  void initState() {
-    super.initState();
-    _futureReservas = _reservaService.listarReservas();
-  }
-
+class _ReservasViewState extends ConsumerState<ReservasView> {
   @override
   Widget build(BuildContext context) {
+    final reservasAsync = ref.watch(todasLasReservasProvider);
+
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
       child: SafeArea(
-        child: FutureBuilder<List<Reserva>>(
-          future: _futureReservas,
-          builder: (context, snapshot) {
-            final reservas = snapshot.data ?? const <Reserva>[];
-            final proximas = reservas.where((reserva) => !reserva.estaPendiente).toList();
-            final pendientes = reservas.where((reserva) => reserva.estaPendiente).toList();
+        child: reservasAsync.when(
+          loading: () => const Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          ),
+          error: (error, _) => _ErrorState(
+            message: 'Error al cargar reservas',
+            onRetry: () => ref.invalidate(todasLasReservasProvider),
+          ),
+          data: (reservas) {
+            final proximas =
+                reservas.where((r) => !r.estaPendiente).toList();
+            final pendientes =
+                reservas.where((r) => r.estaPendiente).toList();
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 22, 20, 120),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            return RefreshIndicator(
+              onRefresh: () async {
+                ref.invalidate(todasLasReservasProvider);
+                await ref.read(todasLasReservasProvider.future);
+              },
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(20, 22, 20, 120),
                 children: [
                   const Text('Mis Reservas', style: AppTextStyles.pageTitle),
                   const SizedBox(height: 10),
@@ -45,36 +49,32 @@ class _ReservasViewState extends State<ReservasView> {
                     style: AppTextStyles.pageSubtitle,
                   ),
                   const SizedBox(height: 28),
-                  const _SectionTitle(title: 'Reservas Proximas'),
-                  const SizedBox(height: 12),
-                  if (snapshot.connectionState == ConnectionState.waiting)
-                    const Center(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 28),
-                        child: CircularProgressIndicator(color: AppColors.primary),
+                  if (proximas.isEmpty && pendientes.isEmpty)
+                    const _EmptyState(
+                        text: 'No tienes reservas registradas.')
+                  else ...[
+                    if (proximas.isNotEmpty) ...[
+                      const _SectionTitle(title: 'Reservas Proximas'),
+                      const SizedBox(height: 12),
+                      ...proximas.map(
+                        (reserva) => Padding(
+                          padding: const EdgeInsets.only(bottom: 14),
+                          child: _ReservaCard(data: reserva),
+                        ),
                       ),
-                    )
-                  else if (proximas.isEmpty)
-                    const _EmptyState(text: 'No hay reservas proximas disponibles.')
-                  else
-                    ...proximas.map(
-                      (reserva) => Padding(
-                        padding: const EdgeInsets.only(bottom: 14),
-                        child: _ReservaCard(data: reserva),
+                      const SizedBox(height: 10),
+                    ],
+                    if (pendientes.isNotEmpty) ...[
+                      const _SectionTitle(title: 'Pendiente de Aprobacion'),
+                      const SizedBox(height: 12),
+                      ...pendientes.map(
+                        (reserva) => Padding(
+                          padding: const EdgeInsets.only(bottom: 14),
+                          child: _ReservaCard(data: reserva),
+                        ),
                       ),
-                    ),
-                  const SizedBox(height: 10),
-                  const _SectionTitle(title: 'Pendiente de Aprobacion'),
-                  const SizedBox(height: 12),
-                  if (pendientes.isEmpty)
-                    const _EmptyState(text: 'No hay reservas pendientes.')
-                  else
-                    ...pendientes.map(
-                      (reserva) => Padding(
-                        padding: const EdgeInsets.only(bottom: 14),
-                        child: _ReservaCard(data: reserva),
-                      ),
-                    ),
+                    ],
+                  ],
                 ],
               ),
             );
@@ -85,9 +85,31 @@ class _ReservasViewState extends State<ReservasView> {
   }
 }
 
+class _ErrorState extends StatelessWidget {
+  const _ErrorState({required this.message, required this.onRetry});
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(message, style: AppTextStyles.cardSubtitle),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: onRetry,
+            child: const Text('Reintentar'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _SectionTitle extends StatelessWidget {
   const _SectionTitle({required this.title});
-
   final String title;
 
   @override
@@ -98,7 +120,6 @@ class _SectionTitle extends StatelessWidget {
 
 class _EmptyState extends StatelessWidget {
   const _EmptyState({required this.text});
-
   final String text;
 
   @override
@@ -121,186 +142,248 @@ class _EmptyState extends StatelessWidget {
 
 class _ReservaCard extends StatelessWidget {
   const _ReservaCard({required this.data});
-
-  final Reserva data;
+  final ReservaEntity data;
 
   @override
   Widget build(BuildContext context) {
-    final estadoColor = _estadoColor(data.estado);
+    final isPendiente = data.estaPendiente;
+    final estadoColor = isPendiente
+        ? const Color(0xFFF6B11A)
+        : const Color(0xFF24C89A);
+    final theme = Theme.of(context);
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppColors.surface, AppColors.surface.withOpacity(0.95)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
         ),
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x22000000),
-            blurRadius: 14,
-            offset: Offset(0, 8),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Leading time circle
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(12),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        estadoColor.withValues(alpha: 0.2),
+                        estadoColor.withValues(alpha: 0.08),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  alignment: Alignment.center,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        data.displayHoraInicio,
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                          color: estadoColor,
+                          height: 1,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${data.horaFin.hour.toString().padLeft(2, '0')}:${data.horaFin.minute.toString().padLeft(2, '0')}',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: estadoColor.withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                alignment: Alignment.center,
-                child: Text(
-                  '${data.horaInicio.hour.toString().padLeft(2, '0')}:${data.horaInicio.minute.toString().padLeft(2, '0')}',
-                  style: AppTextStyles.smallLabel.copyWith(fontWeight: FontWeight.bold),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        data.displayTitulo,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primaryDark,
+                          height: 1.25,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        data.displayAula,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  data.titulo,
-                  style: AppTextStyles.cardTitle,
+                const SizedBox(width: 8),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: estadoColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    data.estado,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: estadoColor,
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: estadoColor,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  data.estado,
-                  style: AppTextStyles.smallLabel.copyWith(color: Colors.black),
-                ),
-              ),
-              const SizedBox(width: 8),
-              _CardIconButton(icon: Icons.edit_square),
-              const SizedBox(width: 6),
-              _CardIconButton(icon: Icons.delete_outline, isDanger: true),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: _InfoBlock(label: data.aula),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: _InfoBlock(label: data.fecha),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    const Icon(Icons.access_time_rounded, color: AppColors.primaryDark, size: 14),
-                    const SizedBox(width: 4),
-                    Flexible(child: _InlineText(text: data.horario)),
-                  ],
+          const SizedBox(height: 14),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                _InfoChip(
+                  icon: Icons.calendar_today_rounded,
+                  label: data.displayFecha,
                 ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Row(
-                  children: [
-                    const Icon(Icons.group_outlined, color: AppColors.primaryDark, size: 14),
-                    const SizedBox(width: 4),
-                    Flexible(child: _InlineText(text: '${data.asistentes} asistentes')),
-                  ],
+                const SizedBox(width: 8),
+                _InfoChip(
+                  icon: Icons.access_time_rounded,
+                  label: data.displayHorario,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(10),
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              color: const Color(0xFFE2E5F4),
-              borderRadius: BorderRadius.circular(10),
+              color: theme.colorScheme.surfaceContainerHighest
+                  .withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Text(
-              data.descripcion,
-              style: AppTextStyles.cardSubtitle.copyWith(color: AppColors.textPrimary),
+            child: Row(
+              children: [
+                const Icon(Icons.person_outline,
+                    size: 16, color: AppColors.primaryDark),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    data.displaySolicitante,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primaryDark,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (data.displayPrograma != '-') ...[
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      data.displayPrograma,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                ],
+                if (data.displayGrupo != '-')
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF24C89A).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      'Grupo ${data.displayGrupo}',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF24C89A),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
+          const SizedBox(height: 14),
         ],
       ),
     );
   }
-
-  Color _estadoColor(String estado) {
-    if (estado.toLowerCase() == 'pendiente') {
-      return const Color(0xFFF6B11A);
-    }
-
-    return const Color(0xFF24C89A);
-  }
 }
 
-class _InfoBlock extends StatelessWidget {
-  const _InfoBlock({required this.label});
-
+class _InfoChip extends StatelessWidget {
+  const _InfoChip({required this.icon, required this.label});
+  final IconData icon;
   final String label;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      label,
-      style: AppTextStyles.cardSubtitle,
-    );
-  }
-}
-
-class _InlineText extends StatelessWidget {
-  const _InlineText({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: AppTextStyles.cardSubtitle,
-    );
-  }
-}
-
-class _CardIconButton extends StatelessWidget {
-  const _CardIconButton({required this.icon, this.isDanger = false});
-
-  final IconData icon;
-  final bool isDanger;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-        color: isDanger ? const Color(0x1AFB2C36) : const Color(0x1A5E66F2),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Icon(
-        icon,
-        size: 14,
-        color: isDanger ? const Color(0xFFFB2C36) : AppColors.primary,
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 15, color: AppColors.primaryDark),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primaryDark,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

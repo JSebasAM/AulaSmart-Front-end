@@ -41,6 +41,7 @@ class ReservaModel extends ReservaEntity {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       'id': id,

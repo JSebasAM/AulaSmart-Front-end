@@ -33,7 +33,7 @@ class ReservaEntity {
     final idVal = (json['id'] ?? json['idReserva'] ?? json['id_reserva'])?.toString() ?? '';
     final codigoAulaRaw = json['codigo_aula'] ?? json['codigoAula'];
     final codigoAulaVal = codigoAulaRaw is int
-        ? codigoAulaRaw as int
+        ? codigoAulaRaw
         : int.tryParse((codigoAulaRaw ?? '').toString()) ?? 0;
     final horaInicioRaw = (json['hora_inicio'] ?? json['horaInicio'] ?? '').toString();
     final horaFinRaw = (json['hora_fin'] ?? json['horaFin'] ?? '').toString();
@@ -42,7 +42,7 @@ class ReservaEntity {
 
     final idSolicitanteRaw = json['id_solicitante'] ?? json['idSolicitante'];
     final idSolicitanteVal = idSolicitanteRaw is int
-        ? idSolicitanteRaw as int
+        ? idSolicitanteRaw
         : int.tryParse((idSolicitanteRaw ?? '0').toString()) ?? 0;
 
     final rolSolicitanteVal = (json['rol_solicitante'] ?? json['rolSolicitante'] ?? '').toString();
@@ -105,4 +105,21 @@ class ReservaEntity {
   }
 
   String get displayGrupo => grupo.trim().isNotEmpty ? grupo.trim() : '-';
+
+  String get displayAula => 'Aula $codigoAula';
+
+  String get displayFecha =>
+      '${horaInicio.day.toString().padLeft(2, '0')}/${horaInicio.month.toString().padLeft(2, '0')}/${horaInicio.year}';
+
+  String get displayHorario =>
+      '${horaInicio.hour.toString().padLeft(2, '0')}:${horaInicio.minute.toString().padLeft(2, '0')} - ${horaFin.hour.toString().padLeft(2, '0')}:${horaFin.minute.toString().padLeft(2, '0')}';
+
+  String get displayHoraInicio =>
+      '${horaInicio.hour.toString().padLeft(2, '0')}:${horaInicio.minute.toString().padLeft(2, '0')}';
+
+  String get displayPrograma =>
+      codigoPrograma.trim().isNotEmpty ? codigoPrograma.trim() : '-';
+
+  String get displayOrigen =>
+      (origen != null && origen!.trim().isNotEmpty) ? origen!.trim() : '-';
 }

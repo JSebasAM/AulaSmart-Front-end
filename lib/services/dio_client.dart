@@ -10,6 +10,7 @@ class ApiUrls {
   static String get reservas    => dotenv.env['API_RESERVAS'] ?? 'http://localhost:8082/api/v1';
   static String get aulas       => dotenv.env['API_AULAS'] ?? 'http://localhost:8083/api/v1';
   static String get incidencias => dotenv.env['API_INCIDENCIAS'] ?? 'http://localhost:8084/api/v1';
+  static String get chat        => dotenv.env['API_CHAT'] ?? 'http://localhost:8086/api/v1';
 }
 
 final dioProvider = Provider<Dio>((ref) {

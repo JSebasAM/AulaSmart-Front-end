@@ -90,3 +90,14 @@ List<AulaEntity> aulasFiltradas(Ref ref) {
     return matchesCategoria && matchesBloque && matchesSearch;
   }).toList();
 }
+
+// Paginacion client-side: carga progresiva de 20 en 20
+final visibleAulasCountProvider = StateProvider<int>((ref) => 20);
+
+final aulasVisiblesProvider = Provider<List<AulaEntity>>((ref) {
+  final todas = ref.watch(aulasFiltradasProvider);
+  final count = ref.watch(visibleAulasCountProvider);
+  if (count >= todas.length) return todas;
+  return todas.take(count).toList();
+});
+

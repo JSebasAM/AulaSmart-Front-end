@@ -12,5 +12,22 @@ class ReservaRemoteDataSource {
 		final list = (data['reservas'] as List?) ?? (data['data'] as List?) ?? [];
 		return list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
 	}
+
+	Future<List<Map<String, dynamic>>> fetchMisReservas() async {
+		final path = '/reserva-service/reservas/mis-reservas';
+		final response = await dio.get(path);
+		final data = response.data;
+		final list = (data['reservas'] as List?) ?? (data['data'] as List?) ?? [];
+		return list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+	}
+
+	Future<Map<String, dynamic>> createReserva(Map<String, dynamic> body) async {
+		final path = '/reserva-service/reservas';
+		final response = await dio.post(path, data: body);
+		final data = response.data;
+		return Map<String, dynamic>.from(
+			(data['reserva'] as Map?) ?? (data['data'] as Map?) ?? data as Map,
+		);
+	}
 }
 

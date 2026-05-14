@@ -1,21 +1,55 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/aulas_provider.dart';
 import '../widgets/aula_card_widget.dart';
 
-class AulasScreen extends ConsumerWidget {
+class AulasScreen extends ConsumerStatefulWidget {
   const AulasScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AulasScreen> createState() => _AulasScreenState();
+}
+
+class _AulasScreenState extends ConsumerState<AulasScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 300) {
+      final total = ref.read(aulasFiltradasProvider).length;
+      final current = ref.read(visibleAulasCountProvider);
+      if (current < total) {
+        ref.read(visibleAulasCountProvider.notifier).state =
+            min(current + 20, total);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final aulasAsync = ref.watch(aulasProvider);
     final categoriaSeleccionada = ref.watch(categoriaFiltroProvider);
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Aulas Smart', style: TextStyle(fontWeight: FontWeight.w800)),
+        title: const Text('Aulas Smart',
+            style: TextStyle(fontWeight: FontWeight.w800)),
         centerTitle: false,
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -26,68 +60,73 @@ class AulasScreen extends ConsumerWidget {
             return _buildEmptyState(context);
           }
 
-          // Extraer categorías únicas para los filtros dinámicos
           final categorias = ['Todas'];
-          categorias.addAll(aulas.map((a) => a.tipoAula.nombre).toSet().toList());
-          // Extraer bloques únicos
+          categorias
+              .addAll(aulas.map((a) => a.tipoAula.nombre).toSet().toList());
           final bloques = ['Todos'];
           bloques.addAll(aulas.map((a) => a.bloque.nombre).toSet().toList());
           final bloqueSeleccionada = ref.watch(bloqueFiltroProvider);
 
-          // Usamos el nuevo Provider que creamos para obtener la lista ya filtrada
           final aulasFiltradas = ref.watch(aulasFiltradasProvider);
+          final aulasVisibles = ref.watch(aulasVisiblesProvider);
 
           return RefreshIndicator(
-            onRefresh: () => ref.read(aulasProvider.notifier).refresh(),
+            onRefresh: () async {
+              ref.read(visibleAulasCountProvider.notifier).state = 20;
+              await ref.read(aulasProvider.notifier).refresh();
+            },
             child: CustomScrollView(
+              controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
-                // Sección Título Categorías
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
                     child: Text(
-                      'Categorías',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                      'Categorias',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
-
-                // Campo de búsqueda
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
                     child: TextField(
-                      onChanged: (v) => ref.read(searchQueryProvider.notifier).state = v,
+                      onChanged: (v) {
+                        ref.read(searchQueryProvider.notifier).state = v;
+                        ref.read(visibleAulasCountProvider.notifier).state = 20;
+                      },
                       decoration: InputDecoration(
                         hintText: 'Buscar aula...',
                         prefixIcon: const Icon(Icons.search),
                         filled: true,
-                        fillColor: Theme.of(context).colorScheme.surfaceVariant,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                        fillColor: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none),
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 12),
                       ),
                     ),
                   ),
                 ),
-
-                // Barra de filtros horizontal
                 SliverToBoxAdapter(
-                          child: Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: _buildFilterBar(context, ref, categorias, categoriaSeleccionada),
-                        ),
-                      ),
-
-                      // Barra de filtros por bloque
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 16.0),
-                          child: _buildBloqueBar(context, ref, bloques, bloqueSeleccionada),
-                        ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: _buildFilterBar(context, ref, categorias,
+                        categoriaSeleccionada),
+                  ),
                 ),
-
-                // Título Aulas Disponibles y contador
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0),
+                    child: _buildBloqueBar(
+                        context, ref, bloques, bloqueSeleccionada),
+                  ),
+                ),
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
@@ -96,25 +135,32 @@ class AulasScreen extends ConsumerWidget {
                       children: [
                         Text(
                           'Aulas Disponibles',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceVariant,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            '${aulasFiltradas.length} aulas',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                            '${aulasVisibles.length} de ${aulasFiltradas.length} aulas',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
-                
-                // Lista de Aulas o Estado Vacío de Filtro
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   sliver: aulasFiltradas.isEmpty
@@ -122,23 +168,44 @@ class AulasScreen extends ConsumerWidget {
                           hasScrollBody: false,
                           child: Center(
                             child: Text(
-                              'No hay aulas en esta categoría',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.outline,
-                              ),
+                              'No hay aulas en esta categoria',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    color:
+                                        Theme.of(context).colorScheme.outline,
+                                  ),
                             ),
                           ),
                         )
                       : SliverList(
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
-                              return AulaCardWidget(aula: aulasFiltradas[index]);
+                              if (index >= aulasVisibles.length) return null;
+                              return AulaCardWidget(
+                                  aula: aulasVisibles[index]);
                             },
-                            childCount: aulasFiltradas.length,
+                            childCount: aulasVisibles.length +
+                                (aulasVisibles.length < aulasFiltradas.length
+                                    ? 1
+                                    : 0),
                           ),
                         ),
                 ),
-                // Espacio al final de la lista
+                if (aulasVisibles.length < aulasFiltradas.length)
+                  const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20),
+                      child: Center(
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                    ),
+                  ),
                 const SliverToBoxAdapter(child: SizedBox(height: 32)),
               ],
             ),
@@ -150,7 +217,8 @@ class AulasScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildFilterBar(BuildContext context, WidgetRef ref, List<String> categorias, String seleccionActual) {
+  Widget _buildFilterBar(BuildContext context, WidgetRef ref,
+      List<String> categorias, String seleccionActual) {
     return SizedBox(
       height: 40,
       child: ListView.separated(
@@ -169,15 +237,20 @@ class AulasScreen extends ConsumerWidget {
             onSelected: (selected) {
               if (selected) {
                 ref.read(categoriaFiltroProvider.notifier).setCategoria(cat);
+                ref.read(visibleAulasCountProvider.notifier).state = 20;
               }
             },
             labelStyle: TextStyle(
               fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-              color: isSelected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
+              color: isSelected
+                  ? colorScheme.onPrimary
+                  : colorScheme.onSurfaceVariant,
             ),
-            backgroundColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            backgroundColor:
+                colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             selectedColor: colorScheme.primary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20)),
             side: BorderSide.none,
             showCheckmark: false,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -187,7 +260,8 @@ class AulasScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildBloqueBar(BuildContext context, WidgetRef ref, List<String> bloques, String seleccionActual) {
+  Widget _buildBloqueBar(BuildContext context, WidgetRef ref,
+      List<String> bloques, String seleccionActual) {
     return SizedBox(
       height: 40,
       child: ListView.separated(
@@ -206,15 +280,20 @@ class AulasScreen extends ConsumerWidget {
             onSelected: (selected) {
               if (selected) {
                 ref.read(bloqueFiltroProvider.notifier).state = b;
+                ref.read(visibleAulasCountProvider.notifier).state = 20;
               }
             },
             labelStyle: TextStyle(
               fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-              color: isSelected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
+              color: isSelected
+                  ? colorScheme.onPrimary
+                  : colorScheme.onSurfaceVariant,
             ),
-            backgroundColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            backgroundColor:
+                colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             selectedColor: colorScheme.primary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20)),
             side: BorderSide.none,
             showCheckmark: false,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -229,7 +308,8 @@ class AulasScreen extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.meeting_room_outlined, size: 64, color: Theme.of(context).colorScheme.outline),
+          Icon(Icons.meeting_room_outlined,
+              size: 64, color: Theme.of(context).colorScheme.outline),
           const SizedBox(height: 16),
           Text(
             'No hay aulas disponibles.',
@@ -240,14 +320,16 @@ class AulasScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildErrorState(BuildContext context, WidgetRef ref, Object error) {
+  Widget _buildErrorState(
+      BuildContext context, WidgetRef ref, Object error) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.wifi_off_outlined, size: 64, color: Theme.of(context).colorScheme.error),
+            Icon(Icons.wifi_off_outlined,
+                size: 64, color: Theme.of(context).colorScheme.error),
             const SizedBox(height: 16),
             Text(
               'No pudimos cargar las aulas',
@@ -257,12 +339,16 @@ class AulasScreen extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(
               error.toString(),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             FilledButton.tonalIcon(
-              onPressed: () => ref.read(aulasProvider.notifier).refresh(),
+              onPressed: () {
+                ref.read(visibleAulasCountProvider.notifier).state = 20;
+                ref.read(aulasProvider.notifier).refresh();
+              },
               icon: const Icon(Icons.refresh),
               label: const Text('Reintentar'),
             ),

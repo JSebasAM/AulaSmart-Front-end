@@ -5,6 +5,7 @@ import 'package:aulasmart_front_end/views/perfil_view.dart';
 import 'package:aulasmart_front_end/views/reportes_view.dart';
 import 'package:aulasmart_front_end/views/reservas_view.dart';
 import 'package:aulasmart_front_end/widgets/app_bottom_nav.dart';
+import 'package:aulasmart_front_end/features/chat/presentation/widgets/chat_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -41,7 +42,7 @@ class _AppShellViewState extends ConsumerState<AppShellView> {
       const NavItemData(
           label: 'Perfil', icon: Icons.person_outline, page: PerfilView()),
       const NavItemData(
-        label: 'Gestión',
+        label: 'Gestion',
         icon: Icons.admin_panel_settings_rounded,
         page: AdminDashboardView(),
       ),
@@ -51,6 +52,15 @@ class _AppShellViewState extends ConsumerState<AppShellView> {
       _navItems = items;
       _loading = false;
     });
+  }
+
+  void _openChat() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => const ChatOverlay(),
+      ),
+    );
   }
 
   @override
@@ -80,6 +90,10 @@ class _AppShellViewState extends ConsumerState<AppShellView> {
             ],
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _openChat,
+        child: const Icon(Icons.smart_toy_rounded),
       ),
     );
   }
