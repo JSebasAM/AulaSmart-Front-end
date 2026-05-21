@@ -10,6 +10,7 @@ class ReservaRepositoryImpl implements ReservaRepository {
   final Duration cacheTtl = const Duration(minutes: 2);
   List<ReservaEntity>? _misReservasCache;
   DateTime? _misReservasFetchedAt;
+  List<ReservaEntity>? _pendientesCache;
 
   ReservaRepositoryImpl({required this.remoteDataSource});
 
@@ -48,7 +49,33 @@ class ReservaRepositoryImpl implements ReservaRepository {
     final reserva = ReservaModel.fromJson(raw);
     _cache.remove(body['codigo_aula'] as int?);
     _misReservasCache = null;
+    _pendientesCache = null;
     return reserva;
+  }
+
+  @override
+  Future<List<ReservaEntity>> getReservasPendientes() async {
+    final raw = await remoteDataSource.fetchReservasPendientes();
+    final list = raw.map((e) => ReservaModel.fromJson(e)).toList();
+    list.sort((a, b) => b.horaInicio.compareTo(a.horaInicio));
+    _pendientesCache = list;
+    return list;
+  }
+
+  @override
+  Future<ReservaEntity> confirmarReserva(String id) async {
+    final raw = await remoteDataSource.confirmarReserva(id);
+    _pendientesCache = null;
+    _misReservasCache = null;
+    return ReservaModel.fromJson(raw);
+  }
+
+  @override
+  Future<ReservaEntity> rechazarReserva(String id) async {
+    final raw = await remoteDataSource.rechazarReserva(id);
+    _pendientesCache = null;
+    _misReservasCache = null;
+    return ReservaModel.fromJson(raw);
   }
 
   void invalidateCache(int aulaId) {

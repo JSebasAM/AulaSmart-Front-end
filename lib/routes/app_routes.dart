@@ -5,6 +5,7 @@ import 'package:aulasmart_front_end/views/evidence_view.dart';
 import 'package:aulasmart_front_end/views/login_view.dart';
 import 'package:aulasmart_front_end/features/aulas/presentation/views/aulas_screen.dart';
 import 'package:aulasmart_front_end/features/usuarios/presentation/views/usuarios_screen.dart';
+import 'package:aulasmart_front_end/features/reservas/presentation/views/admin_reservas_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final GoRouter routerProvider = GoRouter(
@@ -49,7 +50,7 @@ final GoRouter routerProvider = GoRouter(
     ),
     GoRoute(
       path: '/admin/reservas',
-      builder: (_, _) => const ComingSoonView(featureName: 'Gestión de Reservas'),
+      builder: (_, _) => const AdminReservasScreen(),
     ),
     
   ],

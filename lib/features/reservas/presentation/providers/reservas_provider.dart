@@ -6,6 +6,9 @@ import 'package:aulasmart_front_end/features/reservas/domain/entities/reserva_en
 import 'package:aulasmart_front_end/features/reservas/domain/usecases/get_reservas_por_aula.dart';
 import 'package:aulasmart_front_end/features/reservas/domain/usecases/get_mis_reservas.dart';
 import 'package:aulasmart_front_end/features/reservas/domain/usecases/create_reserva.dart';
+import 'package:aulasmart_front_end/features/reservas/domain/usecases/get_reservas_pendientes.dart';
+import 'package:aulasmart_front_end/features/reservas/domain/usecases/confirmar_reserva.dart';
+import 'package:aulasmart_front_end/features/reservas/domain/usecases/rechazar_reserva.dart';
 import 'package:aulasmart_front_end/features/reservas/data/datasources/reserva_remote_data_source.dart';
 import 'package:aulasmart_front_end/features/reservas/data/repositories/reserva_repository_impl.dart';
 import 'package:aulasmart_front_end/features/reservas/domain/repositories/reserva_repository.dart';
@@ -35,6 +38,27 @@ final getMisReservasProvider = Provider((ref) {
 final createReservaProvider = Provider((ref) {
   final repo = ref.read(reservaRepositoryProvider);
   return CreateReserva(repo);
+});
+
+final getReservasPendientesProvider = Provider((ref) {
+  final repo = ref.read(reservaRepositoryProvider);
+  return GetReservasPendientes(repo);
+});
+
+final confirmarReservaProvider = Provider((ref) {
+  final repo = ref.read(reservaRepositoryProvider);
+  return ConfirmarReserva(repo);
+});
+
+final rechazarReservaProvider = Provider((ref) {
+  final repo = ref.read(reservaRepositoryProvider);
+  return RechazarReserva(repo);
+});
+
+final reservasPendientesProvider =
+    FutureProvider<List<ReservaEntity>>((ref) async {
+  final usecase = ref.read(getReservasPendientesProvider);
+  return usecase.call();
 });
 
 final reservasPorAulaProvider =
