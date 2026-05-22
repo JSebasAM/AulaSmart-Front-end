@@ -3,13 +3,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'storage_service.dart';
+import 'crypto_interceptor.dart';
 
 class ApiUrls {
   static String get auth        => dotenv.env['API_AUTH'] ?? 'http://localhost:8081/api/v1';
   static String get usuarios    => dotenv.env['API_USUARIOS'] ?? 'http://localhost:8081/api/v1';
   static String get reservas    => dotenv.env['API_RESERVAS'] ?? 'http://localhost:8082/api/v1';
   static String get aulas       => dotenv.env['API_AULAS'] ?? 'http://localhost:8083/api/v1';
-  static String get incidencias => dotenv.env['API_INCIDENCIAS'] ?? 'http://localhost:8084/api/v1';
+  static String get incidencias => dotenv.env['API_INCIDENCIAS'] ?? 'http://localhost:8085/api/v1';
   static String get chat        => dotenv.env['API_CHAT'] ?? 'http://localhost:8086/api/v1';
 }
 
@@ -21,6 +22,7 @@ final dioProvider = Provider<Dio>((ref) {
   ));
 
   dio.interceptors.add(_AuthInterceptor(StorageService(), dio));
+  dio.interceptors.add(CryptoInterceptor(StorageService()));
   return dio;
 });
 
@@ -45,16 +47,16 @@ class _AuthInterceptor extends QueuedInterceptor {
     }
     handler.next(options);
   }
-  
+
   @override
   Future<void> onError(
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
     if (err.response?.statusCode == 401) {
-      try{
+      try {
         final refreshToken = await _storage.refreshToken;
-        if(refreshToken == null){
+        if (refreshToken == null) {
           await _storage.clearTokens();
           return handler.next(err);
         }
@@ -76,11 +78,11 @@ class _AuthInterceptor extends QueuedInterceptor {
           accessToken: newAccess,
           refreshToken: newRefresh,
         );
-        
+
         err.requestOptions.headers['Authorization'] = 'Bearer $newAccess';
         final retryResponse = await _dio.fetch(err.requestOptions);
         return handler.resolve(retryResponse);
-      }catch(_){
+      } catch (_) {
         await _storage.clearTokens();
         return handler.next(err);
       }
