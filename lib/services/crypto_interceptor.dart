@@ -18,7 +18,8 @@ class CryptoInterceptor extends Interceptor {
 
   static bool isSensitivePath(String path) {
     return path.contains('/aula-service/aulas') ||
-        path.contains('/usuario-service/usuarios');
+        path.contains('/usuario-service/usuarios') ||
+        path.contains('/auth/');
   }
 
   String _extractHost(String baseUrl) {
