@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,33 +12,6 @@ class AulasScreen extends ConsumerStatefulWidget {
 }
 
 class _AulasScreenState extends ConsumerState<AulasScreen> {
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(_onScroll);
-  }
-
-  @override
-  void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 300) {
-      final total = ref.read(aulasFiltradasProvider).length;
-      final current = ref.read(visibleAulasCountProvider);
-      if (current < total) {
-        ref.read(visibleAulasCountProvider.notifier).state =
-            min(current + 20, total);
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final aulasAsync = ref.watch(aulasProvider);
@@ -76,7 +48,6 @@ class _AulasScreenState extends ConsumerState<AulasScreen> {
               await ref.read(aulasProvider.notifier).refresh();
             },
             child: CustomScrollView(
-              controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 SliverToBoxAdapter(
@@ -194,14 +165,18 @@ class _AulasScreenState extends ConsumerState<AulasScreen> {
                         ),
                 ),
                 if (aulasVisibles.length < aulasFiltradas.length)
-                  const SliverToBoxAdapter(
+                  SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 20),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                       child: Center(
-                        child: SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                        child: TextButton.icon(
+                          onPressed: () {
+                            final total = ref.read(visibleAulasCountProvider);
+                            ref.read(visibleAulasCountProvider.notifier).state =
+                                total + 20;
+                          },
+                          icon: const Icon(Icons.expand_more),
+                          label: const Text('Cargar más'),
                         ),
                       ),
                     ),

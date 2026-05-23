@@ -4,14 +4,23 @@ import '../views/aula_detail_screen.dart';
 
 class AulaCardWidget extends StatelessWidget {
   final AulaEntity aula;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
+  final VoidCallback? onTap;
 
-  const AulaCardWidget({super.key, required this.aula});
+  const AulaCardWidget({
+    super.key,
+    required this.aula,
+    this.onEdit,
+    this.onDelete,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -34,7 +43,7 @@ class AulaCardWidget extends StatelessWidget {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () {
+            onTap: onTap ?? () {
               Navigator.of(context).push(MaterialPageRoute(builder: (_) => AulaDetailScreen(aula: aula)));
             },
             child: Padding(
@@ -42,7 +51,6 @@ class AulaCardWidget extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Encabezado: Bloque e Ícono de Autorización
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -67,23 +75,42 @@ class AulaCardWidget extends StatelessWidget {
                           ],
                         ),
                       ),
-                      if (aula.requiereAutorizacion)
-                        Tooltip(
-                          message: 'Requiere Autorización',
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: colorScheme.errorContainer,
-                              shape: BoxShape.circle,
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (aula.requiereAutorizacion)
+                            Tooltip(
+                              message: 'Requiere Autorización',
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.errorContainer,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(Icons.security_rounded, color: colorScheme.error, size: 16),
+                              ),
                             ),
-                            child: Icon(Icons.security_rounded, color: colorScheme.error, size: 16),
-                          ),
-                        ),
+                          if (onEdit != null || onDelete != null)
+                            PopupMenuButton<String>(
+                              padding: EdgeInsets.zero,
+                              iconSize: 20,
+                              icon: Icon(Icons.more_vert_rounded, color: colorScheme.onSurfaceVariant),
+                              onSelected: (value) {
+                                if (value == 'edit') onEdit?.call();
+                                if (value == 'delete') onDelete?.call();
+                              },
+                              itemBuilder: (_) => [
+                                if (onEdit != null)
+                                  const PopupMenuItem(value: 'edit', child: Text('Editar')),
+                                if (onDelete != null)
+                                  const PopupMenuItem(value: 'delete', child: Text('Eliminar')),
+                              ],
+                            ),
+                        ],
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  
-                  // Título Principal
                   Text(
                     aula.nombreAula,
                     style: theme.textTheme.titleLarge?.copyWith(
@@ -93,8 +120,6 @@ class AulaCardWidget extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  
-                  // Categoría / Tipo
                   Text(
                     aula.tipoAula.nombre.toUpperCase(),
                     style: theme.textTheme.labelMedium?.copyWith(
@@ -104,8 +129,6 @@ class AulaCardWidget extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
-                  // Detalles finales (Capacidad)
                   Row(
                     children: [
                       _buildInfoBadge(
@@ -116,18 +139,11 @@ class AulaCardWidget extends StatelessWidget {
                         bgColor: colorScheme.tertiaryContainer,
                       ),
                       const Spacer(),
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: colorScheme.primaryContainer.withOpacity(0.5),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 14,
-                          color: colorScheme.primary,
-                        ),
-                      )
+                      Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 14,
+                        color: colorScheme.primary,
+                      ),
                     ],
                   ),
                 ],
