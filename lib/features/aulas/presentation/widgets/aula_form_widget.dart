@@ -60,7 +60,7 @@ class _AulaFormWidgetState extends ConsumerState<AulaFormWidget> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Completa todos los campos correctamente'),
-          backgroundColor: Colors.redAccent,
+          backgroundColor: AppColors.danger,
         ),
       );
       return;
@@ -70,7 +70,7 @@ class _AulaFormWidgetState extends ConsumerState<AulaFormWidget> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Selecciona un tipo de aula y un bloque'),
-          backgroundColor: Colors.redAccent,
+          backgroundColor: AppColors.danger,
         ),
       );
       return;
@@ -207,7 +207,7 @@ class _AulaFormWidgetState extends ConsumerState<AulaFormWidget> {
             ),
             error: (_, __) => const Padding(
               padding: EdgeInsets.symmetric(vertical: 14),
-              child: Text('Error al cargar', style: TextStyle(color: Colors.red)),
+              child: Text('Error al cargar', style: TextStyle(color: AppColors.danger)),
             ),
           ),
         ),

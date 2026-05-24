@@ -1,6 +1,9 @@
 import 'package:aulasmart_front_end/features/auth/presentation/providers/auth_provider.dart';
 import 'package:aulasmart_front_end/themes/app_colors.dart';
 import 'package:aulasmart_front_end/themes/app_text_styles.dart';
+import 'package:aulasmart_front_end/services/storage_service.dart';
+import 'package:aulasmart_front_end/services/session_provider.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,7 +18,16 @@ class PerfilView extends ConsumerWidget {
       color: AppColors.background,
       child: SafeArea(
         child: userAsync.when(
-          data: (user) => _buildContent(user),
+          data: (user) => SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildContent(user),
+                if (kDebugMode) const _DebugTools(),
+              ],
+            ),
+          ),
           loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
           error: (err, _) => _buildError(err),
         ),
@@ -31,26 +43,23 @@ class PerfilView extends ConsumerWidget {
     final nombre = nombreCompleto.split(' ').first;
     final apellidos = nombreCompleto.split(' ').skip(1).join(' ');
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _HeaderSection(nombreCompleto: nombreCompleto, rol: rol),
-          const SizedBox(height: 24),
-          const _SectionTitle(title: 'Información Personal', subtitle: 'Tus datos registrados en el sistema'),
-          const SizedBox(height: 12),
-          _InfoCard(nombre: nombre, apellidos: apellidos, email: email),
-          const SizedBox(height: 24),
-          const _SectionTitle(title: 'Preferencias', subtitle: 'Personaliza tu experiencia'),
-          const SizedBox(height: 12),
-          const _PreferencesCard(),
-          const SizedBox(height: 24),
-          const _SectionTitle(title: 'Cuenta', subtitle: 'Gestiona tu seguridad y acceso'),
-          const SizedBox(height: 12),
-          const _AccountActionsCard(),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _HeaderSection(nombreCompleto: nombreCompleto, rol: rol),
+        const SizedBox(height: 24),
+        const _SectionTitle(title: 'Información Personal', subtitle: 'Tus datos registrados en el sistema'),
+        const SizedBox(height: 12),
+        _InfoCard(nombre: nombre, apellidos: apellidos, email: email),
+        const SizedBox(height: 24),
+        const _SectionTitle(title: 'Preferencias', subtitle: 'Personaliza tu experiencia'),
+        const SizedBox(height: 12),
+        const _PreferencesCard(),
+        const SizedBox(height: 24),
+        const _SectionTitle(title: 'Cuenta', subtitle: 'Gestiona tu seguridad y acceso'),
+        const SizedBox(height: 12),
+        const _AccountActionsCard(),
+      ],
     );
   }
 
@@ -504,6 +513,95 @@ class _ActionDivider extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14),
       child: Divider(height: 1, color: AppColors.border.withValues(alpha: 0.5)),
+    );
+  }
+}
+
+// ─── DEBUG ───────────────────────────────────────────────────────────────────
+
+class _DebugTools extends ConsumerWidget {
+  const _DebugTools();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.warning.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Text('DEBUG', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.warning, letterSpacing: 2)),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () async {
+                final storage = StorageService();
+                await storage.clearAccessToken();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Access token eliminado')),
+                  );
+                }
+              },
+              icon: const Icon(Icons.key_off_rounded, size: 18),
+              label: const Text('Eliminar access token'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.warning,
+                side: const BorderSide(color: AppColors.warning),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () async {
+                final storage = StorageService();
+                await storage.saveAccessToken('invalid.token.here');
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Access token corrupto — hasValidToken retornará false')),
+                  );
+                }
+              },
+              icon: const Icon(Icons.error_outline, size: 18),
+              label: const Text('Corromper access token'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.danger,
+                side: const BorderSide(color: AppColors.danger),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                ref.read(sessionExpiredProvider.notifier).state = true;
+              },
+              icon: const Icon(Icons.logout_rounded, size: 18),
+              label: const Text('Simular sesión expirada'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.danger,
+                side: const BorderSide(color: AppColors.danger),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/aula_entity.dart';
 import '../../../reservas/presentation/providers/reservas_provider.dart';
 import '../../../reservas/domain/entities/reserva_entity.dart';
+import '../../../../themes/app_colors.dart';
+import '../../../../themes/app_text_styles.dart';
 
 class AulaAdminDetailScreen extends ConsumerStatefulWidget {
   final AulaEntity aula;
@@ -27,7 +29,6 @@ class _AulaAdminDetailScreenState
   @override
   Widget build(BuildContext context) {
     final reservasAsync = ref.watch(reservasPorAulaProvider(widget.aula.id));
-    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -40,9 +41,9 @@ class _AulaAdminDetailScreenState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildInfoCard(theme),
+            _buildInfoCard(),
             const SizedBox(height: 24),
-            _buildDatePicker(theme),
+            _buildDatePicker(),
             const SizedBox(height: 16),
             reservasAsync.when(
               data: (reservas) => _buildReservasList(reservas),
@@ -57,25 +58,24 @@ class _AulaAdminDetailScreenState
     );
   }
 
-  Widget _buildInfoCard(ThemeData theme) {
-    final colorScheme = theme.colorScheme;
+  Widget _buildInfoCard() {
     final aula = widget.aula;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.05),
+            color: AppColors.shadow,
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
         border: Border.all(
-          color: colorScheme.outlineVariant.withOpacity(0.5),
+          color: AppColors.border.withOpacity(0.5),
         ),
       ),
       child: Column(
@@ -86,14 +86,14 @@ class _AulaAdminDetailScreenState
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: colorScheme.secondaryContainer,
+                  color: AppColors.pageCard,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   'Código: ${aula.codigoAula}',
-                  style: theme.textTheme.labelMedium?.copyWith(
+                  style: AppTextStyles.smallLabel.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: colorScheme.onSecondaryContainer,
+                    color: AppColors.primary,
                   ),
                 ),
               ),
@@ -102,17 +102,17 @@ class _AulaAdminDetailScreenState
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.12),
+                    color: AppColors.warning.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.shield_outlined, size: 14, color: Colors.orange[700]),
+                      Icon(Icons.shield_outlined, size: 14, color: AppColors.warning),
                       const SizedBox(width: 4),
                       Text('Requiere Auth',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.orange[700],
+                          style: AppTextStyles.smallLabel.copyWith(
+                            color: AppColors.warning,
                             fontWeight: FontWeight.bold,
                           )),
                     ],
@@ -123,37 +123,37 @@ class _AulaAdminDetailScreenState
           const SizedBox(height: 16),
           Text(
             aula.nombreAula,
-            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            style: AppTextStyles.pageTitle,
           ),
           const SizedBox(height: 8),
           Row(
             children: [
-              Icon(Icons.business_rounded, size: 16, color: colorScheme.onSurfaceVariant),
+              Icon(Icons.business_rounded, size: 16, color: AppColors.textSecondary),
               const SizedBox(width: 6),
-              Text(aula.bloque.nombre,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  )),
+              Flexible(
+                child: Text(aula.bloque.nombre,
+                    style: AppTextStyles.cardSubtitle),
+              ),
               const SizedBox(width: 16),
-              Icon(Icons.people_alt_rounded, size: 16, color: colorScheme.onSurfaceVariant),
+              Icon(Icons.people_alt_rounded, size: 16, color: AppColors.textSecondary),
               const SizedBox(width: 6),
-              Text('${aula.capacidad} asientos',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  )),
+              Flexible(
+                child: Text('${aula.capacidad} asientos',
+                    style: AppTextStyles.cardSubtitle),
+              ),
             ],
           ),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: colorScheme.primaryContainer.withOpacity(0.3),
+              color: AppColors.surfaceVariant.withOpacity(0.3),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
               aula.tipoAula.nombre.toUpperCase(),
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: colorScheme.primary,
+              style: AppTextStyles.smallLabel.copyWith(
+                color: AppColors.primary,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.2,
               ),
@@ -164,7 +164,7 @@ class _AulaAdminDetailScreenState
     );
   }
 
-  Widget _buildDatePicker(ThemeData theme) {
+  Widget _buildDatePicker() {
     return InkWell(
       onTap: () async {
         final picked = await showDatePicker(
@@ -182,19 +182,19 @@ class _AulaAdminDetailScreenState
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest,
+          color: AppColors.surfaceVariant,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
-            Icon(Icons.calendar_today_rounded, color: theme.colorScheme.primary),
+            Icon(Icons.calendar_today_rounded, color: AppColors.primary),
             const SizedBox(width: 12),
             Text(
               '${_selectedDate.day.toString().padLeft(2, '0')}/${_selectedDate.month.toString().padLeft(2, '0')}/${_selectedDate.year}',
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+              style: AppTextStyles.cardTitle,
             ),
             const Spacer(),
-            Icon(Icons.arrow_drop_down, color: theme.colorScheme.onSurfaceVariant),
+            Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
           ],
         ),
       ),
@@ -202,7 +202,6 @@ class _AulaAdminDetailScreenState
   }
 
   Widget _buildReservasList(List<ReservaEntity> reservas) {
-    final theme = Theme.of(context);
     final diaReservas = reservas.where((r) {
       return r.horaInicio.year == _selectedDate.year &&
           r.horaInicio.month == _selectedDate.month &&
@@ -217,13 +216,11 @@ class _AulaAdminDetailScreenState
           padding: const EdgeInsets.symmetric(vertical: 40),
           child: Column(
             children: [
-              Icon(Icons.event_busy_rounded, size: 48, color: theme.colorScheme.outline),
+              Icon(Icons.event_busy_rounded, size: 48, color: AppColors.neutral),
               const SizedBox(height: 12),
               Text(
                 'No hay reservas para esta fecha',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+                style: AppTextStyles.sectionBody,
               ),
             ],
           ),
@@ -236,7 +233,7 @@ class _AulaAdminDetailScreenState
       children: [
         Text(
           '${diaReservas.length} reserva${diaReservas.length == 1 ? '' : 's'}',
-          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          style: AppTextStyles.sectionTitle,
         ),
         const SizedBox(height: 12),
         ...diaReservas.map((r) => _ReservaItem(reserva: r)),
@@ -253,13 +250,13 @@ class _ReservaItem extends StatelessWidget {
   Color _estadoColor(String estado) {
     switch (estado.toLowerCase()) {
       case 'confirmada':
-        return Colors.green;
+        return AppColors.success;
       case 'pendiente':
-        return Colors.orange;
+        return AppColors.warning;
       case 'rechazada':
-        return Colors.red;
+        return AppColors.danger;
       default:
-        return Colors.grey;
+        return AppColors.neutral;
     }
   }
 
@@ -269,7 +266,6 @@ class _ReservaItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final color = _estadoColor(reserva.estado);
 
     return Container(
@@ -277,9 +273,9 @@ class _ReservaItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.colorScheme.outlineVariant.withOpacity(0.5)),
+        border: Border.all(color: AppColors.border.withOpacity(0.5)),
       ),
       child: Row(
         children: [
@@ -294,7 +290,7 @@ class _ReservaItem extends StatelessWidget {
               children: [
                 Text(_formatTime(reserva.horaInicio),
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: color)),
-                const Text('-', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                Text('-', style: TextStyle(color: AppColors.neutral, fontSize: 12)),
                 Text(_formatTime(reserva.horaFin),
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: color)),
               ],
@@ -307,20 +303,18 @@ class _ReservaItem extends StatelessWidget {
               children: [
                 Text(
                   reserva.tituloApi ?? 'Reserva',
-                  style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.cardTitle,
                 ),
                 const SizedBox(height: 4),
                 if (reserva.nombreUsuarioResponsable != null)
                   Text(
                     reserva.nombreUsuarioResponsable!,
-                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                    style: AppTextStyles.cardSubtitle,
                   ),
                 const SizedBox(height: 2),
                 Text(
                   '${reserva.codigoPrograma} · Grupo ${reserva.grupo}',
-                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+                  style: AppTextStyles.cardSubtitle.copyWith(color: AppColors.neutral),
                 ),
               ],
             ),

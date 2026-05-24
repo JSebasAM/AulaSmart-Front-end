@@ -53,6 +53,14 @@ class StorageService {
     ]);
   }
 
+  Future<void> clearAccessToken() async {
+    await _secureStorage.delete(key: _accessKey);
+  }
+
+  Future<void> saveAccessToken(String token) async {
+    await _secureStorage.write(key: _accessKey, value: token);
+  }
+
   Future<bool> get hasValidToken async {
     final token = await accessToken;
     if (token == null) return false;

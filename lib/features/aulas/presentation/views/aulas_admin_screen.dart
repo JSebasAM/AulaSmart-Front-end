@@ -5,6 +5,8 @@ import '../providers/aulas_provider.dart';
 import '../widgets/aula_card_widget.dart';
 import 'aula_form_screen.dart';
 import 'aula_admin_detail_screen.dart';
+import '../../../../themes/app_colors.dart';
+import '../../../../themes/app_text_styles.dart';
 
 class AulasAdminScreen extends ConsumerStatefulWidget {
   const AulasAdminScreen({super.key});
@@ -49,13 +51,13 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Eliminar aula'),
-        content: Text('¿Estás seguro de eliminar "${aula.nombreAula}"?'),
+        title: Text('Eliminar aula', style: AppTextStyles.sectionTitle),
+        content: Text('¿Estás seguro de eliminar "${aula.nombreAula}"?', style: AppTextStyles.sectionBody),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
             child: const Text('Eliminar'),
           ),
         ],
@@ -70,12 +72,15 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gestión de Aulas'),
+        title: Text('Gestión de Aulas', style: AppTextStyles.sectionTitle),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        foregroundColor: AppColors.textPrimary,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showFormDialog(),
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.textOnPrimary,
         child: const Icon(Icons.add),
       ),
       body: Column(
@@ -89,9 +94,10 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
               },
               decoration: InputDecoration(
                 hintText: 'Buscar aula...',
-                prefixIcon: const Icon(Icons.search),
+                hintStyle: TextStyle(color: AppColors.textSecondary),
+                prefixIcon: Icon(Icons.search, color: AppColors.textSecondary),
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                fillColor: AppColors.surfaceVariant,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -104,17 +110,7 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
             child: aulasAsync.when(
               data: (aulas) {
                 if (aulas.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.meeting_room_outlined,
-                            size: 64, color: Theme.of(context).colorScheme.outline),
-                        const SizedBox(height: 16),
-                        const Text('No hay aulas registradas'),
-                      ],
-                    ),
-                  );
+                  return _buildEmptyState();
                 }
 
                 final filtradas = ref.watch(aulasFiltradasProvider);
@@ -138,12 +134,13 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
                         const SizedBox(height: 8),
                         _buildBloqueBar(bloques, bloqueSeleccionado),
                         const SizedBox(height: 16),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Center(
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Text(
                               'No se encontraron aulas con ese criterio',
-                              style: Theme.of(context).textTheme.titleMedium,
+                              style: AppTextStyles.sectionBody,
+                              textAlign: TextAlign.center,
                             ),
                           ),
                         ),
@@ -183,7 +180,9 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
                                     total + 20;
                               },
                               icon: const Icon(Icons.expand_more),
-                              label: const Text('Cargar más'),
+                              label: Text('Cargar más',
+                                  style: AppTextStyles.sectionBody.copyWith(
+                                      color: AppColors.primary)),
                             ),
                           ),
                         );
@@ -201,7 +200,7 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text('"${aula.nombreAula}" eliminada'),
-                                    backgroundColor: Colors.green,
+                                    backgroundColor: AppColors.success,
                                   ),
                                 );
                               }
@@ -210,7 +209,7 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text('Error: $e'),
-                                    backgroundColor: Colors.redAccent,
+                                    backgroundColor: AppColors.danger,
                                   ),
                                 );
                               }
@@ -231,22 +230,27 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
               },
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, _) => Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.wifi_off_outlined,
-                        size: 64, color: Theme.of(context).colorScheme.error),
-                    const SizedBox(height: 16),
-                    Text('Error al cargar aulas', style: Theme.of(context).textTheme.titleLarge),
-                    const SizedBox(height: 8),
-                    Text(error.toString(), textAlign: TextAlign.center),
-                    const SizedBox(height: 24),
-                    FilledButton.tonalIcon(
-                      onPressed: () => ref.read(aulasProvider.notifier).refresh(),
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Reintentar'),
-                    ),
-                  ],
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.wifi_off_outlined,
+                          size: 64, color: AppColors.danger),
+                      const SizedBox(height: 16),
+                      Text('Error al cargar aulas', style: AppTextStyles.sectionTitle),
+                      const SizedBox(height: 8),
+                      Text(error.toString(),
+                          style: AppTextStyles.sectionBody,
+                          textAlign: TextAlign.center),
+                      const SizedBox(height: 24),
+                      FilledButton.tonalIcon(
+                        onPressed: () => ref.read(aulasProvider.notifier).refresh(),
+                        icon: const Icon(Icons.refresh),
+                        label: Text('Reintentar', style: AppTextStyles.sectionBody),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -256,8 +260,20 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
     );
   }
 
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.meeting_room_outlined, size: 64, color: AppColors.neutral),
+          const SizedBox(height: 16),
+          Text('No hay aulas registradas', style: AppTextStyles.sectionBody),
+        ],
+      ),
+    );
+  }
+
   Widget _buildFilterBar(List<String> categorias, String seleccionActual) {
-    final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
       height: 40,
       child: ListView.separated(
@@ -265,7 +281,7 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
         scrollDirection: Axis.horizontal,
         itemCount: categorias.length,
         separatorBuilder: (_, _) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
+        itemBuilder: (_, index) {
           final cat = categorias[index];
           final isSelected = cat == seleccionActual;
           return ChoiceChip(
@@ -279,10 +295,10 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
             },
             labelStyle: TextStyle(
               fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-              color: isSelected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
+              color: isSelected ? AppColors.textOnPrimary : AppColors.textSecondary,
             ),
-            backgroundColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-            selectedColor: colorScheme.primary,
+            backgroundColor: AppColors.surfaceVariant,
+            selectedColor: AppColors.primary,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             side: BorderSide.none,
             showCheckmark: false,
@@ -294,7 +310,6 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
   }
 
   Widget _buildBloqueBar(List<String> bloques, String seleccionActual) {
-    final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
       height: 40,
       child: ListView.separated(
@@ -302,7 +317,7 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
         scrollDirection: Axis.horizontal,
         itemCount: bloques.length,
         separatorBuilder: (_, _) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
+        itemBuilder: (_, index) {
           final b = bloques[index];
           final isSelected = b == seleccionActual;
           return ChoiceChip(
@@ -316,10 +331,10 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
             },
             labelStyle: TextStyle(
               fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-              color: isSelected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
+              color: isSelected ? AppColors.textOnPrimary : AppColors.textSecondary,
             ),
-            backgroundColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-            selectedColor: colorScheme.primary,
+            backgroundColor: AppColors.surfaceVariant,
+            selectedColor: AppColors.primary,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             side: BorderSide.none,
             showCheckmark: false,
