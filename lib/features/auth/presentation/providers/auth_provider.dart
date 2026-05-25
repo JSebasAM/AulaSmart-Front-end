@@ -14,7 +14,7 @@ part 'auth_provider.g.dart';
 AuthRepositoryImpl authRepository(Ref ref) {
   final dioGlobal = ref.watch(dioProvider);
   final dio = Dio(dioGlobal.options.copyWith(
-    baseUrl: ApiUrls.usuarios,
+    baseUrl: ApiUrls.auth,
   ));
   dio.interceptors.addAll(dioGlobal.interceptors);
   final storageService = ref.watch(storageServiceProvider);

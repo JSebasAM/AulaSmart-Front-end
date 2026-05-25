@@ -6,6 +6,8 @@ import 'package:aulasmart_front_end/features/reservas/presentation/providers/res
 import 'package:aulasmart_front_end/features/reservas/domain/entities/reserva_entity.dart';
 import 'package:aulasmart_front_end/features/reservas/presentation/widgets/reserva_form_sheet.dart';
 import 'package:aulasmart_front_end/features/auth/presentation/providers/user_role_provider.dart';
+import 'package:aulasmart_front_end/themes/app_colors.dart';
+import 'package:aulasmart_front_end/themes/app_text_styles.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class AulaDetailScreen extends ConsumerStatefulWidget {
@@ -95,7 +97,7 @@ class _AulaDetailScreenState extends ConsumerState<AulaDetailScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Reserva creada exitosamente'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
           ),
         );
       }
@@ -114,14 +116,14 @@ class _AulaDetailScreenState extends ConsumerState<AulaDetailScreen> {
           mensaje = 'Error al crear reserva: ${e.message}';
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(mensaje), backgroundColor: Colors.red),
+        SnackBar(content: Text(mensaje), backgroundColor: AppColors.danger),
       );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error inesperado: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.danger,
           ),
         );
       }
@@ -148,15 +150,15 @@ class _AulaDetailScreenState extends ConsumerState<AulaDetailScreen> {
               const SnackBar(
                 content: Text(
                     'Esta aula requiere autorizacion. Los estudiantes no pueden reservarla directamente.'),
-                backgroundColor: Colors.orange,
+                backgroundColor: AppColors.warning,
               ),
             );
           }
         },
         icon: const Icon(Icons.add),
         label: const Text('Reservar'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.textOnPrimary,
       ),
       body: reservasAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -200,21 +202,11 @@ class _AulaDetailScreenState extends ConsumerState<AulaDetailScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(aula.nombreAula,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineSmall
-                                      ?.copyWith(
-                                          fontWeight: FontWeight.bold)),
+                                  style: AppTextStyles.pageTitle),
                               const SizedBox(height: 6),
                               Text(
                                   '${aula.bloque.nombre} \u2022 Capacidad: ${aula.capacidad}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onSurfaceVariant)),
+                                  style: AppTextStyles.sectionBody),
                             ],
                           ),
                         ),
@@ -225,20 +217,17 @@ class _AulaDetailScreenState extends ConsumerState<AulaDetailScreen> {
                                 horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
                                 color:
-                                    Colors.orange.withValues(alpha: 0.12),
+                                    AppColors.warning.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(20)),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(Icons.shield_outlined,
-                                    size: 14, color: Colors.orange[700]),
+                                    size: 14, color: AppColors.warning),
                                 const SizedBox(width: 4),
                                 Text('Requiere autorizacion',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
-                                        ?.copyWith(
-                                            color: Colors.orange[700],
+                                    style: AppTextStyles.smallLabel.copyWith(
+                                            color: AppColors.warning,
                                             fontWeight: FontWeight.bold)),
                               ],
                             ),
@@ -258,9 +247,9 @@ class _AulaDetailScreenState extends ConsumerState<AulaDetailScreen> {
                           _selectedDate = selectedDay;
                         });
                       },
-                      calendarStyle: const CalendarStyle(
+                      calendarStyle: CalendarStyle(
                         markerDecoration: BoxDecoration(
-                            color: Colors.blue, shape: BoxShape.circle),
+                            color: AppColors.primary, shape: BoxShape.circle),
                       ),
                       eventLoader: (day) =>
                           eventsMap[DateTime(
@@ -277,9 +266,7 @@ class _AulaDetailScreenState extends ConsumerState<AulaDetailScreen> {
                         child: Center(
                             child: Text(
                                 'No hay reservas para esta fecha',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge)),
+                                style: AppTextStyles.sectionBody)),
                       )
                     else
                       ...selected
@@ -304,13 +291,13 @@ class _ReservaExpansion extends StatelessWidget {
   Color _estadoColor(String estado) {
     switch (estado.toLowerCase()) {
       case 'confirmada':
-        return Colors.green;
+        return AppColors.success;
       case 'pendiente':
-        return Colors.orange;
+        return AppColors.warning;
       case 'rechazada':
-        return Colors.red;
+        return AppColors.danger;
       default:
-        return Colors.grey;
+        return AppColors.neutral;
     }
   }
 
@@ -342,7 +329,7 @@ class _ReservaExpansion extends StatelessWidget {
                       style:
                           const TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
-                  const Text('-', style: TextStyle(color: Colors.grey)),
+                  Text('-', style: TextStyle(color: AppColors.neutral)),
                   const SizedBox(height: 4),
                   Text(
                       '${reserva.horaFin.hour.toString().padLeft(2, '0')}:${reserva.horaFin.minute.toString().padLeft(2, '0')}',
@@ -362,7 +349,7 @@ class _ReservaExpansion extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                       '${reserva.displayPrograma} \u2022 Grupo ${reserva.displayGrupo}',
-                      style: Theme.of(context).textTheme.bodySmall),
+                      style: AppTextStyles.cardSubtitle),
                 ],
               ),
             ),
@@ -413,10 +400,7 @@ class _ReservaExpansion extends StatelessWidget {
           Align(
             alignment: Alignment.centerRight,
             child: Text('ID: ${reserva.id}',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: Colors.grey)),
+                style: AppTextStyles.tinyLabel.copyWith(color: AppColors.neutral)),
           ),
         ],
       ),
