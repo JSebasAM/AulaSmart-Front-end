@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/usuario_entity.dart';
 import '../providers/usuarios_provider.dart';
 import '../widgets/user_form_widget.dart';
+import 'package:aulasmart_front_end/features/auth/presentation/providers/user_role_provider.dart';
 
 class AdminUserFormView extends ConsumerStatefulWidget {
   final UsuarioEntity? user;
@@ -70,6 +71,9 @@ class _AdminUserFormViewState extends ConsumerState<AdminUserFormView> {
 
   @override
   Widget build(BuildContext context) {
+    final rolAsync = ref.watch(currentUserRoleProvider);
+    final currentRole = rolAsync.value ?? '';
+
     return Stack(
       children: [
         Padding(
@@ -105,6 +109,7 @@ class _AdminUserFormViewState extends ConsumerState<AdminUserFormView> {
                     onSubmit: () {},
                     onFormSubmit: _handleFormSubmit,
                     fixedRole: widget.fixedRole,
+                    currentUserRole: currentRole,
                     submitButtonLabel:
                         widget.user != null ? 'Guardar Cambios' : 'Crear Usuario',
                     initialData: widget.user != null

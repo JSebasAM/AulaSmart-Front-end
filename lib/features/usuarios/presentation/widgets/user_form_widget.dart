@@ -9,6 +9,7 @@ class UserFormWidget extends StatefulWidget {
   final String submitButtonLabel;
   final Map<String, dynamic>? initialData;
   final String? fixedRole;
+  final String currentUserRole;
 
   const UserFormWidget({
     super.key,
@@ -17,6 +18,7 @@ class UserFormWidget extends StatefulWidget {
     this.submitButtonLabel = 'Registrar',
     this.initialData,
     this.fixedRole,
+    this.currentUserRole = '',
   });
 
   @override
@@ -39,6 +41,10 @@ class _UserFormWidgetState extends State<UserFormWidget> {
     emailController = TextEditingController(text: widget.initialData?['email'] ?? '');
     passwordController = TextEditingController(text: widget.initialData?['password'] ?? '');
     selectedRol = widget.fixedRole ?? widget.initialData?['rol'] ?? 'Estudiante';
+    final esAdmin = widget.currentUserRole.toLowerCase() == 'administrador';
+    if (!esAdmin && selectedRol.toLowerCase() == 'administrador') {
+      selectedRol = 'Estudiante';
+    }
   }
 
   @override
@@ -59,6 +65,15 @@ class _UserFormWidgetState extends State<UserFormWidget> {
       'rol': widget.fixedRole ?? selectedRol,
     };
     widget.onFormSubmit(formData);
+  }
+
+  List<DropdownMenuItem<String>> _buildRoleItems() {
+    final roles = ['Estudiante', 'Docente', 'Administrativo', 'Monitor'];
+    final esAdmin = widget.currentUserRole.toLowerCase() == 'administrador';
+    if (esAdmin) {
+      roles.add('Administrador');
+    }
+    return roles.map((r) => DropdownMenuItem(value: r, child: Text(r))).toList();
   }
 
   @override
@@ -131,13 +146,7 @@ class _UserFormWidgetState extends State<UserFormWidget> {
                     color: AppColors.textPrimary,
                     fontSize: 16,
                   ),
-                  items: const [
-                    DropdownMenuItem(value: 'Estudiante', child: Text('Estudiante')),
-                    DropdownMenuItem(value: 'Docente', child: Text('Docente')),
-                    DropdownMenuItem(value: 'Administrativo', child: Text('Administrativo')),
-                    DropdownMenuItem(value: 'Administrador', child: Text('Administrador')),
-                    DropdownMenuItem(value: 'Monitor', child: Text('Monitor')),
-                  ],
+                  items: _buildRoleItems(),
                   onChanged: (value) {
                     if (value != null) {
                       setState(() => selectedRol = value);

@@ -86,4 +86,16 @@ class UsuarioRepositoryImpl implements IUsuarioRepository {
       throw ApiException.fromDioException(e);
     }
   }
+
+  @override
+  Future<void> changePassword(String id, String newPassword) async {
+    try {
+      await dio.put(
+        '/usuario-service/usuarios/$id/password',
+        data: {'password': newPassword},
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
 }

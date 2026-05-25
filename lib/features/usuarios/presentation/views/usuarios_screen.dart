@@ -65,7 +65,7 @@ class _AdminUsersViewState extends ConsumerState<AdminUsersView> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Eliminar usuario'),
         content: Text(
-          '¿Estás seguro de que deseas eliminar a ${user.nombre} ${user.apellido}?\nEsta acción no se puede deshacer.',
+          'Esta seguro de que deseas eliminar a ${user.nombre} ${user.apellido}?\nEsta accion no se puede deshacer.',
         ),
         actions: [
           TextButton(
@@ -85,6 +85,87 @@ class _AdminUsersViewState extends ConsumerState<AdminUsersView> {
               ),
             ),
             child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPasswordDialog(UsuarioEntity user) {
+    final controller = TextEditingController();
+    final confirmController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Cambiar contrasena de ${user.nombre}'),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: controller,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Nueva contrasena',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                ),
+                validator: (v) =>
+                    (v == null || v.isEmpty) ? 'Requerido' : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: confirmController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Confirmar contrasena',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                ),
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'Requerido';
+                  if (v != controller.text) return 'No coinciden';
+                  return null;
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              if (!formKey.currentState!.validate()) return;
+              try {
+                await ref
+                    .read(usuariosProvider.notifier)
+                    .cambiarPassword(user.codigo, controller.text);
+                if (mounted) Navigator.pop(context);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Contrasena actualizada'),
+                        backgroundColor: Colors.green),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text('Error: $e'),
+                        backgroundColor: Colors.red),
+                  );
+                }
+              }
+            },
+            child: const Text('Guardar'),
           ),
         ],
       ),
@@ -245,6 +326,8 @@ class _AdminUsersViewState extends ConsumerState<AdminUsersView> {
                             onEdit: () =>
                                 _showFormDialog(context, user: user),
                             onDelete: () => _confirmDelete(user),
+                            onChangePassword: () =>
+                                _showPasswordDialog(user),
                           );
                         },
                       ),

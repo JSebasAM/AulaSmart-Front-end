@@ -6,4 +6,5 @@ abstract class IUsuarioRepository {
   Future<UsuarioEntity> create(Map<String, dynamic> payload);
   Future<UsuarioEntity> update(String id, Map<String, dynamic> payload);
   Future<void> delete(String id);
+  Future<void> changePassword(String id, String newPassword);
 }

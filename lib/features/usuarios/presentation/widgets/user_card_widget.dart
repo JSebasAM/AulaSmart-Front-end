@@ -6,12 +6,14 @@ class UserCardWidget extends StatelessWidget {
   final UsuarioEntity user;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final VoidCallback onChangePassword;
 
   const UserCardWidget({
     super.key,
     required this.user,
     required this.onEdit,
     required this.onDelete,
+    required this.onChangePassword,
   });
 
   @override
@@ -90,6 +92,7 @@ class UserCardWidget extends StatelessWidget {
                   PopupMenuButton<String>(
                     onSelected: (value) {
                       if (value == 'edit') onEdit();
+                      if (value == 'password') onChangePassword();
                       if (value == 'delete') onDelete();
                     },
                     icon: const Icon(Icons.more_vert, color: AppColors.neutral),
@@ -104,6 +107,16 @@ class UserCardWidget extends StatelessWidget {
                             Icon(Icons.edit_outlined, size: 20),
                             SizedBox(width: 8),
                             Text('Editar'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'password',
+                        child: Row(
+                          children: [
+                            Icon(Icons.lock_outline, size: 20),
+                            SizedBox(width: 8),
+                            Text('Cambiar contraseña'),
                           ],
                         ),
                       ),

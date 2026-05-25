@@ -48,6 +48,10 @@ class Usuarios extends _$Usuarios {
     await ref.read(usuarioRepositoryProvider).delete(id);
     await refresh();
   }
+
+  Future<void> cambiarPassword(String id, String newPassword) async {
+    await ref.read(usuarioRepositoryProvider).changePassword(id, newPassword);
+  }
 }
 
 final searchQueryProvider = StateProvider<String>((ref) => '');

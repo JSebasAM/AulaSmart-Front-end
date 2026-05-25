@@ -6,6 +6,7 @@ import 'package:aulasmart_front_end/views/login_view.dart';
 import 'package:aulasmart_front_end/features/aulas/presentation/views/aulas_screen.dart';
 import 'package:aulasmart_front_end/features/usuarios/presentation/views/usuarios_screen.dart';
 import 'package:aulasmart_front_end/features/reservas/presentation/views/admin_reservas_screen.dart';
+import 'package:aulasmart_front_end/features/incidencias/presentation/views/admin_incidencias_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final GoRouter routerProvider = GoRouter(
@@ -42,7 +43,7 @@ final GoRouter routerProvider = GoRouter(
     ),
     GoRoute(
       path: '/admin/incidencias',
-      builder: (_, _) => const ComingSoonView(featureName: 'Gestión de Incidencias'),
+      builder: (_, _) => const AdminIncidenciasScreen(),
     ),
     GoRoute(
       path: '/admin/aulas',
