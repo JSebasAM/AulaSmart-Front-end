@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'storage_service.dart';
+import 'crypto_interceptor.dart';
 import 'session_provider.dart';
 
 class ApiUrls {
@@ -9,7 +10,7 @@ class ApiUrls {
   static String get usuarios    => dotenv.env['API_USUARIOS'] ?? 'http://localhost:8081/api/v1';
   static String get reservas    => dotenv.env['API_RESERVAS'] ?? 'http://localhost:8082/api/v1';
   static String get aulas       => dotenv.env['API_AULAS'] ?? 'http://localhost:8083/api/v1';
-  static String get incidencias => dotenv.env['API_INCIDENCIAS'] ?? 'http://localhost:8084/api/v1';
+  static String get incidencias => dotenv.env['API_INCIDENCIAS'] ?? 'http://localhost:8085/api/v1';
   static String get chat        => dotenv.env['API_CHAT'] ?? 'http://localhost:8086/api/v1';
 }
 
@@ -19,11 +20,11 @@ final dioProvider = Provider<Dio>((ref) {
     receiveTimeout: const Duration(seconds: 10),
     headers: {'Content-Type': 'application/json'},
   ));
+
+  dio.interceptors.add(_AuthInterceptor(StorageService(), dio, onSessionExpired: () => ref.read(sessionExpiredProvider.notifier).state = true));
+  dio.interceptors.add(CryptoInterceptor(StorageService()));
   dio.interceptors.add(_AuthInterceptor(
-    StorageService(),
-    dio,
-    onSessionExpired: () => ref.read(sessionExpiredProvider.notifier).state = true,
-  ));
+
   return dio;
 });
 

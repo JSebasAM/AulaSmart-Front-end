@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final storageServiceProvider = Provider<StorageService>((ref) {
@@ -27,13 +26,12 @@ class StorageService {
   Future<String?> get refreshToken => _secureStorage.read(key: _refreshKey);
 
   Future<void> saveUserInfo(Map<String, dynamic> userInfo) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_userInfoKey, jsonEncode(userInfo));
+    await _secureStorage.write(
+        key: _userInfoKey, value: jsonEncode(userInfo));
   }
 
   Future<Map<String, dynamic>?> getUserInfo() async {
-    final prefs = await SharedPreferences.getInstance();
-    final data = prefs.getString(_userInfoKey);
+    final data = await _secureStorage.read(key: _userInfoKey);
     if (data != null) {
       return jsonDecode(data) as Map<String, dynamic>;
     }
@@ -41,9 +39,9 @@ class StorageService {
   }
 
   Future<void> clearAll() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_userInfoKey);
+    await _secureStorage.delete(key: _userInfoKey);
     await clearTokens();
+    await clearSession();
   }
 
   Future<void> clearTokens() async {
@@ -53,6 +51,9 @@ class StorageService {
     ]);
   }
 
+  Future<void> clearSession() async {
+    await _secureStorage.delete(key: 'crypto_sessions');
+    
   Future<void> clearAccessToken() async {
     await _secureStorage.delete(key: _accessKey);
   }
@@ -67,11 +68,13 @@ class StorageService {
     try {
       final parts = token.split('.');
       if (parts.length != 3) return false;
-      final payload = String.fromCharCodes(base64Url.decode(base64Url.normalize(parts[1])));
+      final payload = String.fromCharCodes(
+          base64Url.decode(base64Url.normalize(parts[1])));
       final data = jsonDecode(payload) as Map<String, dynamic>;
       final exp = data['exp'] as int?;
       if (exp == null) return true;
-      return DateTime.fromMillisecondsSinceEpoch(exp * 1000).isAfter(DateTime.now());
+      return DateTime.fromMillisecondsSinceEpoch(exp * 1000)
+          .isAfter(DateTime.now());
     } catch (_) {
       return false;
     }
