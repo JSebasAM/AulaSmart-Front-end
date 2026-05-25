@@ -1,7 +1,8 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../themes/app_colors.dart';
+import '../../../../themes/app_text_styles.dart';
 import '../providers/aulas_provider.dart';
 import '../widgets/aula_card_widget.dart';
 
@@ -13,40 +14,13 @@ class AulasScreen extends ConsumerStatefulWidget {
 }
 
 class _AulasScreenState extends ConsumerState<AulasScreen> {
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(_onScroll);
-  }
-
-  @override
-  void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 300) {
-      final total = ref.read(aulasFiltradasProvider).length;
-      final current = ref.read(visibleAulasCountProvider);
-      if (current < total) {
-        ref.read(visibleAulasCountProvider.notifier).state =
-            min(current + 20, total);
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final aulasAsync = ref.watch(aulasProvider);
     final categoriaSeleccionada = ref.watch(categoriaFiltroProvider);
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
         title: const Text('Aulas Smart',
             style: TextStyle(fontWeight: FontWeight.w800)),
@@ -57,7 +31,7 @@ class _AulasScreenState extends ConsumerState<AulasScreen> {
       body: aulasAsync.when(
         data: (aulas) {
           if (aulas.isEmpty) {
-            return _buildEmptyState(context);
+            return _buildEmptyState();
           }
 
           final categorias = ['Todas'];
@@ -76,7 +50,6 @@ class _AulasScreenState extends ConsumerState<AulasScreen> {
               await ref.read(aulasProvider.notifier).refresh();
             },
             child: CustomScrollView(
-              controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 SliverToBoxAdapter(
@@ -84,8 +57,7 @@ class _AulasScreenState extends ConsumerState<AulasScreen> {
                     padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
                     child: Text(
                       'Categorias',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold),
+                        style: AppTextStyles.sectionTitle,
                     ),
                   ),
                 ),
@@ -101,9 +73,7 @@ class _AulasScreenState extends ConsumerState<AulasScreen> {
                         hintText: 'Buscar aula...',
                         prefixIcon: const Icon(Icons.search),
                         filled: true,
-                        fillColor: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
+                        fillColor: AppColors.surfaceVariant,
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide.none),
@@ -116,7 +86,7 @@ class _AulasScreenState extends ConsumerState<AulasScreen> {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
-                    child: _buildFilterBar(context, ref, categorias,
+                    child: _buildFilterBar(ref, categorias,
                         categoriaSeleccionada),
                   ),
                 ),
@@ -124,7 +94,7 @@ class _AulasScreenState extends ConsumerState<AulasScreen> {
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 16.0),
                     child: _buildBloqueBar(
-                        context, ref, bloques, bloqueSeleccionada),
+                        ref, bloques, bloqueSeleccionada),
                   ),
                 ),
                 SliverToBoxAdapter(
@@ -135,26 +105,18 @@ class _AulasScreenState extends ConsumerState<AulasScreen> {
                       children: [
                         Text(
                           'Aulas Disponibles',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge
-                              ?.copyWith(fontWeight: FontWeight.bold),
+                          style: AppTextStyles.sectionTitle,
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest,
+                            color: AppColors.surfaceVariant,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
                             '${aulasVisibles.length} de ${aulasFiltradas.length} aulas',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(fontWeight: FontWeight.bold),
+                            style: AppTextStyles.smallLabel,
                           ),
                         ),
                       ],
@@ -169,12 +131,8 @@ class _AulasScreenState extends ConsumerState<AulasScreen> {
                           child: Center(
                             child: Text(
                               'No hay aulas en esta categoria',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    color:
-                                        Theme.of(context).colorScheme.outline,
+                              style: AppTextStyles.sectionBody.copyWith(
+                                    color: AppColors.neutral,
                                   ),
                             ),
                           ),
@@ -194,14 +152,18 @@ class _AulasScreenState extends ConsumerState<AulasScreen> {
                         ),
                 ),
                 if (aulasVisibles.length < aulasFiltradas.length)
-                  const SliverToBoxAdapter(
+                  SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 20),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                       child: Center(
-                        child: SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                        child: TextButton.icon(
+                          onPressed: () {
+                            final total = ref.read(visibleAulasCountProvider);
+                            ref.read(visibleAulasCountProvider.notifier).state =
+                                total + 20;
+                          },
+                          icon: const Icon(Icons.expand_more),
+                          label: const Text('Cargar más'),
                         ),
                       ),
                     ),
@@ -212,12 +174,12 @@ class _AulasScreenState extends ConsumerState<AulasScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => _buildErrorState(context, ref, error),
+        error: (error, stack) => _buildErrorState(ref, error),
       ),
     );
   }
 
-  Widget _buildFilterBar(BuildContext context, WidgetRef ref,
+  Widget _buildFilterBar(WidgetRef ref,
       List<String> categorias, String seleccionActual) {
     return SizedBox(
       height: 40,
@@ -229,7 +191,6 @@ class _AulasScreenState extends ConsumerState<AulasScreen> {
         itemBuilder: (context, index) {
           final cat = categorias[index];
           final isSelected = cat == seleccionActual;
-          final colorScheme = Theme.of(context).colorScheme;
 
           return ChoiceChip(
             label: Text(cat),
@@ -243,12 +204,11 @@ class _AulasScreenState extends ConsumerState<AulasScreen> {
             labelStyle: TextStyle(
               fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
               color: isSelected
-                  ? colorScheme.onPrimary
-                  : colorScheme.onSurfaceVariant,
+                  ? AppColors.textOnPrimary
+                  : AppColors.textSecondary,
             ),
-            backgroundColor:
-                colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-            selectedColor: colorScheme.primary,
+            backgroundColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
+            selectedColor: AppColors.primary,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20)),
             side: BorderSide.none,
@@ -260,7 +220,7 @@ class _AulasScreenState extends ConsumerState<AulasScreen> {
     );
   }
 
-  Widget _buildBloqueBar(BuildContext context, WidgetRef ref,
+  Widget _buildBloqueBar(WidgetRef ref,
       List<String> bloques, String seleccionActual) {
     return SizedBox(
       height: 40,
@@ -272,7 +232,6 @@ class _AulasScreenState extends ConsumerState<AulasScreen> {
         itemBuilder: (context, index) {
           final b = bloques[index];
           final isSelected = b == seleccionActual;
-          final colorScheme = Theme.of(context).colorScheme;
 
           return ChoiceChip(
             label: Text(b),
@@ -286,12 +245,11 @@ class _AulasScreenState extends ConsumerState<AulasScreen> {
             labelStyle: TextStyle(
               fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
               color: isSelected
-                  ? colorScheme.onPrimary
-                  : colorScheme.onSurfaceVariant,
+                  ? AppColors.textOnPrimary
+                  : AppColors.textSecondary,
             ),
-            backgroundColor:
-                colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-            selectedColor: colorScheme.primary,
+            backgroundColor: AppColors.surfaceVariant.withValues(alpha: 0.5),
+            selectedColor: AppColors.primary,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20)),
             side: BorderSide.none,
@@ -303,25 +261,24 @@ class _AulasScreenState extends ConsumerState<AulasScreen> {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.meeting_room_outlined,
-              size: 64, color: Theme.of(context).colorScheme.outline),
+              size: 64, color: AppColors.neutral),
           const SizedBox(height: 16),
           Text(
             'No hay aulas disponibles.',
-            style: Theme.of(context).textTheme.titleMedium,
+            style: AppTextStyles.sectionBody,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildErrorState(
-      BuildContext context, WidgetRef ref, Object error) {
+  Widget _buildErrorState(WidgetRef ref, Object error) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -329,18 +286,17 @@ class _AulasScreenState extends ConsumerState<AulasScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.wifi_off_outlined,
-                size: 64, color: Theme.of(context).colorScheme.error),
+                size: 64, color: AppColors.danger),
             const SizedBox(height: 16),
             Text(
               'No pudimos cargar las aulas',
-              style: Theme.of(context).textTheme.titleLarge,
+              style: AppTextStyles.sectionTitle,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
               error.toString(),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant),
+              style: AppTextStyles.sectionBody,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),

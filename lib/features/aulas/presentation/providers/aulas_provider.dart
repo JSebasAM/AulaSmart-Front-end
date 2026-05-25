@@ -4,23 +4,20 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/aula_entity.dart';
+import '../../domain/entities/tipo_aula_entity.dart';
+import '../../domain/entities/bloque_entity.dart';
 import '../../data/repositories/aula_repository_impl.dart';
-import '../../../../services/dio_client.dart'; // Importante: Traer tu cliente JWT
+import '../../../../services/dio_client.dart';
 
 part 'aulas_provider.g.dart';
 
 @riverpod
 AulaRepositoryImpl aulaRepository(Ref ref) {
-  // Ahora inyectamos tu Dio global que YA tiene los interceptores de JWT
   final dioGlobal = ref.watch(dioProvider);
-  
-  // Clonamos el Dio para setearle la baseUrl específica de Aulas sin dañar el original
   final dioAulas = Dio(dioGlobal.options.copyWith(
     baseUrl: ApiUrls.aulas,
   ));
-  // Le copiamos los interceptores (el JWT y el Refresh Token)
   dioAulas.interceptors.addAll(dioGlobal.interceptors);
-  
   return AulaRepositoryImpl(dio: dioAulas);
 }
 
@@ -32,16 +29,37 @@ class Aulas extends _$Aulas {
   }
 
   Future<List<AulaEntity>> _fetchAulas() async {
-    final repository = ref.watch(aulaRepositoryProvider);
-    return await repository.getAulas();
+    return ref.read(aulaRepositoryProvider).getAulas();
   }
 
-  // Método opcional para refrescar la lista manualmente
   Future<void> refresh() async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() => _fetchAulas());
   }
+
+  Future<void> create(Map<String, dynamic> payload) async {
+    await ref.read(aulaRepositoryProvider).create(payload);
+    await refresh();
+  }
+
+  Future<void> editar(Map<String, dynamic> payload) async {
+    await ref.read(aulaRepositoryProvider).update(payload);
+    await refresh();
+  }
+
+  Future<void> delete(int id) async {
+    await ref.read(aulaRepositoryProvider).delete(id);
+    await refresh();
+  }
 }
+
+final tiposAulaProvider = FutureProvider<List<TipoAulaEntity>>((ref) async {
+  return ref.read(aulaRepositoryProvider).getTiposAula();
+});
+
+final bloquesProvider = FutureProvider<List<BloqueEntity>>((ref) async {
+  return ref.read(aulaRepositoryProvider).getBloques();
+});
 
 @riverpod
 class CategoriaFiltro extends _$CategoriaFiltro {
@@ -53,45 +71,30 @@ class CategoriaFiltro extends _$CategoriaFiltro {
   }
 }
 
-// Estado local para la query de búsqueda (no requiere codegen)
 final searchQueryProvider = StateProvider<String>((ref) => '');
 
-// Filtro por bloque (nombre).
 final bloqueFiltroProvider = StateProvider<String>((ref) => 'Todos');
 
 @riverpod
 List<AulaEntity> aulasFiltradas(Ref ref) {
-  // 1. Escuchamos la lista original de aulas
   final aulasAsync = ref.watch(aulasProvider);
-  
-  // 2. Escuchamos los criterios de filtrado
   final categoria = ref.watch(categoriaFiltroProvider);
   final bloque = ref.watch(bloqueFiltroProvider);
   final search = ref.watch(searchQueryProvider);
 
-  // Si aún están cargando o hubo error, devolvemos lista vacía
   final todasLasAulas = aulasAsync.value ?? [];
 
-  // 3. Aplicamos la lógica de filtrado
   return todasLasAulas.where((aula) {
-    // Filtro por Tipo de Aula
-    final matchesCategoria = categoria == 'Todas' || 
-                             aula.tipoAula.nombre.toLowerCase() == categoria.toLowerCase();
-    
-    // Filtro por Bloque
-    final matchesBloque = bloque == 'Todos' || 
-                          aula.bloque.nombre.toLowerCase() == bloque.toLowerCase();
-    
-    // Filtro por texto de búsqueda
-    final matchesSearch = search.isEmpty || 
-                          aula.nombreAula.toLowerCase().contains(search.toLowerCase());
-
-    // El aula debe cumplir los TRES filtros
+    final matchesCategoria = categoria == 'Todas' ||
+        aula.tipoAula.nombre.toLowerCase() == categoria.toLowerCase();
+    final matchesBloque = bloque == 'Todos' ||
+        aula.bloque.nombre.toLowerCase() == bloque.toLowerCase();
+    final matchesSearch = search.isEmpty ||
+        aula.nombreAula.toLowerCase().contains(search.toLowerCase());
     return matchesCategoria && matchesBloque && matchesSearch;
   }).toList();
 }
 
-// Paginacion client-side: carga progresiva de 20 en 20
 final visibleAulasCountProvider = StateProvider<int>((ref) => 20);
 
 final aulasVisiblesProvider = Provider<List<AulaEntity>>((ref) {
@@ -100,4 +103,3 @@ final aulasVisiblesProvider = Provider<List<AulaEntity>>((ref) {
   if (count >= todas.length) return todas;
   return todas.take(count).toList();
 });
-

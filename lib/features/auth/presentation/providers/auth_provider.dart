@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../data/repositories/auth_repository_impl.dart';
@@ -13,7 +14,7 @@ part 'auth_provider.g.dart';
 AuthRepositoryImpl authRepository(Ref ref) {
   final dioGlobal = ref.watch(dioProvider);
   final dio = Dio(dioGlobal.options.copyWith(
-    baseUrl: ApiUrls.usuarios,
+    baseUrl: ApiUrls.auth,
   ));
   dio.interceptors.addAll(dioGlobal.interceptors);
   final storageService = ref.watch(storageServiceProvider);
@@ -38,3 +39,7 @@ class Auth extends _$Auth {
     }
   }
 }
+
+final currentUserProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
+  return ref.read(storageServiceProvider).getUserInfo();
+});

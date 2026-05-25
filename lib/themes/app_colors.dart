@@ -29,6 +29,7 @@ class AppColors {
   static const Color border = Color(0xFFE3E7FF);
   static const Color shadow = Color(0x0A000000);
   static const Color accent = Color(0xFF6B7FF2);
+  static const Color disabled = Color(0xFF9CA3AF);
 
   // Colores para el modal de carta/reporte
   static const Color cartaPrimary = Color(0xFF5E66F2);
