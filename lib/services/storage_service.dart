@@ -53,7 +53,8 @@ class StorageService {
 
   Future<void> clearSession() async {
     await _secureStorage.delete(key: 'crypto_sessions');
-    
+  }
+
   Future<void> clearAccessToken() async {
     await _secureStorage.delete(key: _accessKey);
   }

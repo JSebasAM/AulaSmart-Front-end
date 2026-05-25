@@ -16,10 +16,17 @@ class CryptoInterceptor extends Interceptor {
 
   CryptoInterceptor(this._storage);
 
+  static bool isPublicPath(String path) {
+    return path.contains('/auth/') || path.contains('/crypto/');
+  }
+
   static bool isSensitivePath(String path) {
-    return path.contains('/aula-service/aulas') ||
-        path.contains('/usuario-service/usuarios') ||
-        path.contains('/auth/');
+    if (isPublicPath(path)) return false;
+    return path.contains('/aula-service/') ||
+        path.contains('/usuario-service/') ||
+        path.contains('/chat') ||
+        path.contains('/reserva-service/') ||
+        path.contains('/incidencia-service/');
   }
 
   String _extractHost(String baseUrl) {
@@ -29,7 +36,14 @@ class CryptoInterceptor extends Interceptor {
   @override
   Future<void> onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
-    if (!isSensitivePath(options.path)) {
+    final path = options.path;
+
+    if (isPublicPath(path)) {
+      options.headers.remove('x-session-id');
+      return handler.next(options);
+    }
+
+    if (!isSensitivePath(path)) {
       return handler.next(options);
     }
 
@@ -69,13 +83,13 @@ class CryptoInterceptor extends Interceptor {
   @override
   Future<void> onResponse(
       Response response, ResponseInterceptorHandler handler) async {
-    final request = response.requestOptions;
-    if (!isSensitivePath(request.path)) {
+    final path = response.requestOptions.path;
+    if (isPublicPath(path) || !isSensitivePath(path)) {
       return handler.next(response);
     }
 
     if (response.data is Map && response.data['payload'] != null) {
-      final host = _extractHost(request.baseUrl);
+      final host = _extractHost(response.requestOptions.baseUrl);
       final session = await SessionManager.getSession(host);
       if (session != null) {
         final aes = AesHelper(
@@ -89,6 +103,30 @@ class CryptoInterceptor extends Interceptor {
       }
     }
     handler.next(response);
+  }
+
+  @override
+  Future<void> onError(
+      DioException err, ErrorInterceptorHandler handler) async {
+    final path = err.requestOptions.path;
+    if (isPublicPath(path) || !isSensitivePath(path)) {
+      return handler.next(err);
+    }
+
+    if (err.response?.statusCode == 401) {
+      final body = err.response?.data;
+      final msg = body is Map
+          ? (body['mensaje'] ?? body['message'] ?? body['error'] ?? '')
+              .toString()
+          : body?.toString() ?? '';
+      if (msg.contains('Sesion criptografica invalida') ||
+          msg.toLowerCase().contains('sesion criptografica') ||
+          msg.toLowerCase().contains('session')) {
+        await SessionManager.clearAll();
+        return handler.next(err);
+      }
+    }
+    handler.next(err);
   }
 
   Future<SessionEntry> _performHandshake(String baseUrl) async {
