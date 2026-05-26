@@ -154,16 +154,22 @@ class CryptoInterceptor extends Interceptor {
     final host = _extractHost(err.requestOptions.baseUrl);
     final statusCode = err.response?.statusCode;
 
+    Map<String, dynamic>? decryptedError;
     if (err.response?.data is Map) {
-      final data = err.response?.data as Map;
-      final error = data['error']?.toString() ?? '';
-      final message = data['message']?.toString() ?? '';
+      final rawData = err.response?.data as Map<String, dynamic>;
+      decryptedError = await _tryDecryptErrorResponse(rawData, host);
+      if (decryptedError != null) {
+        err.response!.data = decryptedError;
+      }
+      final displayData = decryptedError ?? rawData;
+      final error = displayData['error']?.toString() ?? '';
+      final message = displayData['message']?.toString() ?? '';
       debugPrint('[CryptoInterceptor] Error en $path | status=$statusCode | error=$error | message=$message');
     } else {
       debugPrint('[CryptoInterceptor] Error en $path | status=$statusCode | data=${err.response?.data}');
     }
 
-    final isCryptoError = _isLikelyCryptoError(err);
+    final isCryptoError = _isLikelyCryptoError(err, decryptedError);
 
     if (isCryptoError) {
       debugPrint('[CryptoInterceptor] Error criptografico detectado, renovando sesion...');
@@ -172,8 +178,8 @@ class CryptoInterceptor extends Interceptor {
       return handler.next(err);
     }
 
-    if (_isLikelySessionExpired(err)) {
-      debugPrint('[CryptoInterceptor] Posible sesion expirada (5xx en peticion cifrada), renovando...');
+    if (_isLikelySessionExpired(err, decryptedError)) {
+      debugPrint('[CryptoInterceptor] Posible sesion expirada, renovando...');
       final retried = await _retryWithNewSession(err, host, path);
       if (retried != null) return handler.resolve(retried);
       return handler.next(err);
@@ -193,6 +199,24 @@ class CryptoInterceptor extends Interceptor {
       }
     }
     handler.next(err);
+  }
+
+  Future<Map<String, dynamic>?> _tryDecryptErrorResponse(Map<String, dynamic> rawData, String host) async {
+    if (rawData['payload'] == null) return null;
+    final session = await SessionManager.getSession(host);
+    if (session == null) {
+      debugPrint('[CryptoInterceptor] Sin sesion para descifrar error');
+      return null;
+    }
+    try {
+      final aes = AesHelper(Uint8List.fromList(base64Decode(session.aesKeyBase64)));
+      final decrypted = aes.decryptText(rawData['payload']);
+      debugPrint('[CryptoInterceptor] Error descifrado correctamente');
+      return Map<String, dynamic>.from(jsonDecode(decrypted));
+    } catch (e) {
+      debugPrint('[CryptoInterceptor] Error descifrando respuesta de error: $e');
+      return null;
+    }
   }
 
   Future<Response?> _retryWithNewSession(DioException err, String host, String path) async {
@@ -229,7 +253,7 @@ class CryptoInterceptor extends Interceptor {
     }
   }
 
-  bool _isLikelySessionExpired(DioException err) {
+  bool _isLikelySessionExpired(DioException err, [Map<String, dynamic>? decryptedData]) {
     final method = err.requestOptions.method.toUpperCase();
     if (method != 'POST' && method != 'PUT' && method != 'PATCH') return false;
     final hadOriginalBody = err.requestOptions.extra.containsKey('_originalBody');
@@ -238,11 +262,23 @@ class CryptoInterceptor extends Interceptor {
     if (statusCode < 500) return false;
     final sessionRetryCount = (err.requestOptions.extra['_sessionRetryCount'] as int?) ?? 0;
     if (sessionRetryCount >= _sessionRetries) return false;
-    debugPrint('[CryptoInterceptor] 5xx en peticion cifrada: status=$statusCode, posible sesion expirada');
+    if (decryptedData != null) {
+      final error = decryptedData['error']?.toString() ?? '';
+      final message = decryptedData['message']?.toString() ?? '';
+      if (error.contains('Payload invalido') ||
+          error.contains('Error cifrando respuesta') ||
+          error.toLowerCase().contains('sesion criptografica') ||
+          message.toLowerCase().contains('payload')) {
+        return true;
+      }
+      debugPrint('[CryptoInterceptor] 5xx con error descifrado, no es problema de sesion: error=$error');
+      return false;
+    }
+    debugPrint('[CryptoInterceptor] 5xx en peticion cifrada (body encriptado): status=$statusCode, posible sesion expirada');
     return true;
   }
 
-  bool _isLikelyCryptoError(DioException err) {
+  bool _isLikelyCryptoError(DioException err, [Map<String, dynamic>? decryptedData]) {
     final method = err.requestOptions.method.toUpperCase();
     if (method != 'POST' && method != 'PUT' && method != 'PATCH') {
       return false;
@@ -254,17 +290,17 @@ class CryptoInterceptor extends Interceptor {
     final statusCode = err.response?.statusCode ?? 0;
     if (statusCode < 400) return false;
 
-    if (err.response?.data is Map) {
-      final data = err.response?.data as Map;
-      final error = data['error']?.toString() ?? '';
-      final message = data['message']?.toString() ?? '';
+    final sourceData = decryptedData ?? (err.response?.data is Map<String, dynamic> ? err.response?.data as Map<String, dynamic> : null);
+    if (sourceData == null) return false;
 
-      if (error.contains('Payload invalido') ||
-          error.contains('Error cifrando respuesta') ||
-          error.toLowerCase().contains('sesion criptografica') ||
-          message.toLowerCase().contains('payload')) {
-        return true;
-      }
+    final error = sourceData['error']?.toString() ?? '';
+    final message = sourceData['message']?.toString() ?? '';
+
+    if (error.contains('Payload invalido') ||
+        error.contains('Error cifrando respuesta') ||
+        error.toLowerCase().contains('sesion criptografica') ||
+        message.toLowerCase().contains('payload')) {
+      return true;
     }
 
     return false;
