@@ -7,6 +7,9 @@ import 'package:aulasmart_front_end/features/aulas/presentation/views/aulas_scre
 import 'package:aulasmart_front_end/features/aulas/presentation/views/aulas_admin_screen.dart';
 import 'package:aulasmart_front_end/features/usuarios/presentation/views/usuarios_screen.dart';
 import 'package:aulasmart_front_end/features/reservas/presentation/views/admin_reservas_screen.dart';
+import 'package:aulasmart_front_end/features/incidencias/presentation/views/admin_incidencias_screen.dart';
+import 'package:aulasmart_front_end/features/incidencias/presentation/views/mis_incidencias_screen.dart';
+import 'package:aulasmart_front_end/features/incidencias/presentation/views/incidencia_detail_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 
@@ -48,7 +51,7 @@ final GoRouter routerProvider = GoRouter(
     ),
     GoRoute(
       path: '/admin/incidencias',
-      builder: (_, _) => const ComingSoonView(featureName: 'Gestión de Incidencias'),
+      builder: (_, _) => const AdminIncidenciasScreen(),
     ),
     GoRoute(
       path: '/admin/aulas',
@@ -58,6 +61,13 @@ final GoRouter routerProvider = GoRouter(
       path: '/admin/reservas',
       builder: (_, _) => const AdminReservasScreen(),
     ),
-    
+    GoRoute(
+      path: '/incidencias',
+      builder: (_, _) => const MisIncidenciasScreen(),
+    ),
+    GoRoute(
+      path: '/incidencias/:id',
+      builder: (_, state) => IncidenciaDetailScreen(id: state.pathParameters['id']!),
+    ),
   ],
 );

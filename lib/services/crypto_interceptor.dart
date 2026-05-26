@@ -24,9 +24,9 @@ class CryptoInterceptor extends Interceptor {
     if (isPublicPath(path)) return false;
     return path.contains('/aula-service/') ||
         path.contains('/usuario-service/') ||
-        path.contains('/chat') ||
-        path.contains('/reserva-service/') ||
-        path.contains('/incidencia-service/');
+        path.contains('/chat');
+    // reserva-service e incidencia-service: E2E pendiente de verificar
+    // en el backend (EncryptionFilter no está descifrando el payload)
   }
 
   String _extractHost(String baseUrl) {
