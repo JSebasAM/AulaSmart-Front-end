@@ -1,6 +1,4 @@
-import 'dart:convert';
-import 'dart:math';
-import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:encrypt/encrypt.dart' as enc;
 
 class RsaHelper {
@@ -30,12 +28,18 @@ class AesHelper {
         );
 
   String encryptText(String plaintext) {
+    debugPrint('[AES] Cifrando texto (${plaintext.length} chars)');
     final iv = enc.IV.fromLength(16);
-    return _encrypter.encrypt(plaintext, iv: iv).base64;
+    final result = _encrypter.encrypt(plaintext, iv: iv).base64;
+    debugPrint('[AES] Cifrado completado (${result.length} chars base64)');
+    return result;
   }
 
   String decryptText(String base64Cipher) {
+    debugPrint('[AES] Descifrando texto (${base64Cipher.length} chars base64)');
     final iv = enc.IV.fromLength(16);
-    return _encrypter.decrypt64(base64Cipher, iv: iv);
+    final result = _encrypter.decrypt64(base64Cipher, iv: iv);
+    debugPrint('[AES] Descifrado completado (${result.length} chars)');
+    return result;
   }
 }
