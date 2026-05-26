@@ -32,6 +32,13 @@ class IncidenciaDetailScreen extends ConsumerWidget {
                     ? Image.network(
                         ref.read(incidenciaRepoProvider).imageUrl(incidencia.urlImagen!),
                         fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [_chipBg(incidencia.tipoIncidencia), _chipBg(incidencia.tipoIncidencia).withValues(alpha: 0.5)],
+                            ),
+                          ),
+                        ),
                       )
                     : Container(
                         decoration: BoxDecoration(

@@ -11,7 +11,7 @@ final chatRemoteDataSourceProvider = Provider<ChatRemoteDataSource>((ref) {
   final dio = ref.read(dioProvider);
   final dioChat = Dio(dio.options.copyWith(
     baseUrl: ApiUrls.chat,
-    receiveTimeout: const Duration(seconds: 30),
+    receiveTimeout: const Duration(minutes: 2),
   ));
   dioChat.interceptors.addAll(dio.interceptors);
   return ChatRemoteDataSource(dioChat);

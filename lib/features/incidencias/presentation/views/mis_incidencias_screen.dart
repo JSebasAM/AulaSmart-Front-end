@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -6,11 +7,73 @@ import 'package:aulasmart_front_end/features/incidencias/domain/entities/inciden
 import 'package:aulasmart_front_end/features/incidencias/presentation/providers/incidencia_provider.dart';
 import 'package:aulasmart_front_end/themes/app_colors.dart';
 
-class MisIncidenciasScreen extends ConsumerWidget {
+class MisIncidenciasScreen extends ConsumerStatefulWidget {
   const MisIncidenciasScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MisIncidenciasScreen> createState() => _MisIncidenciasScreenState();
+}
+
+class _MisIncidenciasScreenState extends ConsumerState<MisIncidenciasScreen>
+    with WidgetsBindingObserver {
+  Timer? _pollingTimer;
+  Map<int, EstadoIncidencia> _lastState = {};
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _startPolling();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _pollingTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      _pollingTimer?.cancel();
+    } else if (state == AppLifecycleState.resumed) {
+      _refresh();
+      _startPolling();
+    }
+  }
+
+  void _startPolling() {
+    _pollingTimer?.cancel();
+    _pollingTimer = Timer.periodic(const Duration(seconds: 30), (_) => _refresh());
+  }
+
+  Future<void> _refresh() async {
+    try {
+      ref.invalidate(todasLasIncidenciasProvider);
+      final nuevas = await ref.read(todasLasIncidenciasProvider.future);
+      if (!mounted) return;
+      for (final inc in nuevas) {
+        final prev = _lastState[inc.id];
+        if (prev == EstadoIncidencia.PENDIENTE && inc.esRevisada) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Tu incidencia del aula ${inc.codigoAula} tiene una nueva respuesta'),
+              backgroundColor: Colors.blue,
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 5),
+            ),
+          );
+        }
+        _lastState[inc.id] = inc.estado;
+      }
+    } catch (_) {
+      // error silencioso, reintenta en el siguiente ciclo
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final todas = ref.watch(todasLasIncidenciasProvider);
 
     return Scaffold(
@@ -23,7 +86,7 @@ class MisIncidenciasScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
           const Text('Error al cargar'), const SizedBox(height: 8),
-          ElevatedButton(onPressed: () => ref.invalidate(todasLasIncidenciasProvider), child: const Text('Reintentar')),
+          ElevatedButton(onPressed: _refresh, child: const Text('Reintentar')),
         ])),
         data: (list) {
           if (list.isEmpty) {
@@ -32,17 +95,11 @@ class MisIncidenciasScreen extends ConsumerWidget {
                 Icon(Icons.inbox_outlined, size: 64, color: Colors.grey.shade400),
                 const SizedBox(height: 16),
                 const Text('No has reportado incidencias', style: TextStyle(fontSize: 16, color: Colors.grey)),
-                const SizedBox(height: 24),
-                FilledButton.icon(
-                  onPressed: () => context.push('/incidencias/create'),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Reportar Incidencia'),
-                ),
               ]),
             );
           }
           return RefreshIndicator(
-            onRefresh: () async { ref.invalidate(todasLasIncidenciasProvider); await ref.read(todasLasIncidenciasProvider.future); },
+            onRefresh: _refresh,
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: list.length,

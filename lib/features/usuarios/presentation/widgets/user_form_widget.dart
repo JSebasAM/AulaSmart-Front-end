@@ -30,6 +30,8 @@ class _UserFormWidgetState extends State<UserFormWidget> {
   late TextEditingController passwordController;
   String selectedRol = 'Estudiante';
   bool _hidePassword = true;
+  String? _passwordError;
+  bool get _isEditing => widget.initialData != null;
 
   @override
   void initState() {
@@ -37,7 +39,7 @@ class _UserFormWidgetState extends State<UserFormWidget> {
     nombreController = TextEditingController(text: widget.initialData?['nombre'] ?? '');
     apellidoController = TextEditingController(text: widget.initialData?['apellido'] ?? '');
     emailController = TextEditingController(text: widget.initialData?['email'] ?? '');
-    passwordController = TextEditingController(text: widget.initialData?['password'] ?? '');
+    passwordController = TextEditingController();
     selectedRol = widget.fixedRole ?? widget.initialData?['rol'] ?? 'Estudiante';
   }
 
@@ -50,24 +52,52 @@ class _UserFormWidgetState extends State<UserFormWidget> {
     super.dispose();
   }
 
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) return null;
+    if (value.length < 8) return 'Minimo 8 caracteres';
+    if (!value.contains(RegExp(r'[A-Z]'))) return 'Debe contener al menos una mayuscula';
+    if (!value.contains(RegExp(r'[a-z]'))) return 'Debe contener al menos una minuscula';
+    if (!value.contains(RegExp(r'[0-9]'))) return 'Debe contener al menos un numero';
+    if (!value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) return 'Debe contener un caracter especial';
+    return null;
+  }
+
   void _submitForm() {
-    final formData = {
+    final pwd = passwordController.text.trim();
+    setState(() => _passwordError = _validatePassword(pwd));
+    if (_passwordError != null) return;
+
+    final formData = <String, dynamic>{
       'nombre': nombreController.text,
       'apellido': apellidoController.text,
       'email': emailController.text,
-      'password': passwordController.text,
       'rol': widget.fixedRole ?? selectedRol,
     };
+    if (pwd.isNotEmpty) {
+      formData['password'] = pwd;
+    }
     widget.onFormSubmit(formData);
   }
 
   @override
   Widget build(BuildContext context) {
+    final codigo = widget.initialData?['codigo']?.toString();
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (codigo != null && codigo.isNotEmpty) ...[
+            AuthTextField(
+              label: 'ID Usuario',
+              hintText: codigo,
+              controller: TextEditingController(text: codigo),
+              icon: Icons.badge_outlined,
+              enabled: false,
+            ),
+            const SizedBox(height: 16),
+          ],
           AuthTextField(
             label: 'Nombre',
             hintText: 'Ej. Juan',
@@ -77,7 +107,7 @@ class _UserFormWidgetState extends State<UserFormWidget> {
           const SizedBox(height: 16),
           AuthTextField(
             label: 'Apellido',
-            hintText: 'Ej. Pérez',
+            hintText: 'Ej. Perez',
             controller: apellidoController,
             icon: Icons.person_outline_rounded,
           ),
@@ -90,11 +120,13 @@ class _UserFormWidgetState extends State<UserFormWidget> {
           ),
           const SizedBox(height: 16),
           AuthTextField(
-            label: 'Contraseña',
-            hintText: 'Mínimo 8 caracteres',
+            label: 'Contrasena',
+            hintText: _isEditing ? 'Dejar vacio para mantener la actual' : 'Minimo 8 caracteres',
             controller: passwordController,
             icon: Icons.lock_rounded,
             obscureText: _hidePassword,
+            errorText: _passwordError,
+            onChanged: (_) => setState(() => _passwordError = null),
             suffixIcon: IconButton(
               icon: Icon(
                 _hidePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
@@ -107,11 +139,7 @@ class _UserFormWidgetState extends State<UserFormWidget> {
             const SizedBox(height: 20),
             const Text(
               'Rol del usuario',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Container(
@@ -127,10 +155,7 @@ class _UserFormWidgetState extends State<UserFormWidget> {
                   value: selectedRol,
                   isExpanded: true,
                   icon: const Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 16,
-                  ),
+                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 16),
                   items: const [
                     DropdownMenuItem(value: 'Estudiante', child: Text('Estudiante')),
                     DropdownMenuItem(value: 'Docente', child: Text('Docente')),
@@ -139,9 +164,7 @@ class _UserFormWidgetState extends State<UserFormWidget> {
                     DropdownMenuItem(value: 'Monitor', child: Text('Monitor')),
                   ],
                   onChanged: (value) {
-                    if (value != null) {
-                      setState(() => selectedRol = value);
-                    }
+                    if (value != null) setState(() => selectedRol = value);
                   },
                 ),
               ),

@@ -47,13 +47,17 @@ class ReservaRemoteDataSource {
 		);
 	}
 
-	Future<Map<String, dynamic>> rechazarReserva(String id) async {
+  Future<Map<String, dynamic>> rechazarReserva(String id) async {
 		final path = '/reserva-service/reservas/$id/rechazar';
 		final response = await dio.put(path);
 		final data = response.data;
 		return Map<String, dynamic>.from(
 			(data['reserva'] as Map?) ?? (data['data'] as Map?) ?? data as Map,
 		);
+	}
+
+	Future<void> cancelarReserva(String id) async {
+		await dio.delete('/reserva-service/reservas/$id');
 	}
 }
 
