@@ -38,6 +38,11 @@ class Auth extends _$Auth {
       state = AuthError('Error inesperado: $e');
     }
   }
+
+  Future<void> logout() async {
+    final repository = ref.read(authRepositoryProvider);
+    await repository.logout();
+  }
 }
 
 final currentUserProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
