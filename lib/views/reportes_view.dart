@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:aulasmart_front_end/themes/app_colors.dart';
 import 'package:aulasmart_front_end/themes/app_text_styles.dart';
 import 'package:aulasmart_front_end/views/new_report_modal_view.dart';
@@ -44,42 +45,52 @@ class _ReportesViewState extends State<ReportesView> {
                 style: AppTextStyles.pageSubtitle,
               ),
               const SizedBox(height: 16),
-              InkWell(
-                onTap: _openOverlay,
-                borderRadius: BorderRadius.circular(22),
-                child: _softCard(
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 62,
-                        height: 62,
-                        decoration: BoxDecoration(
-                          gradient: AppColors.activeIconGradient,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.primaryDark.withValues(alpha: 0.5)),
-                        ),
-                        child: const Icon(Icons.add, color: Colors.white, size: 34),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
+              Row(
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      onTap: _openOverlay,
+                      borderRadius: BorderRadius.circular(22),
+                      child: _softCard(
+                        padding: const EdgeInsets.all(16),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              'Nuevo Reporte',
-                              style: AppTextStyles.sectionTitle,
+                            Container(
+                              width: 48, height: 48,
+                              decoration: BoxDecoration(gradient: AppColors.activeIconGradient, borderRadius: BorderRadius.circular(14)),
+                              child: const Icon(Icons.add, color: Colors.white, size: 28),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Reporta un problema en cualquier area del campus',
-                              style: AppTextStyles.sectionBody,
-                            ),
+                            const SizedBox(height: 8),
+                            const Text('Nuevo Reporte', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                           ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: InkWell(
+                      onTap: () => context.push('/incidencias'),
+                      borderRadius: BorderRadius.circular(22),
+                      child: _softCard(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 48, height: 48,
+                              decoration: BoxDecoration(color: AppColors.info.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(14)),
+                              child: const Icon(Icons.list_alt_rounded, color: AppColors.info, size: 28),
+                            ),
+                            const SizedBox(height: 8),
+                            const Text('Mis Incidencias', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               _softCard(

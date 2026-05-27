@@ -78,6 +78,13 @@ class ReservaRepositoryImpl implements ReservaRepository {
     return ReservaModel.fromJson(raw);
   }
 
+  @override
+  Future<void> cancelarReserva(String id) async {
+    await remoteDataSource.cancelarReserva(id);
+    _misReservasCache = null;
+    _pendientesCache = null;
+  }
+
   void invalidateCache(int aulaId) {
     _cache.remove(aulaId);
   }

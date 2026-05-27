@@ -109,10 +109,10 @@ class _AdminUserFormViewState extends ConsumerState<AdminUserFormView> {
                         widget.user != null ? 'Guardar Cambios' : 'Crear Usuario',
                     initialData: widget.user != null
                         ? {
+                            'codigo': widget.user!.codigo,
                             'nombre': widget.user!.nombre,
                             'apellido': widget.user!.apellido,
                             'email': widget.user!.email,
-                            'password': widget.user!.password,
                             'rol': widget.user!.rol,
                           }
                         : null,

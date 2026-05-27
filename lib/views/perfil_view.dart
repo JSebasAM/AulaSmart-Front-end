@@ -6,13 +6,14 @@ import 'package:aulasmart_front_end/services/session_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class PerfilView extends ConsumerWidget {
   const PerfilView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userAsync = ref.watch(currentUserProvider);
+    final userAsync = ref.watch(currentUserProfileProvider);
 
     return Container(
       color: AppColors.background,
@@ -403,11 +404,52 @@ class _PreferenceDivider extends StatelessWidget {
 
 // ─── ACCOUNT ACTIONS ─────────────────────────────────────────────────────────
 
-class _AccountActionsCard extends StatelessWidget {
+class _AccountActionsCard extends ConsumerWidget {
   const _AccountActionsCard();
 
+  Future<void> _onLogout(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Icon(Icons.logout_rounded, size: 48, color: AppColors.danger),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Cerrar sesión',
+                style: AppTextStyles.sectionTitle, textAlign: TextAlign.center),
+            SizedBox(height: 8),
+            Text('¿Estás seguro de que quieres cerrar sesión?',
+                style: AppTextStyles.sectionBody, textAlign: TextAlign.center),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.danger),
+            child: const Text('Cerrar sesión',
+                style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await ref.read(authProvider.notifier).logout();
+      } catch (_) {}
+      if (context.mounted) {
+        context.go('/login');
+      }
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
@@ -425,25 +467,11 @@ class _AccountActionsCard extends StatelessWidget {
       child: Column(
         children: [
           _ActionTile(
-            icon: Icons.edit_outlined,
-            title: 'Editar perfil',
-            subtitle: 'Actualiza tus datos personales',
-            onTap: () {},
-          ),
-          const _ActionDivider(),
-          _ActionTile(
-            icon: Icons.lock_outline_rounded,
-            title: 'Cambiar contraseña',
-            subtitle: 'Refuerza la seguridad de tu cuenta',
-            onTap: () {},
-          ),
-          const _ActionDivider(),
-          _ActionTile(
             icon: Icons.logout_rounded,
             title: 'Cerrar sesión',
             subtitle: 'Salir de la aplicación',
             isDanger: true,
-            onTap: () {},
+            onTap: () => _onLogout(context, ref),
           ),
         ],
       ),
@@ -501,18 +529,6 @@ class _ActionTile extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _ActionDivider extends StatelessWidget {
-  const _ActionDivider();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      child: Divider(height: 1, color: AppColors.border.withValues(alpha: 0.5)),
     );
   }
 }
