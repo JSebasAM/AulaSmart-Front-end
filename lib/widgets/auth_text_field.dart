@@ -8,6 +8,9 @@ class AuthTextField extends StatelessWidget {
   final bool obscureText;
   final Widget? suffixIcon;
   final TextInputType? keyboardType;
+  final bool enabled;
+  final String? errorText;
+  final ValueChanged<String>? onChanged;
 
   const AuthTextField({
     super.key,
@@ -18,6 +21,9 @@ class AuthTextField extends StatelessWidget {
     this.obscureText = false,
     this.suffixIcon,
     this.keyboardType,
+    this.enabled = true,
+    this.errorText,
+    this.onChanged,
   });
 
   @override
@@ -38,13 +44,16 @@ class AuthTextField extends StatelessWidget {
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
-          style: const TextStyle(
-            color: Color(0xFF28356F),
+          enabled: enabled,
+          onChanged: onChanged,
+          style: TextStyle(
+            color: enabled ? const Color(0xFF28356F) : Colors.grey,
             fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
             hintText: hintText,
+            errorText: errorText,
             prefixIcon: Padding(
               padding: const EdgeInsets.all(14),
               child: Icon(icon, color: const Color(0xFF7A87D9), size: 20),

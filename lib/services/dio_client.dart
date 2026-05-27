@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'storage_service.dart';
@@ -23,6 +24,13 @@ final dioProvider = Provider<Dio>((ref) {
 
   dio.interceptors.add(_AuthInterceptor(StorageService(), dio, onSessionExpired: () => ref.read(sessionExpiredProvider.notifier).state = true));
   dio.interceptors.add(CryptoInterceptor(StorageService(), dio));
+  if (kDebugMode) {
+    dio.interceptors.add(LogInterceptor(
+      requestBody: true,
+      responseBody: true,
+      logPrint: (obj) => debugPrint('[DIO] $obj'),
+    ));
+  }
 
   return dio;
 });

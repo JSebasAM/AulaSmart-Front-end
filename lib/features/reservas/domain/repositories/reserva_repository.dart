@@ -7,4 +7,5 @@ abstract class ReservaRepository {
   Future<ReservaEntity> createReserva(Map<String, dynamic> body);
   Future<ReservaEntity> confirmarReserva(String id);
   Future<ReservaEntity> rechazarReserva(String id);
+  Future<void> cancelarReserva(String id);
 }

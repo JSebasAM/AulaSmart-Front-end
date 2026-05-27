@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../domain/entities/aula_entity.dart';
 import 'package:aulasmart_front_end/features/reservas/presentation/providers/reservas_provider.dart';
 import 'package:aulasmart_front_end/features/reservas/domain/entities/reserva_entity.dart';
@@ -36,8 +37,9 @@ class _AulaDetailScreenState extends ConsumerState<AulaDetailScreen> {
   bool get _puedeReservar {
     final rolAsync = ref.read(currentUserRoleProvider);
     final rol = rolAsync.value ?? '';
-    if (rol == 'estudiante' && widget.aula.requiereAutorizacion) {
-      return false;
+    if (rol == 'estudiante') {
+      final tipo = widget.aula.tipoAula.codigoTipoAula;
+      return tipo == '78' || tipo == '79';
     }
     return true;
   }
@@ -85,11 +87,10 @@ class _AulaDetailScreenState extends ConsumerState<AulaDetailScreen> {
 
       await useCase.call(body);
 
-      ref.invalidate(reservasPorAulaProvider(widget.aula.id));
-      ref.invalidate(reservasEventsProvider(widget.aula.id));
       ref.invalidate(todasLasReservasProvider);
+      await ref.read(todasLasReservasProvider.future);
 
-      await ref.read(reservasPorAulaProvider(widget.aula.id).future);
+      ref.invalidate(reservasPorAulaProvider(widget.aula.id));
       ref.invalidate(reservasEventsProvider(widget.aula.id));
       await ref.read(reservasEventsProvider(widget.aula.id).future);
 
@@ -103,31 +104,87 @@ class _AulaDetailScreenState extends ConsumerState<AulaDetailScreen> {
       }
     } on DioException catch (e) {
       if (!mounted) return;
-      final statusCode = e.response?.statusCode;
-      String mensaje;
-      switch (statusCode) {
-        case 409:
-          mensaje = 'Conflicto de horario: ya existe una reserva que se solapa en ese horario.';
-          break;
-        case 400:
-          mensaje = 'Datos invalidos. Verifica los campos ingresados.';
-          break;
-        default:
-          mensaje = 'Error al crear reserva: ${e.message}';
+      final response = e.response;
+      if (response == null) {
+        _showSnack('Error de conexion. Verifica tu internet.', isError: true);
+        return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(mensaje), backgroundColor: AppColors.danger),
-      );
+
+      final statusCode = response.statusCode;
+      final data = response.data as Map<String, dynamic>?;
+      final message = data?['message']?.toString() ?? '';
+
+      switch (statusCode) {
+        case 400:
+          final detalles = data?['detalle']?.toString();
+          if (detalles != null && detalles.contains('LocalDateTime')) {
+            _showSnack('Formato de fecha invalido. Use AAAA-MM-DDTHH:mm:ss', isError: true);
+          } else {
+            final errores = data?['error'] ?? data?['errores'];
+            String content;
+            if (errores is List) {
+              content = errores.map((e) => '\u2022 $e').join('\n');
+            } else {
+              content = message.isNotEmpty ? message : 'Verifica los campos ingresados.';
+            }
+            _showDialog('Datos incorrectos', content);
+          }
+        case 401:
+          if (mounted) {
+            context.go('/login');
+          }
+        case 403:
+          _showSnack('No tienes permisos para realizar esta accion.', isError: true);
+        case 404:
+          _showSnack(message.isNotEmpty ? message : 'El aula o la reserva no existe.', isError: true);
+        case 409:
+          if (message.contains('modificada')) {
+            _showDialog('Datos desactualizados', '$message\nDeseas recargar los datos?', actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context, rootNavigator: true).pop();
+                  _onRefresh();
+                },
+                child: const Text('Recargar'),
+              ),
+            ]);
+          } else {
+            _showDialog('Aula no disponible', message.isNotEmpty ? message : 'El horario seleccionado ya esta ocupado. Elige otro.');
+          }
+        case 500:
+          _showSnack('Error del servidor. Intenta mas tarde.', isError: true);
+        default:
+          _showSnack('Error ${statusCode ?? ""}: $message', isError: true);
+      }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error inesperado: $e'),
-            backgroundColor: AppColors.danger,
-          ),
-        );
+        _showSnack('Error inesperado: $e', isError: true);
       }
     }
+  }
+
+  void _showSnack(String msg, {bool isError = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        content: Text(msg),
+        backgroundColor: isError ? AppColors.danger : AppColors.success,
+        behavior: SnackBarBehavior.floating,
+      ));
+  }
+
+  void _showDialog(String title, String content, {List<Widget>? actions}) {
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: actions ??
+            [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Aceptar'))],
+      ),
+    );
   }
 
   @override
@@ -141,25 +198,15 @@ class _AulaDetailScreenState extends ConsumerState<AulaDetailScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          if (_puedeReservar) {
-            _mostrarFormularioReserva();
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                    'Esta aula requiere autorizacion. Los estudiantes no pueden reservarla directamente.'),
-                backgroundColor: AppColors.warning,
-              ),
-            );
-          }
-        },
-        icon: const Icon(Icons.add),
-        label: const Text('Reservar'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.textOnPrimary,
-      ),
+      floatingActionButton: _puedeReservar
+          ? FloatingActionButton.extended(
+              onPressed: _mostrarFormularioReserva,
+              icon: const Icon(Icons.add),
+              label: const Text('Reservar'),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            )
+          : null,
       body: reservasAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('Error cargando reservas: $e')),

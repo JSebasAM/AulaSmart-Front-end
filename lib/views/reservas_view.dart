@@ -140,12 +140,12 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-class _ReservaCard extends StatelessWidget {
+class _ReservaCard extends ConsumerWidget {
   const _ReservaCard({required this.data});
   final ReservaEntity data;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isPendiente = data.estaPendiente;
     final estadoColor = isPendiente
         ? const Color(0xFFF6B11A)
@@ -220,45 +220,20 @@ class _ReservaCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        data.displayTitulo,
-                        style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.primaryDark,
-                          height: 1.25,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      Text(data.displayTitulo,
+                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.primaryDark, height: 1.25),
+                          maxLines: 2, overflow: TextOverflow.ellipsis),
                       const SizedBox(height: 4),
-                      Text(
-                        data.displayAula,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
+                      Text(data.displayAula,
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: theme.colorScheme.onSurfaceVariant)),
                     ],
                   ),
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: estadoColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    data.estado,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: estadoColor,
-                    ),
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(color: estadoColor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
+                  child: Text(data.estado, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: estadoColor)),
                 ),
               ],
             ),
@@ -266,86 +241,81 @@ class _ReservaCard extends StatelessWidget {
           const SizedBox(height: 14),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                _InfoChip(
-                  icon: Icons.calendar_today_rounded,
-                  label: data.displayFecha,
-                ),
-                const SizedBox(width: 8),
-                _InfoChip(
-                  icon: Icons.access_time_rounded,
-                  label: data.displayHorario,
-                ),
-              ],
-            ),
+            child: Row(children: [
+              _InfoChip(icon: Icons.calendar_today_rounded, label: data.displayFecha),
+              const SizedBox(width: 8),
+              _InfoChip(icon: Icons.access_time_rounded, label: data.displayHorario),
+            ]),
           ),
           const SizedBox(height: 12),
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 16),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest
-                  .withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.person_outline,
-                    size: 16, color: AppColors.primaryDark),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    data.displaySolicitante,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primaryDark,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(12)),
+            child: Row(children: [
+              const Icon(Icons.meeting_room_outlined, size: 16, color: AppColors.primaryDark),
+              const SizedBox(width: 6),
+              Expanded(child: Text(data.displayAula, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primaryDark), overflow: TextOverflow.ellipsis)),
+              if (data.displaySolicitante.isNotEmpty) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
+                  child: Text(data.displaySolicitante, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary), overflow: TextOverflow.ellipsis),
                 ),
-                if (data.displayPrograma != '-') ...[
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      data.displayPrograma,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                ],
-                if (data.displayGrupo != '-')
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF24C89A).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      'Grupo ${data.displayGrupo}',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF24C89A),
-                      ),
-                    ),
-                  ),
               ],
-            ),
+              if (data.displayGrupo != '-') ...[const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(color: const Color(0xFF24C89A).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
+                  child: Text('Grupo ${data.displayGrupo}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF24C89A))),
+                ),
+              ],
+            ]),
           ),
+          if (isPendiente) ...[
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => _cancelarReserva(context, ref),
+                  icon: const Icon(Icons.close, size: 16, color: Colors.red),
+                  label: const Text('Cancelar reserva', style: TextStyle(color: Colors.red, fontSize: 13)),
+                  style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.red), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 14),
+        ],
+      ),
+    );
+  }
+
+  void _cancelarReserva(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Cancelar reserva'),
+        content: Text('Deseas cancelar la reserva "${data.displayTitulo}"?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('No')),
+          FilledButton(
+            onPressed: () async {
+              try {
+                await cancelarReserva(ref, data.id);
+                if (ctx.mounted) Navigator.pop(ctx);
+                ref.invalidate(todasLasReservasProvider);
+                if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reserva cancelada'), backgroundColor: Colors.green));
+              } catch (e) {
+                if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red));
+              }
+            },
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Si, cancelar'),
+          ),
         ],
       ),
     );

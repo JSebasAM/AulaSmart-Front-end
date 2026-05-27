@@ -55,6 +55,10 @@ final rechazarReservaProvider = Provider((ref) {
   return RechazarReserva(repo);
 });
 
+Future<void> cancelarReserva(WidgetRef ref, String id) async {
+  await ref.read(reservaRepositoryProvider).cancelarReserva(id);
+}
+
 final reservasPendientesProvider =
     FutureProvider<List<ReservaEntity>>((ref) async {
   final usecase = ref.read(getReservasPendientesProvider);

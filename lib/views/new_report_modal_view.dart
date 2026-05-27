@@ -1,493 +1,330 @@
+import 'dart:async';
+import 'dart:io';
+import 'package:dio/dio.dart';
+import 'package:aulasmart_front_end/features/aulas/presentation/providers/aulas_provider.dart';
+import 'package:aulasmart_front_end/features/aulas/domain/entities/aula_entity.dart';
+import 'package:aulasmart_front_end/features/incidencias/domain/entities/incidencia_entity.dart';
+import 'package:aulasmart_front_end/features/incidencias/presentation/providers/incidencia_provider.dart';
 import 'package:aulasmart_front_end/themes/app_colors.dart';
 import 'package:aulasmart_front_end/themes/app_text_styles.dart';
-import 'package:aulasmart_front_end/widgets/carta_preview_widget.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
-
-class NewReportModalView extends StatefulWidget {
+class NewReportModalView extends ConsumerStatefulWidget {
   final VoidCallback onClose;
-
-  const NewReportModalView({
-    super.key,
-    required this.onClose,
-  });
+  const NewReportModalView({super.key, required this.onClose});
 
   @override
-  State<NewReportModalView> createState() => _NewReportModalViewState();
+  ConsumerState<NewReportModalView> createState() => _NewReportModalViewState();
 }
 
-class _NewReportModalViewState extends State<NewReportModalView> {
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
-
+class _NewReportModalViewState extends ConsumerState<NewReportModalView> {
+  final _descCtrl = TextEditingController();
   String? _selectedType;
-  String? _selectedLocation;
+  int? _selectedAulaId;
+  AulaEntity? _selectedAula;
   bool _isGenerating = false;
   bool _showPreview = false;
+  String? _cartaGenerada;
+  File? _imagenFile;
+  IncidenciaEntity? _incidenciaCreada;
 
-  static const List<_ReportTypeOption> _typeOptions = [
-    _ReportTypeOption('😤', 'Queja'),
-    _ReportTypeOption('💡', 'Recomendación'),
-    _ReportTypeOption('🙏', 'Petición'),
-    _ReportTypeOption('🔨', 'Daño Físico'),
-    _ReportTypeOption('🧹', 'Limpieza'),
-    _ReportTypeOption('📋', 'Otro'),
-  ];
-
-  static const List<String> _locations = [
-    'A-101 Ingeniería',
-    'B-205 Ciencias',
-    'C-301 Admin',
-    'D-102 Humanidades',
-    'Biblioteca Central',
+  static const _typeOptions = [
+    ('🖥️', 'Hardware', 'HARDWARE'),
+    ('💻', 'Software', 'SOFTWARE'),
+    ('🏗️', 'Infraestructura', 'INFRAESTRUCTURA'),
+    ('📋', 'Otro', 'OTRO'),
   ];
 
   @override
   void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
+    _descCtrl.dispose();
     super.dispose();
   }
 
+  Future<void> _pickImage(ImageSource source) async {
+    final f = await ImagePicker().pickImage(source: source, maxWidth: 1024);
+    if (f != null) setState(() => _imagenFile = File(f.path));
+  }
+
   Future<void> _generarCarta() async {
-    if (_titleController.text.trim().isEmpty ||
-        _selectedType == null ||
-        _selectedLocation == null ||
-        _descriptionController.text.trim().length < 30) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Completa todos los campos obligatorios para generar la carta.'),
-          backgroundColor: Colors.red.shade400,
-        ),
-      );
+    if (_descCtrl.text.trim().length < 10 || _selectedType == null || _selectedAulaId == null) {
+      _showSnack('Completa todos los campos (min 10 caracteres).', isError: true);
       return;
     }
-
-    setState(() {
-      _isGenerating = true;
-    });
-
-    await Future.delayed(const Duration(seconds: 2));
-
-    if (!mounted) {
-      return;
+    setState(() => _isGenerating = true);
+    try {
+      _incidenciaCreada = await crearIncidencia(ref, {
+        'codigoAula': _selectedAula!.id,
+        'descripcionBreve': _descCtrl.text.trim(),
+        'tipoIncidencia': _selectedType,
+      });
+      _cartaGenerada = _incidenciaCreada!.cartaFormalGenerada;
+      ref.invalidate(incidenciasPendientesProvider);
+      ref.invalidate(todasLasIncidenciasProvider);
+      if (mounted) setState(() { _isGenerating = false; _showPreview = true; });
+    } on DioException catch (e) {
+      if (mounted) {
+        debugPrint('[Incidencia] Error creando: ${e.message}');
+        setState(() => _isGenerating = false);
+        _showSnack('No se pudo crear la incidencia. Intenta de nuevo.', isError: true);
+      }
+    } catch (e) {
+      if (mounted) {
+        debugPrint('[Incidencia] Error inesperado: $e');
+        setState(() => _isGenerating = false);
+        _showSnack('Error inesperado. Intenta de nuevo.', isError: true);
+      }
     }
-
-    setState(() {
-      _isGenerating = false;
-      _showPreview = true;
-    });
   }
 
-  void _volverAEditar() {
-    setState(() {
-      _showPreview = false;
-    });
-  }
-
-  void _descargarCarta() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Carta descargada exitosamente'),
-        backgroundColor: Colors.green,
-      ),
-    );
-  }
-
-  void _enviarCarta() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Carta enviada exitosamente'),
-        backgroundColor: Colors.green,
-      ),
-    );
+  Future<void> _confirmarEnvio() async {
+    if (_imagenFile != null && _incidenciaCreada != null) {
+      try {
+        await subirImagen(ref, _incidenciaCreada!.id.toString(), _imagenFile!.path);
+        _showSnack('Incidencia e imagen guardadas exitosamente.');
+        widget.onClose();
+        return;
+      } catch (e) {
+        debugPrint('[Incidencia] Error subiendo imagen: $e');
+        _showSnack(
+          'Incidencia creada. No se pudo adjuntar la imagen, intenta subirla mas tarde.',
+          isError: false,
+          action: SnackBarAction(
+            label: 'Reintentar',
+            onPressed: _confirmarEnvio,
+          ),
+        );
+        return;
+      }
+    }
+    _showSnack('Incidencia enviada a administracion.');
     widget.onClose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
-    final horizontalPadding = size.width < 380 ? 16.0 : 24.0;
+  void _showSnack(String msg, {bool isError = false, SnackBarAction? action}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        content: Text(msg),
+        backgroundColor: isError ? Colors.red.shade400 : Colors.green,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        action: action,
+      ));
+  }
 
-    return Material(
-      color: Colors.transparent,
-      child: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.fromLTRB(horizontalPadding, 16, horizontalPadding, 16),
-              decoration: const BoxDecoration(
-                gradient: AppColors.activeIconGradient,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 20),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          'Reportar Incidencia',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.cardTitle,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Reporte general del campus',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.tinyLabel.copyWith(color: Colors.white.withValues(alpha: 0.88)),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  InkWell(
-                    onTap: widget.onClose,
-                    borderRadius: BorderRadius.circular(16),
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.18),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Icon(Icons.close, color: Colors.white, size: 20),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                color: AppColors.pageCard,
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 250),
-                  child: _showPreview
-                      ? CartaPreviewWidget(
-                          key: const ValueKey('preview'),
-                          tipo: _selectedType ?? '',
-                          ubicacion: _selectedLocation ?? '',
-                          titulo: _titleController.text.trim(),
-                          descripcion: _descriptionController.text.trim(),
-                          onEditar: _volverAEditar,
-                          onDescargar: _descargarCarta,
-                          onEnviar: _enviarCarta,
-                        )
-                      : SingleChildScrollView(
-                          key: const ValueKey('form'),
-                          padding: EdgeInsets.fromLTRB(horizontalPadding, 24, horizontalPadding, 24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _SectionLabel(text: 'Título del Reporte *'),
-                              const SizedBox(height: 8),
-                              _FieldShell(
-                                height: 55.2,
-                                child: TextField(
-                                  controller: _titleController,
-                                  maxLines: 1,
-                                  textAlignVertical: TextAlignVertical.center,
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    isDense: true,
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
-                                    hintText: 'Ej: Proyector no funciona correctamente',
-                                    hintStyle: AppTextStyles.sectionBody.copyWith(
-                                      color: AppColors.textSecondary,
-                                      height: 1.0,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                              _SectionLabel(text: 'Tipo de Reporte *'),
-                              const SizedBox(height: 10),
-                              GridView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: _typeOptions.length,
-                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  crossAxisSpacing: 8,
-                                  mainAxisSpacing: 12,
-                                  childAspectRatio: 186.4 / 87.2,
-                                ),
-                                itemBuilder: (context, index) {
-                                  final option = _typeOptions[index];
-                                  final isSelected = _selectedType == option.label;
+  void _pickAula() {
+    final aulasAsync = ref.read(aulasProvider);
+    final aulas = aulasAsync.value ?? [];
+    final searchCtrl = TextEditingController();
+    Timer? _debounce;
 
-                                  return InkWell(
-                                    onTap: () => setState(() => _selectedType = option.label),
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: AppColors.pageCard,
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: isSelected ? AppColors.primaryDark : const Color(0xFFB9C4FF),
-                                          width: isSelected ? 1.4 : 1,
-                                        ),
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text(option.emoji, style: const TextStyle(fontSize: 24)),
-                                          const SizedBox(height: 12),
-                                          Text(
-                                            option.label,
-                                            textAlign: TextAlign.center,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: AppTextStyles.sectionTitle.copyWith(
-                                              fontSize: 15,
-                                              height: 1.0,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                              const SizedBox(height: 24),
-                              _SectionLabel(text: 'Ubicación *'),
-                              const SizedBox(height: 8),
-                              _FieldShell(
-                                height: 55.2,
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton<String>(
-                                    value: _selectedLocation,
-                                    isExpanded: true,
-                                    icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.textSecondary),
-                                    hint: Text(
-                                      'Selecciona una ubicación...',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: AppTextStyles.sectionBody.copyWith(
-                                        color: AppColors.textSecondary,
-                                      ),
-                                    ),
-                                    items: _locations
-                                        .map(
-                                          (location) => DropdownMenuItem<String>(
-                                            value: location,
-                                            child: Text(
-                                              location,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: AppTextStyles.sectionBody.copyWith(
-                                                color: AppColors.textPrimary,
-                                              ),
-                                            ),
-                                          ),
-                                        )
-                                        .toList(),
-                                    onChanged: (value) => setState(() => _selectedLocation = value),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                              _SectionLabel(text: 'Descripción Breve *'),
-                              const SizedBox(height: 8),
-                              _FieldShell(
-                                height: 115.2,
-                                child: TextField(
-                                  controller: _descriptionController,
-                                  maxLines: 4,
-                                  textAlignVertical: TextAlignVertical.top,
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    isDense: true,
-                                    contentPadding: EdgeInsets.fromLTRB(16, 16, 16, 16),
-                                    hintText:
-                                        'Describe detalladamente la situación. Esta información será utilizada para generar una carta formal...',
-                                    hintMaxLines: 4,
-                                    hintStyle: AppTextStyles.sectionBody.copyWith(
-                                      color: AppColors.textSecondary,
-                                      height: 1.25,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Mínimo 30 caracteres para generar la carta formal',
-                                style: AppTextStyles.tinyLabel.copyWith(
-                                  color: AppColors.textSecondary,
-                                  height: 1.1,
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                              _SectionLabel(text: 'Adjuntar Imagen (Opcional)'),
-                              const SizedBox(height: 8),
-                              _UploadPlaceholder(height: 159.2),
-                              const SizedBox(height: 24),
-                              _ActionButton(
-                                onTap: _isGenerating ? null : _generarCarta,
-                                label: _isGenerating ? 'Generando carta...' : 'Generar Carta Formal con IA',
-                              ),
-                            ],
-                          ),
-                        ),
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (ctx) => StatefulBuilder(builder: (ctx, setSheetState) {
+        final query = searchCtrl.text.toLowerCase();
+        final filtered = query.isEmpty ? aulas : aulas.where((a) =>
+            a.nombreAula.toLowerCase().contains(query) ||
+            a.codigoAula.toString().contains(query) ||
+            a.bloque.nombre.toLowerCase().contains(query)).toList();
+
+        return DraggableScrollableSheet(
+          initialChildSize: 0.7, minChildSize: 0.4, maxChildSize: 0.9,
+          expand: false,
+          builder: (_, scrollCtrl) => Column(children: [
+            Container(margin: const EdgeInsets.only(top: 12), width: 40, height: 4,
+                decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2))),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: TextField(
+                controller: searchCtrl,
+                onChanged: (_) {
+                  _debounce?.cancel();
+                  _debounce = Timer(const Duration(milliseconds: 400), () => setSheetState(() {}));
+                },
+                autofocus: false,
+                onTapOutside: (_) => FocusScope.of(ctx).unfocus(),
+                decoration: InputDecoration(
+                  hintText: 'Buscar aula por nombre, codigo o bloque...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: searchCtrl.text.isNotEmpty
+                      ? IconButton(icon: const Icon(Icons.clear), onPressed: () {
+                          searchCtrl.clear();
+                          _debounce?.cancel();
+                          setSheetState(() {});
+                        })
+                      : null,
+                  filled: true, fillColor: Colors.grey.shade100,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                 ),
               ),
             ),
-          ],
-        ),
-      ),
+            const Divider(),
+            Expanded(
+              child: filtered.isEmpty
+                  ? const Center(child: Text('No se encontraron aulas', style: TextStyle(color: Colors.grey)))
+                  : RepaintBoundary(
+                      child: ListView.separated(
+                        controller: scrollCtrl, padding: const EdgeInsets.only(bottom: 16),
+                        itemCount: filtered.length, separatorBuilder: (_, __) => const Divider(height: 1, indent: 16),
+                        itemBuilder: (_, i) {
+                          final a = filtered[i];
+                          final sel = _selectedAulaId == a.id;
+                          return ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: sel ? AppColors.primary : Colors.grey.shade200,
+                              child: Icon(Icons.meeting_room_outlined, color: sel ? Colors.white : Colors.grey.shade600, size: 20),
+                            ),
+                            title: Text(a.nombreAula, style: TextStyle(fontWeight: sel ? FontWeight.w700 : FontWeight.w500)),
+                            subtitle: Text('${a.bloque.nombre} \u2022 ${a.tipoAula.nombre} \u2022 Cap: ${a.capacidad}'),
+                            trailing: sel ? const Icon(Icons.check_circle, color: AppColors.primary) : null,
+                            onTap: () { setState(() { _selectedAula = a; _selectedAulaId = a.id; }); Navigator.pop(ctx); },
+                          );
+                        },
+                      ),
+                    ),
+            ),
+          ]),
+        );
+      }),
     );
   }
-}
-
-class _SectionLabel extends StatelessWidget {
-  final String text;
-
-  const _SectionLabel({required this.text});
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: AppTextStyles.sectionTitle.copyWith(fontSize: 16),
-    );
+    if (_showPreview && _cartaGenerada != null) return _buildPreview();
+    return _buildForm();
   }
-}
 
-class _FieldShell extends StatelessWidget {
-  final double height;
-  final Widget child;
-
-  const _FieldShell({
-    required this.height,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: height,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.pageCard,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFB9C4FF), width: 1.2),
-      ),
-      child: child,
-    );
-  }
-}
-
-class _UploadPlaceholder extends StatelessWidget {
-  final double height;
-
-  const _UploadPlaceholder({required this.height});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: height,
-      decoration: BoxDecoration(
-        color: AppColors.pageCard,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFB9C4FF),
-          width: 1.2,
-          style: BorderStyle.solid,
-        ),
-      ),
-      child: Center(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.add_a_photo_outlined, size: 40, color: AppColors.textSecondary),
-              SizedBox(height: 14),
-              Text(
-                'Toca para adjuntar evidencia fotográfica',
-                textAlign: TextAlign.center,
-                style: AppTextStyles.sectionTitle.copyWith(fontSize: 16),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'JPG, PNG o WEBP (máx. 5MB)',
-                textAlign: TextAlign.center,
-                style: AppTextStyles.smallLabel,
-              ),
-            ],
+  Widget _buildPreview() {
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            Text('Carta Formal Generada', style: AppTextStyles.sectionTitle.copyWith(fontSize: 20)),
+            IconButton(onPressed: widget.onClose, icon: const Icon(Icons.close)),
+          ]),
+          const SizedBox(height: 16),
+          Container(
+            width: double.infinity, padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(color: AppColors.cartaBackground, borderRadius: BorderRadius.circular(16)),
+            child: SelectableText(_cartaGenerada!, style: const TextStyle(fontSize: 14, height: 1.6)),
           ),
-        ),
+          const SizedBox(height: 24),
+          Row(children: [
+            Expanded(child: OutlinedButton.icon(
+              onPressed: () => setState(() => _showPreview = false),
+              icon: const Icon(Icons.edit, size: 18), label: const Text('Editar'),
+              style: OutlinedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+            )),
+            const SizedBox(width: 12),
+            Expanded(child: FilledButton.icon(
+              onPressed: _confirmarEnvio,
+              icon: const Icon(Icons.check_circle, size: 18), label: const Text('Confirmar envio'),
+              style: FilledButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+            )),
+          ]),
+        ]),
       ),
     );
   }
-}
 
-class _ActionButton extends StatelessWidget {
-  final VoidCallback? onTap;
-  final String label;
+  Widget _buildForm() {
+    final theme = Theme.of(context);
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
-  const _ActionButton({
-    required this.onTap,
-    required this.label,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
-      child: Container(
-        width: double.infinity,
-        height: 59.2,
-        decoration: BoxDecoration(
-          gradient: onTap == null
-              ? const LinearGradient(
-                  colors: [
-                    Color(0xFF9AA7ED),
-                    Color(0xFFA9B3EE),
-                  ],
-                )
-              : AppColors.activeIconGradient,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: const Color(0xFFA8B4FF)),
-        ),
-        child: Center(
-          child: Text(
-            '✨  $label',
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.sectionTitle.copyWith(
-              color: Colors.white,
-              height: 1.15,
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + bottomInset),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        child: RepaintBoundary(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Center(child: Container(width: 48, height: 4,
+              decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)))),
+          const SizedBox(height: 16),
+          Text('Reportar Incidencia', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 4),
+          Text('Describe el problema y la IA generara una carta formal.', style: AppTextStyles.pageSubtitle),
+          const SizedBox(height: 24),
+          Text('Tipo de incidencia', style: AppTextStyles.sectionTitle.copyWith(fontSize: 15)),
+          const SizedBox(height: 10),
+          Wrap(spacing: 8, runSpacing: 8, children: _typeOptions.map((t) {
+            final sel = _selectedType == t.$3;
+            return ChoiceChip(label: Text('${t.$1} ${t.$2}'), selected: sel,
+                onSelected: (_) => setState(() => _selectedType = t.$3),
+                selectedColor: AppColors.primary.withValues(alpha: 0.15),
+                labelStyle: TextStyle(fontWeight: sel ? FontWeight.w700 : FontWeight.w500));
+          }).toList()),
+          const SizedBox(height: 20),
+          Text('Aula', style: AppTextStyles.sectionTitle.copyWith(fontSize: 15)),
+          const SizedBox(height: 10),
+          InkWell(
+            onTap: _pickAula, borderRadius: BorderRadius.circular(12),
+            child: Container(
+              width: double.infinity, padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              decoration: BoxDecoration(
+                border: Border.all(color: _selectedAula != null ? AppColors.primary : Colors.grey.shade300, width: _selectedAula != null ? 2 : 1),
+                borderRadius: BorderRadius.circular(12),
+                color: _selectedAula != null ? AppColors.primary.withValues(alpha: 0.04) : null,
+              ),
+              child: Row(children: [
+                Icon(Icons.meeting_room_outlined, color: _selectedAula != null ? AppColors.primary : Colors.grey.shade400, size: 22),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _selectedAula != null
+                      ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text(_selectedAula!.nombreAula, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: AppColors.primaryDark)),
+                          const SizedBox(height: 2),
+                          Text('${_selectedAula!.bloque.nombre} \u2022 ${_selectedAula!.tipoAula.nombre} \u2022 Cap: ${_selectedAula!.capacidad}',
+                              style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                        ])
+                      : const Text('Toca para buscar un aula...', style: TextStyle(color: Colors.grey)),
+                ),
+                const Icon(Icons.search, color: Colors.grey),
+              ]),
             ),
           ),
+          const SizedBox(height: 20),
+          Text('Descripcion breve', style: AppTextStyles.sectionTitle.copyWith(fontSize: 15)),
+          const SizedBox(height: 10),
+          TextFormField(controller: _descCtrl, maxLines: 5, maxLength: 500,
+              decoration: InputDecoration(hintText: 'Describe el problema...', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)))),
+          const SizedBox(height: 12),
+          Text('Evidencia (opcional)', style: AppTextStyles.sectionTitle.copyWith(fontSize: 15)),
+          const SizedBox(height: 10),
+          Row(children: [
+            Expanded(child: OutlinedButton.icon(
+              onPressed: () => _pickImage(ImageSource.camera), icon: const Icon(Icons.camera_alt, size: 18), label: const Text('Camara'),
+              style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+            )),
+            const SizedBox(width: 12),
+            Expanded(child: OutlinedButton.icon(
+              onPressed: () => _pickImage(ImageSource.gallery), icon: const Icon(Icons.photo_library, size: 18), label: const Text('Galeria'),
+              style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+            )),
+          ]),
+          if (_imagenFile != null) ...[
+            const SizedBox(height: 10),
+            ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.file(_imagenFile!, height: 120, width: double.infinity, fit: BoxFit.cover)),
+          ],
+          const SizedBox(height: 24),
+          SizedBox(width: double.infinity, height: 52, child: FilledButton.icon(
+            onPressed: _isGenerating ? null : _generarCarta,
+            icon: _isGenerating ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Icon(Icons.auto_awesome),
+            label: Text(_isGenerating ? 'Generando carta...' : 'Generar Carta Formal con IA'),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.cartaPrimary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+          )),
+          const SizedBox(height: 12),
+        ]),
         ),
       ),
     );
   }
-}
-
-class _ReportTypeOption {
-  final String emoji;
-  final String label;
-
-  const _ReportTypeOption(this.emoji, this.label);
 }

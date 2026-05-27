@@ -132,81 +132,31 @@ class _ReservaFormSheetState extends State<ReservaFormSheet> {
   }
 
   Widget _buildInfoRow(IconData icon, String label, String value) {
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: Colors.grey[600]),
-        const SizedBox(width: 8),
-        Text('$label: ', style: const TextStyle(fontWeight: FontWeight.w600)),
-        Text(value),
-      ],
-    );
+    return _InfoTile(icon: icon, label: label, value: value);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Padding(
-      padding: EdgeInsets.only(
-        left: 24,
-        right: 24,
-        top: 24,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-      ),
+      padding: EdgeInsets.only(left: 24, right: 24, top: 24, bottom: bottomInset + 24),
       child: Form(
         key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Reservar ${widget.aula.nombreAula}',
-                style: theme.textTheme.titleLarge
-                    ?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${widget.aula.bloque.nombre} • Capacidad: ${widget.aula.capacidad}',
-                style: theme.textTheme.bodyMedium
-                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-              ),
-              if (!widget.puedeReservar) ...[
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.warning_amber_rounded,
-                          color: Colors.orange, size: 20),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'Esta aula requiere autorizacion. Los estudiantes no pueden reservarla directamente.',
-                          style: theme.textTheme.bodySmall
-                              ?.copyWith(color: Colors.orange[800]),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+        child: RepaintBoundary(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const _DragHandle(),
+                const SizedBox(height: 16),
+                _AulaHeader(aula: widget.aula),
+                if (!widget.puedeReservar) ...[
+                  const SizedBox(height: 12),
+                  const _WarningBanner(),
+                ],
               const SizedBox(height: 20),
               if (widget.aula.requiereAutorizacion)
                 _buildInfoRow(
@@ -401,6 +351,67 @@ class _ReservaFormSheetState extends State<ReservaFormSheet> {
           ),
         ),
       ),
+      ),
     );
   }
+}
+
+class _DragHandle extends StatelessWidget {
+  const _DragHandle();
+  @override
+  Widget build(BuildContext context) => Center(
+        child: Container(
+          width: 40, height: 4,
+          decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)),
+        ),
+      );
+}
+
+class _AulaHeader extends StatelessWidget {
+  final AulaEntity aula;
+  const _AulaHeader({required this.aula});
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text('Reservar ${aula.nombreAula}',
+          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+      const SizedBox(height: 4),
+      Text('${aula.bloque.nombre} \u2022 Capacidad: ${aula.capacidad}',
+          style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+    ]);
+  }
+}
+
+class _WarningBanner extends StatelessWidget {
+  const _WarningBanner();
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.orange.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+        ),
+        child: const Row(children: [
+          Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 20),
+          SizedBox(width: 10),
+          Expanded(child: Text('Esta aula requiere autorizacion. Los estudiantes no pueden reservarla directamente.',
+              style: TextStyle(color: Color(0xFFE65100), fontSize: 12))),
+        ]),
+      );
+}
+
+class _InfoTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  const _InfoTile({required this.icon, required this.label, required this.value});
+  @override
+  Widget build(BuildContext context) => Row(children: [
+        Icon(icon, size: 18, color: Colors.grey[600]),
+        const SizedBox(width: 8),
+        Text('$label: ', style: const TextStyle(fontWeight: FontWeight.w600)),
+        Flexible(child: Text(value)),
+      ]);
 }
