@@ -13,7 +13,7 @@ class PerfilView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userAsync = ref.watch(currentUserProvider);
+    final userAsync = ref.watch(currentUserProfileProvider);
 
     return Container(
       color: AppColors.background,

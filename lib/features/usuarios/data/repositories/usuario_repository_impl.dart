@@ -36,6 +36,11 @@ class UsuarioRepositoryImpl implements IUsuarioRepository {
   Future<UsuarioEntity> getById(String id) async {
     try {
       final response = await dio.get('/usuario-service/usuarios/$id');
+      if (response.data is Map && response.data['usuario'] != null) {
+        return UsuarioModel.fromJson(
+          response.data['usuario'] as Map<String, dynamic>,
+        );
+      }
       return UsuarioModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);

@@ -10,6 +10,8 @@ import 'package:aulasmart_front_end/features/reservas/presentation/views/admin_r
 import 'package:aulasmart_front_end/features/incidencias/presentation/views/admin_incidencias_screen.dart';
 import 'package:aulasmart_front_end/features/incidencias/presentation/views/mis_incidencias_screen.dart';
 import 'package:aulasmart_front_end/features/incidencias/presentation/views/incidencia_detail_screen.dart';
+import 'package:aulasmart_front_end/services/storage_service.dart';
+import 'package:aulasmart_front_end/services/rbac.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 
@@ -19,11 +21,20 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final GoRouter routerProvider = GoRouter(
   navigatorKey: navigatorKey,
   initialLocation: '/login',
+  redirect: (context, state) async {
+    final path = state.matchedLocation;
+    if (!path.startsWith('/admin')) return null;
+    final storage = StorageService();
+    final userInfo = await storage.getUserInfo();
+    final role = (userInfo?['rol'] ?? '').toString().toLowerCase();
+    if (!Rbac.isAdmin(role)) return '/aulas';
+    return null;
+  },
   errorBuilder: (context, state) => const ComingSoonView(featureName: 'Ruta no encontrada'),
   routes: [
     GoRoute(
       path: '/',
-      redirect: (_, _) => '/home',
+      redirect: (_, _) => '/aulas',
     ),
     GoRoute(
       path: '/login',
@@ -40,6 +51,14 @@ final GoRouter routerProvider = GoRouter(
     GoRoute(
       path: '/evidence',
       builder: (_, _) => const EvidenceView(),
+    ),
+    GoRoute(
+      path: '/incidencias',
+      builder: (_, _) => const MisIncidenciasScreen(),
+    ),
+    GoRoute(
+      path: '/incidencias/:id',
+      builder: (_, state) => IncidenciaDetailScreen(id: state.pathParameters['id']!),
     ),
     GoRoute(
       path: '/admin/dashboard',
@@ -61,13 +80,6 @@ final GoRouter routerProvider = GoRouter(
       path: '/admin/reservas',
       builder: (_, _) => const AdminReservasScreen(),
     ),
-    GoRoute(
-      path: '/incidencias',
-      builder: (_, _) => const MisIncidenciasScreen(),
-    ),
-    GoRoute(
-      path: '/incidencias/:id',
-      builder: (_, state) => IncidenciaDetailScreen(id: state.pathParameters['id']!),
-    ),
+    
   ],
 );

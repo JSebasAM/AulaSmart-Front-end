@@ -7,6 +7,7 @@ import '../../../../services/dio_client.dart';
 import '../../../../services/storage_service.dart';
 import '../../../../services/api_exception.dart';
 import 'auth_state.dart';
+import '../../../usuarios/presentation/providers/usuarios_provider.dart';
 
 part 'auth_provider.g.dart';
 
@@ -47,4 +48,27 @@ class Auth extends _$Auth {
 
 final currentUserProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
   return ref.read(storageServiceProvider).getUserInfo();
+});
+
+final currentUserProfileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
+  ref.watch(authProvider);
+  try {
+    final storage = ref.read(storageServiceProvider);
+    final cached = await storage.getUserInfo();
+    final id = cached?['id'];
+    if (id == null) return cached;
+    final repo = ref.read(usuarioRepositoryProvider);
+    final user = await repo.getById(id.toString());
+    final profile = <String, dynamic>{
+      'id': user.codigo,
+      'codigo': user.codigo,
+      'nombre_completo': '${user.nombre} ${user.apellido}'.trim(),
+      'email': user.email,
+      'rol': user.rol,
+    };
+    await storage.saveUserInfo(profile);
+    return profile;
+  } catch (_) {
+    return ref.read(storageServiceProvider).getUserInfo();
+  }
 });
