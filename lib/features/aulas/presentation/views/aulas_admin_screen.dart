@@ -7,6 +7,7 @@ import 'aula_form_screen.dart';
 import 'aula_admin_detail_screen.dart';
 import '../../../../themes/app_colors.dart';
 import '../../../../themes/app_text_styles.dart';
+import '../../../../themes/app_styles.dart';
 
 class AulasAdminScreen extends ConsumerStatefulWidget {
   const AulasAdminScreen({super.key});
@@ -71,8 +72,15 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
     final aulasAsync = ref.watch(aulasProvider);
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('Gestión de Aulas', style: AppTextStyles.sectionTitle),
+        title: ShaderMask(
+          shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
+          child: Text(
+            'Gestión de Aulas',
+            style: AppTextStyles.sectionTitle.copyWith(fontSize: 22, color: Colors.white),
+          ),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: AppColors.textPrimary,
@@ -92,17 +100,9 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
               onChanged: (v) {
                 ref.read(searchQueryProvider.notifier).state = v;
               },
-              decoration: InputDecoration(
-                hintText: 'Buscar aula...',
+              decoration: AppInputStyles.search().copyWith(
                 hintStyle: TextStyle(color: AppColors.textSecondary),
                 prefixIcon: Icon(Icons.search, color: AppColors.textSecondary),
-                filled: true,
-                fillColor: AppColors.surfaceVariant,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 12),
               ),
             ),
           ),
@@ -129,11 +129,11 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
                     onRefresh: () => ref.read(aulasProvider.notifier).refresh(),
                     child: ListView(
                       children: [
-                        const SizedBox(height: 8),
+                        AppGaps.hSm,
                         _buildFilterBar(categorias, categoriaSeleccionada),
-                        const SizedBox(height: 8),
+                        AppGaps.hSm,
                         _buildBloqueBar(bloques, bloqueSeleccionado),
-                        const SizedBox(height: 16),
+                        AppGaps.hLg,
                         Center(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -154,7 +154,7 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
                   child: ListView.separated(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
                     itemCount: visibles.length + 2 + (hayMas ? 1 : 0),
-                    separatorBuilder: (_, _) => const SizedBox(height: 4),
+                    separatorBuilder: (_, _) => AppGaps.hXs,
                     itemBuilder: (_, i) {
                       if (i == 0) {
                         return Padding(
@@ -176,13 +176,10 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
                             child: TextButton.icon(
                               onPressed: () {
                                 final total = ref.read(visibleAulasCountProvider);
-                                ref.read(visibleAulasCountProvider.notifier).state =
-                                    total + 20;
+                                ref.read(visibleAulasCountProvider.notifier).state = total + 20;
                               },
                               icon: const Icon(Icons.expand_more),
-                              label: Text('Cargar más',
-                                  style: AppTextStyles.sectionBody.copyWith(
-                                      color: AppColors.primary)),
+                              label: Text('Cargar más', style: AppTextStyles.sectionBody.copyWith(color: AppColors.primary)),
                             ),
                           ),
                         );
@@ -198,19 +195,13 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
                               await ref.read(aulasProvider.notifier).delete(aula.id);
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('"${aula.nombreAula}" eliminada'),
-                                    backgroundColor: AppColors.success,
-                                  ),
+                                  SnackBar(content: Text('"${aula.nombreAula}" eliminada'), backgroundColor: AppColors.success),
                                 );
                               }
                             } catch (e) {
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Error: $e'),
-                                    backgroundColor: AppColors.danger,
-                                  ),
+                                  SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.danger),
                                 );
                               }
                             }
@@ -218,9 +209,7 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
                         },
                         onTap: () {
                           Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => AulaAdminDetailScreen(aula: aula),
-                            ),
+                            MaterialPageRoute(builder: (_) => AulaAdminDetailScreen(aula: aula)),
                           );
                         },
                       );
@@ -235,15 +224,12 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.wifi_off_outlined,
-                          size: 64, color: AppColors.danger),
-                      const SizedBox(height: 16),
+                      Icon(Icons.wifi_off_outlined, size: 64, color: AppColors.danger),
+                      AppGaps.hLg,
                       Text('Error al cargar aulas', style: AppTextStyles.sectionTitle),
-                      const SizedBox(height: 8),
-                      Text(error.toString(),
-                          style: AppTextStyles.sectionBody,
-                          textAlign: TextAlign.center),
-                      const SizedBox(height: 24),
+                      AppGaps.hSm,
+                      Text(error.toString(), style: AppTextStyles.sectionBody, textAlign: TextAlign.center),
+                      AppGaps.hXxl,
                       FilledButton.tonalIcon(
                         onPressed: () => ref.read(aulasProvider.notifier).refresh(),
                         icon: const Icon(Icons.refresh),
@@ -266,7 +252,7 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.meeting_room_outlined, size: 64, color: AppColors.neutral),
-          const SizedBox(height: 16),
+          AppGaps.hLg,
           Text('No hay aulas registradas', style: AppTextStyles.sectionBody),
         ],
       ),
@@ -280,7 +266,7 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         scrollDirection: Axis.horizontal,
         itemCount: categorias.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => AppGaps.wMd,
         itemBuilder: (_, index) {
           final cat = categorias[index];
           final isSelected = cat == seleccionActual;
@@ -293,13 +279,10 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
                 _resetPaginacion();
               }
             },
-            labelStyle: TextStyle(
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-              color: isSelected ? AppColors.textOnPrimary : AppColors.textSecondary,
-            ),
+            labelStyle: AppChipStyles.label(selected: isSelected),
             backgroundColor: AppColors.surfaceVariant,
             selectedColor: AppColors.primary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: AppShapes.chipShape,
             side: BorderSide.none,
             showCheckmark: false,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -316,7 +299,7 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         scrollDirection: Axis.horizontal,
         itemCount: bloques.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => AppGaps.wMd,
         itemBuilder: (_, index) {
           final b = bloques[index];
           final isSelected = b == seleccionActual;
@@ -329,13 +312,10 @@ class _AulasAdminScreenState extends ConsumerState<AulasAdminScreen> {
                 _resetPaginacion();
               }
             },
-            labelStyle: TextStyle(
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-              color: isSelected ? AppColors.textOnPrimary : AppColors.textSecondary,
-            ),
+            labelStyle: AppChipStyles.label(selected: isSelected),
             backgroundColor: AppColors.surfaceVariant,
             selectedColor: AppColors.primary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: AppShapes.chipShape,
             side: BorderSide.none,
             showCheckmark: false,
             padding: const EdgeInsets.symmetric(horizontal: 16),

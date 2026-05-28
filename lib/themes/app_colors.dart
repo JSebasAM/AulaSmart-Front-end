@@ -37,6 +37,30 @@ class AppColors {
   static const Color cartaSecondary = Color(0xFF99A6F2);
   static const Color cartaBackground = Color(0xFFF7F5FF);
 
+  // Colores de Roles (independientes de colores de estado)
+  static const Color roleAdmin = Color(0xFF8B5CF6);
+  static const Color roleDocente = Color(0xFF06B6D4);
+  static const Color roleEstudiante = Color(0xFF22C55E);
+  static const Color roleMonitor = Color(0xFFA1A1AA);
+  static const Color roleAdministrativo = Color(0xFFF97316);
+
+  static Color forRole(String rol) {
+    switch (rol.toLowerCase()) {
+      case 'administrador':
+        return roleAdmin;
+      case 'docente':
+        return roleDocente;
+      case 'estudiante':
+        return roleEstudiante;
+      case 'monitor':
+        return roleMonitor;
+      case 'administrativo':
+        return roleAdministrativo;
+      default:
+        return primary;
+    }
+  }
+
   // Gradientes Premium
   static const LinearGradient pageGradient = LinearGradient(
     begin: Alignment.topCenter,

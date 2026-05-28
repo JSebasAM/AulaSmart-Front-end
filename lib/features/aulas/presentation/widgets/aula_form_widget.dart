@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../widgets/auth_text_field.dart';
 import '../../../../widgets/primary_button.dart';
 import '../../../../themes/app_colors.dart';
+import '../../../../themes/app_styles.dart';
 import '../providers/aulas_provider.dart';
 
 class AulaFormWidget extends ConsumerStatefulWidget {
@@ -108,14 +109,14 @@ class _AulaFormWidgetState extends ConsumerState<AulaFormWidget> {
             icon: Icons.tag_rounded,
             keyboardType: TextInputType.number,
           ),
-          const SizedBox(height: 16),
+          AppGaps.hLg,
           AuthTextField(
             label: 'Nombre del aula',
             hintText: 'Ej. Aula 101',
             controller: nombreController,
             icon: Icons.meeting_room_rounded,
           ),
-          const SizedBox(height: 16),
+          AppGaps.hLg,
           AuthTextField(
             label: 'Capacidad',
             hintText: 'Ej. 40',
@@ -123,7 +124,7 @@ class _AulaFormWidgetState extends ConsumerState<AulaFormWidget> {
             icon: Icons.people_alt_rounded,
             keyboardType: TextInputType.number,
           ),
-          const SizedBox(height: 20),
+          AppGaps.hXl,
           _buildDropdown(
             label: 'Tipo de aula',
             value: selectedTipoAulaId?.toString(),
@@ -132,7 +133,7 @@ class _AulaFormWidgetState extends ConsumerState<AulaFormWidget> {
             id: (e) => e.id.toString(),
             onChanged: (v) => setState(() => selectedTipoAulaId = v != null ? int.parse(v) : null),
           ),
-          const SizedBox(height: 20),
+          AppGaps.hXl,
           _buildDropdown(
             label: 'Bloque',
             value: selectedBloqueId?.toString(),
@@ -141,7 +142,7 @@ class _AulaFormWidgetState extends ConsumerState<AulaFormWidget> {
             id: (e) => e.id.toString(),
             onChanged: (v) => setState(() => selectedBloqueId = v != null ? int.parse(v) : null),
           ),
-          const SizedBox(height: 32),
+          AppGaps.hXxxl,
           SizedBox(
             width: double.infinity,
             height: 55,
@@ -150,7 +151,7 @@ class _AulaFormWidgetState extends ConsumerState<AulaFormWidget> {
               onPressed: _submitForm,
             ),
           ),
-          const SizedBox(height: 16),
+          AppGaps.hLg,
         ],
       ),
     );
@@ -169,21 +170,13 @@ class _AulaFormWidgetState extends ConsumerState<AulaFormWidget> {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppInputStyles.dropdownLabel,
         ),
-        const SizedBox(height: 8),
+        AppGaps.hSm,
         Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.neutral.withOpacity(0.2)),
-          ),
+          decoration: AppDecorations.dropdown(),
           child: asyncData.when(
             data: (items) => DropdownButtonHideUnderline(
               child: DropdownButton<String>(

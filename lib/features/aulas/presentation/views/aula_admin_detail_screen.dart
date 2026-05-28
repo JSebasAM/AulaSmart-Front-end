@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../domain/entities/aula_entity.dart';
 import '../../../reservas/presentation/providers/reservas_provider.dart';
 import '../../../reservas/domain/entities/reserva_entity.dart';
 import '../../../../themes/app_colors.dart';
 import '../../../../themes/app_text_styles.dart';
+import '../../../../themes/app_styles.dart';
 
 class AulaAdminDetailScreen extends ConsumerStatefulWidget {
   final AulaEntity aula;
@@ -12,12 +14,10 @@ class AulaAdminDetailScreen extends ConsumerStatefulWidget {
   const AulaAdminDetailScreen({super.key, required this.aula});
 
   @override
-  ConsumerState<AulaAdminDetailScreen> createState() =>
-      _AulaAdminDetailScreenState();
+  ConsumerState<AulaAdminDetailScreen> createState() => _AulaAdminDetailScreenState();
 }
 
-class _AulaAdminDetailScreenState
-    extends ConsumerState<AulaAdminDetailScreen> {
+class _AulaAdminDetailScreenState extends ConsumerState<AulaAdminDetailScreen> {
   late DateTime _selectedDate;
 
   @override
@@ -26,33 +26,44 @@ class _AulaAdminDetailScreenState
     _selectedDate = DateTime.now();
   }
 
+  Future<void> _onRefresh() async {
+    ref.invalidate(reservasPorAulaProvider(widget.aula.id));
+    await ref.read(reservasPorAulaProvider(widget.aula.id).future);
+  }
+
   @override
   Widget build(BuildContext context) {
     final reservasAsync = ref.watch(reservasPorAulaProvider(widget.aula.id));
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(widget.aula.nombreAula),
+        title: ShaderMask(
+          shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
+          child: Text(
+            widget.aula.nombreAula,
+            style: AppTextStyles.pageTitle.copyWith(color: Colors.white, fontSize: 22),
+          ),
+        ),
+        centerTitle: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildInfoCard(),
-            const SizedBox(height: 24),
-            _buildDatePicker(),
-            const SizedBox(height: 16),
-            reservasAsync.when(
-              data: (reservas) => _buildReservasList(reservas),
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(
-                child: Text('Error al cargar reservas: $e'),
-              ),
-            ),
-          ],
+      body: reservasAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => _buildError(e),
+        data: (reservas) => RefreshIndicator(
+          onRefresh: _onRefresh,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+            children: [
+              _buildInfoCard(),
+              AppGaps.hXxl,
+              _buildDatePicker(),
+              AppGaps.hLg,
+              _buildReservasList(reservas),
+            ],
+          ),
         ),
       ),
     );
@@ -62,101 +73,60 @@ class _AulaAdminDetailScreenState
     final aula = widget.aula;
 
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: AppShapes.circular16,
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.04), blurRadius: 15, offset: const Offset(0, 10), spreadRadius: -3,
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02), blurRadius: 6, offset: const Offset(0, 4), spreadRadius: -2,
           ),
         ],
-        border: Border.all(
-          color: AppColors.border.withOpacity(0.5),
-        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.pageCard,
-                  borderRadius: BorderRadius.circular(12),
+          Positioned(left: 0, top: 0, bottom: 0, child: Container(width: 4, color: AppColors.primary)),
+          Padding(
+            padding: const EdgeInsets.only(left: 20, top: 16, right: 16, bottom: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            aula.nombreAula,
+                            style: AppTextStyles.cardTitle.copyWith(fontWeight: FontWeight.w800),
+                          ),
+                          AppGaps.hXs,
+                          Text(
+                            '${aula.bloque.nombre} • Capacidad: ${aula.capacidad}',
+                            style: AppTextStyles.sectionBody.copyWith(color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                child: Text(
-                  'Código: ${aula.codigoAula}',
-                  style: AppTextStyles.smallLabel.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
+                AppGaps.hMd,
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    _MiniBadge(icon: Icons.domain, label: aula.bloque.nombre),
+                    _MiniBadge(icon: Icons.people_alt_rounded, label: '${aula.capacidad} asientos'),
+                    _MiniBadge(icon: Icons.category_outlined, label: aula.tipoAula.nombre),
+                  ],
                 ),
-              ),
-              const Spacer(),
-              if (aula.requiereAutorizacion)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppColors.warning.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.shield_outlined, size: 14, color: AppColors.warning),
-                      const SizedBox(width: 4),
-                      Text('Requiere Auth',
-                          style: AppTextStyles.smallLabel.copyWith(
-                            color: AppColors.warning,
-                            fontWeight: FontWeight.bold,
-                          )),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            aula.nombreAula,
-            style: AppTextStyles.pageTitle,
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Icon(Icons.business_rounded, size: 16, color: AppColors.textSecondary),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(aula.bloque.nombre,
-                    style: AppTextStyles.cardSubtitle),
-              ),
-              const SizedBox(width: 16),
-              Icon(Icons.people_alt_rounded, size: 16, color: AppColors.textSecondary),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text('${aula.capacidad} asientos',
-                    style: AppTextStyles.cardSubtitle),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceVariant.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              aula.tipoAula.nombre.toUpperCase(),
-              style: AppTextStyles.smallLabel.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.2,
-              ),
+              ],
             ),
           ),
         ],
@@ -177,20 +147,20 @@ class _AulaAdminDetailScreenState
           setState(() => _selectedDate = picked);
         }
       },
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: AppShapes.circular12,
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color: AppColors.surfaceVariant,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: AppShapes.circular12,
         ),
         child: Row(
           children: [
             Icon(Icons.calendar_today_rounded, color: AppColors.primary),
-            const SizedBox(width: 12),
+            AppGaps.wMd,
             Text(
-              '${_selectedDate.day.toString().padLeft(2, '0')}/${_selectedDate.month.toString().padLeft(2, '0')}/${_selectedDate.year}',
+              DateFormat('EEEE d \'de\' MMMM, yyyy', 'es').format(_selectedDate),
               style: AppTextStyles.cardTitle,
             ),
             const Spacer(),
@@ -211,17 +181,14 @@ class _AulaAdminDetailScreenState
     diaReservas.sort((a, b) => a.horaInicio.compareTo(b.horaInicio));
 
     if (diaReservas.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 40),
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 40),
+        child: Center(
           child: Column(
             children: [
               Icon(Icons.event_busy_rounded, size: 48, color: AppColors.neutral),
-              const SizedBox(height: 12),
-              Text(
-                'No hay reservas para esta fecha',
-                style: AppTextStyles.sectionBody,
-              ),
+              AppGaps.hMd,
+              Text('No hay reservas para esta fecha', style: AppTextStyles.sectionBody.copyWith(color: AppColors.neutral)),
             ],
           ),
         ),
@@ -235,17 +202,77 @@ class _AulaAdminDetailScreenState
           '${diaReservas.length} reserva${diaReservas.length == 1 ? '' : 's'}',
           style: AppTextStyles.sectionTitle,
         ),
-        const SizedBox(height: 12),
-        ...diaReservas.map((r) => _ReservaItem(reserva: r)),
+        AppGaps.hMd,
+        ...diaReservas.map((r) => Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _ReservaTile(reserva: r),
+        )),
       ],
+    );
+  }
+
+  Widget _buildError(Object error) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.wifi_off_outlined, size: 64, color: AppColors.danger),
+            AppGaps.hLg,
+            const Text('Error al cargar reservas', style: AppTextStyles.sectionTitle),
+            AppGaps.hSm,
+            Text(error.toString(), style: AppTextStyles.sectionBody, textAlign: TextAlign.center),
+            AppGaps.hXxl,
+            FilledButton.tonalIcon(
+              onPressed: _onRefresh,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Reintentar'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
 
-class _ReservaItem extends StatelessWidget {
+class _MiniBadge extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _MiniBadge({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceVariant.withValues(alpha: 0.8),
+        borderRadius: AppShapes.circular8,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: AppColors.textPrimary),
+          AppGaps.wXs,
+          Text(
+            label,
+            style: AppTextStyles.tinyLabel.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReservaTile extends StatelessWidget {
   final ReservaEntity reserva;
 
-  const _ReservaItem({required this.reserva});
+  const _ReservaTile({required this.reserva});
 
   Color _estadoColor(String estado) {
     switch (estado.toLowerCase()) {
@@ -260,79 +287,140 @@ class _ReservaItem extends StatelessWidget {
     }
   }
 
-  String _formatTime(DateTime dt) {
-    return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
-  }
-
   @override
   Widget build(BuildContext context) {
     final color = _estadoColor(reserva.estado);
 
     return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(16),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border.withOpacity(0.5)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 72,
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              children: [
-                Text(_formatTime(reserva.horaInicio),
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: color)),
-                Text('-', style: TextStyle(color: AppColors.neutral, fontSize: 12)),
-                Text(_formatTime(reserva.horaFin),
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: color)),
-              ],
-            ),
+        borderRadius: AppShapes.circular16,
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04), blurRadius: 15, offset: const Offset(0, 10), spreadRadius: -3,
           ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  reserva.tituloApi ?? 'Reserva',
-                  style: AppTextStyles.cardTitle,
-                ),
-                const SizedBox(height: 4),
-                if (reserva.nombreUsuarioResponsable != null)
-                  Text(
-                    reserva.nombreUsuarioResponsable!,
-                    style: AppTextStyles.cardSubtitle,
-                  ),
-                const SizedBox(height: 2),
-                Text(
-                  '${reserva.codigoPrograma} · Grupo ${reserva.grupo}',
-                  style: AppTextStyles.cardSubtitle.copyWith(color: AppColors.neutral),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              reserva.estado,
-              style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12),
-            ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02), blurRadius: 6, offset: const Offset(0, 4), spreadRadius: -2,
           ),
         ],
       ),
+      child: Stack(
+        children: [
+          Positioned(left: 0, top: 0, bottom: 0, child: Container(width: 4, color: color)),
+          ExpansionTile(
+            tilePadding: const EdgeInsets.only(left: 20, right: 16, top: 8, bottom: 8),
+            childrenPadding: const EdgeInsets.fromLTRB(20, 0, 16, 16),
+            shape: const RoundedRectangleBorder(),
+            collapsedShape: const RoundedRectangleBorder(),
+            collapsedBackgroundColor: Colors.transparent,
+            backgroundColor: Colors.transparent,
+            iconColor: AppColors.textSecondary,
+            collapsedIconColor: AppColors.textSecondary,
+            title: Row(
+              children: [
+                Container(
+                  width: 64,
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  decoration: AppDecorations.statusDot(color: color),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        reserva.displayHoraInicio,
+                        style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 13),
+                      ),
+                      AppGaps.hXs,
+                      Text('-', style: TextStyle(color: AppColors.neutral, fontSize: 11)),
+                      AppGaps.hXs,
+                      Text(
+                        '${reserva.horaFin.hour.toString().padLeft(2, '0')}:${reserva.horaFin.minute.toString().padLeft(2, '0')}',
+                        style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ),
+                AppGaps.wMd,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        reserva.displayTitulo,
+                        style: AppTextStyles.cardTitle.copyWith(fontWeight: FontWeight.w700, fontSize: 14),
+                      ),
+                      AppGaps.hSm,
+                      Text(
+                        '${reserva.displayPrograma} • Grupo ${reserva.displayGrupo}',
+                        style: AppTextStyles.cardSubtitle,
+                      ),
+                    ],
+                  ),
+                ),
+                AppGaps.wSm,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.12),
+                    borderRadius: AppShapes.circular20,
+                  ),
+                  child: Text(
+                    reserva.estado,
+                    style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 11),
+                  ),
+                ),
+              ],
+            ),
+            children: [
+              const Divider(height: 1),
+              AppGaps.hMd,
+              _DetailRow(
+                icon: Icons.person_outline,
+                label: 'Responsable: ${reserva.displaySolicitante}',
+              ),
+              AppGaps.hSm,
+              _DetailRow(
+                icon: Icons.badge_outlined,
+                label: 'Solicitante: ${reserva.rolSolicitante} • ID ${reserva.idSolicitante}',
+              ),
+              AppGaps.hSm,
+              _DetailRow(
+                icon: Icons.source_outlined,
+                label: 'Origen: ${reserva.displayOrigen}',
+              ),
+              AppGaps.hSm,
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  'ID: ${reserva.id}',
+                  style: AppTextStyles.tinyLabel.copyWith(color: AppColors.neutral),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _DetailRow({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: AppColors.textSecondary),
+        AppGaps.wSm,
+        Expanded(
+          child: Text(label, style: AppTextStyles.sectionBody),
+        ),
+      ],
     );
   }
 }

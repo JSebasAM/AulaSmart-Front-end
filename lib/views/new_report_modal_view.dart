@@ -14,7 +14,8 @@ import 'package:image_picker/image_picker.dart';
 
 class NewReportModalView extends ConsumerStatefulWidget {
   final VoidCallback onClose;
-  const NewReportModalView({super.key, required this.onClose});
+  final ScrollController? scrollController;
+  const NewReportModalView({super.key, required this.onClose, this.scrollController});
 
   @override
   ConsumerState<NewReportModalView> createState() => _NewReportModalViewState();
@@ -205,6 +206,7 @@ class _NewReportModalViewState extends ConsumerState<NewReportModalView> {
   Widget _buildPreview() {
     return SafeArea(
       child: SingleChildScrollView(
+        controller: widget.scrollController,
         padding: const EdgeInsets.all(24),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
@@ -242,6 +244,7 @@ class _NewReportModalViewState extends ConsumerState<NewReportModalView> {
 
     return SafeArea(
       child: SingleChildScrollView(
+        controller: widget.scrollController,
         padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + bottomInset),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: RepaintBoundary(
@@ -328,3 +331,4 @@ class _NewReportModalViewState extends ConsumerState<NewReportModalView> {
     );
   }
 }
+
