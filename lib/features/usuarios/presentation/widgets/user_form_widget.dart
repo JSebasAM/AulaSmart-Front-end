@@ -1,7 +1,7 @@
-import 'package:aulasmart_front_end/themes/app_colors.dart';
+import 'package:aulasmart_front_end/core/themes/app_colors.dart';
 import 'package:flutter/material.dart';
-import '../../../../widgets/auth_text_field.dart';
-import '../../../../widgets/primary_button.dart';
+import '../../../auth/presentation/widgets/auth_text_field.dart';
+import '../../../../core/widgets/primary_button.dart';
 
 class UserFormWidget extends StatefulWidget {
   final VoidCallback onSubmit;

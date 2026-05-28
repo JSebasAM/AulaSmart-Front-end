@@ -1,8 +1,8 @@
-import 'package:aulasmart_front_end/views/admin/admin_dashboard_view.dart';
-import 'package:aulasmart_front_end/views/app_shell_view.dart';
-import 'package:aulasmart_front_end/views/coming_soon_view.dart';
-import 'package:aulasmart_front_end/views/evidence_view.dart';
-import 'package:aulasmart_front_end/views/login_view.dart';
+import 'package:aulasmart_front_end/core/presentation/admin_dashboard_view.dart';
+import 'package:aulasmart_front_end/core/presentation/app_shell_view.dart';
+import 'package:aulasmart_front_end/core/presentation/coming_soon_view.dart';
+import 'package:aulasmart_front_end/features/incidencias/presentation/views/evidence_view.dart';
+import 'package:aulasmart_front_end/features/auth/presentation/views/login_view.dart';
 import 'package:aulasmart_front_end/features/aulas/presentation/views/aulas_screen.dart';
 import 'package:aulasmart_front_end/features/aulas/presentation/views/aulas_admin_screen.dart';
 import 'package:aulasmart_front_end/features/usuarios/presentation/views/usuarios_screen.dart';
@@ -10,8 +10,8 @@ import 'package:aulasmart_front_end/features/reservas/presentation/views/admin_r
 import 'package:aulasmart_front_end/features/incidencias/presentation/views/admin_incidencias_screen.dart';
 import 'package:aulasmart_front_end/features/incidencias/presentation/views/mis_incidencias_screen.dart';
 import 'package:aulasmart_front_end/features/incidencias/presentation/views/incidencia_detail_screen.dart';
-import 'package:aulasmart_front_end/services/storage_service.dart';
-import 'package:aulasmart_front_end/services/rbac.dart';
+import 'package:aulasmart_front_end/core/storage/storage_service.dart';
+import 'package:aulasmart_front_end/core/auth/rbac.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 

@@ -1,9 +1,9 @@
 import 'package:aulasmart_front_end/features/auth/presentation/providers/auth_provider.dart';
 import 'package:aulasmart_front_end/features/auth/presentation/providers/auth_state.dart';
-import 'package:aulasmart_front_end/themes/app_colors.dart';
-import 'package:aulasmart_front_end/themes/app_text_styles.dart';
-import 'package:aulasmart_front_end/widgets/auth_text_field.dart';
-import 'package:aulasmart_front_end/widgets/primary_button.dart';
+import 'package:aulasmart_front_end/core/themes/app_colors.dart';
+import 'package:aulasmart_front_end/core/themes/app_text_styles.dart';
+import 'package:aulasmart_front_end/features/auth/presentation/widgets/auth_text_field.dart';
+import 'package:aulasmart_front_end/core/widgets/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:math' as math;

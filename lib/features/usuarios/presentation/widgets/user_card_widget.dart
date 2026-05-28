@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/usuario_entity.dart';
-import '../../../../themes/app_colors.dart';
-import '../../../../themes/app_text_styles.dart';
-import '../../../../themes/app_styles.dart';
+import '../../../../core/themes/app_colors.dart';
+import '../../../../core/themes/app_text_styles.dart';
+import '../../../../core/themes/app_styles.dart';
 
 class UserCardWidget extends StatelessWidget {
   final UsuarioEntity user;

@@ -4,9 +4,9 @@ import 'package:intl/intl.dart';
 import '../../domain/entities/aula_entity.dart';
 import '../../../reservas/presentation/providers/reservas_provider.dart';
 import '../../../reservas/domain/entities/reserva_entity.dart';
-import '../../../../themes/app_colors.dart';
-import '../../../../themes/app_text_styles.dart';
-import '../../../../themes/app_styles.dart';
+import '../../../../core/themes/app_colors.dart';
+import '../../../../core/themes/app_text_styles.dart';
+import '../../../../core/themes/app_styles.dart';
 
 class AulaAdminDetailScreen extends ConsumerStatefulWidget {
   final AulaEntity aula;

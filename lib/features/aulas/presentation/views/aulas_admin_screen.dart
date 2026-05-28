@@ -5,9 +5,9 @@ import '../providers/aulas_provider.dart';
 import '../widgets/aula_card_widget.dart';
 import 'aula_form_screen.dart';
 import 'aula_admin_detail_screen.dart';
-import '../../../../themes/app_colors.dart';
-import '../../../../themes/app_text_styles.dart';
-import '../../../../themes/app_styles.dart';
+import '../../../../core/themes/app_colors.dart';
+import '../../../../core/themes/app_text_styles.dart';
+import '../../../../core/themes/app_styles.dart';
 
 class AulasAdminScreen extends ConsumerStatefulWidget {
   const AulasAdminScreen({super.key});

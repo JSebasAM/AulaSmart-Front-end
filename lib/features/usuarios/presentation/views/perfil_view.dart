@@ -1,9 +1,9 @@
 import 'package:aulasmart_front_end/features/auth/presentation/providers/auth_provider.dart';
-import 'package:aulasmart_front_end/themes/app_colors.dart';
-import 'package:aulasmart_front_end/themes/app_text_styles.dart';
-import 'package:aulasmart_front_end/themes/app_styles.dart';
-import 'package:aulasmart_front_end/services/storage_service.dart';
-import 'package:aulasmart_front_end/services/session_provider.dart';
+import 'package:aulasmart_front_end/core/themes/app_colors.dart';
+import 'package:aulasmart_front_end/core/themes/app_text_styles.dart';
+import 'package:aulasmart_front_end/core/themes/app_styles.dart';
+import 'package:aulasmart_front_end/core/storage/storage_service.dart';
+import 'package:aulasmart_front_end/core/auth/session_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

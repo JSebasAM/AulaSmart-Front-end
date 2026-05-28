@@ -1,4 +1,4 @@
-import 'package:aulasmart_front_end/themes/app_colors.dart';
+import 'package:aulasmart_front_end/core/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class AppTheme {

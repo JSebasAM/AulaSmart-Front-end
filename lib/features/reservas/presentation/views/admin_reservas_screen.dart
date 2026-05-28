@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aulasmart_front_end/features/reservas/domain/entities/reserva_entity.dart';
 import 'package:aulasmart_front_end/features/reservas/presentation/providers/reservas_provider.dart';
-import 'package:aulasmart_front_end/themes/app_colors.dart';
-import 'package:aulasmart_front_end/themes/app_text_styles.dart';
-import 'package:aulasmart_front_end/themes/app_styles.dart';
+import 'package:aulasmart_front_end/core/themes/app_colors.dart';
+import 'package:aulasmart_front_end/core/themes/app_text_styles.dart';
+import 'package:aulasmart_front_end/core/themes/app_styles.dart';
 
 class AdminReservasScreen extends ConsumerWidget {
   const AdminReservasScreen({super.key});

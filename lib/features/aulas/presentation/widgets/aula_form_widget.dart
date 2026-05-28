@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../widgets/auth_text_field.dart';
-import '../../../../widgets/primary_button.dart';
-import '../../../../themes/app_colors.dart';
-import '../../../../themes/app_styles.dart';
+import '../../../auth/presentation/widgets/auth_text_field.dart';
+import '../../../../core/widgets/primary_button.dart';
+import '../../../../core/themes/app_colors.dart';
+import '../../../../core/themes/app_styles.dart';
 import '../providers/aulas_provider.dart';
 
 class AulaFormWidget extends ConsumerStatefulWidget {

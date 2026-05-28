@@ -4,7 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/usuario_entity.dart';
 import '../../data/repositories/usuario_repository_impl.dart';
-import '../../../../services/dio_client.dart';
+import '../../../../core/network/dio_client.dart';
 
 part 'usuarios_provider.g.dart';
 

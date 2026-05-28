@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../themes/app_colors.dart';
-import '../../../../themes/app_text_styles.dart';
-import '../../../../themes/app_styles.dart';
+import '../../../../core/themes/app_colors.dart';
+import '../../../../core/themes/app_text_styles.dart';
+import '../../../../core/themes/app_styles.dart';
 import '../providers/aulas_provider.dart';
 import '../widgets/aula_card_widget.dart';
 

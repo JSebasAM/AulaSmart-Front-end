@@ -7,7 +7,7 @@ import '../../domain/entities/aula_entity.dart';
 import '../../domain/entities/tipo_aula_entity.dart';
 import '../../domain/entities/bloque_entity.dart';
 import '../../data/repositories/aula_repository_impl.dart';
-import '../../../../services/dio_client.dart';
+import '../../../../core/network/dio_client.dart';
 
 part 'aulas_provider.g.dart';
 

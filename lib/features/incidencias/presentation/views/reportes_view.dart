@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:aulasmart_front_end/themes/app_colors.dart';
-import 'package:aulasmart_front_end/themes/app_text_styles.dart';
-import 'package:aulasmart_front_end/themes/app_styles.dart';
-import 'package:aulasmart_front_end/views/new_report_modal_view.dart';
+import 'package:aulasmart_front_end/core/themes/app_colors.dart';
+import 'package:aulasmart_front_end/core/themes/app_text_styles.dart';
+import 'package:aulasmart_front_end/core/themes/app_styles.dart';
+import 'package:aulasmart_front_end/features/incidencias/presentation/views/new_report_modal_view.dart';
 
 class ReportesView extends StatefulWidget {
   const ReportesView({super.key});

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aulasmart_front_end/features/chat/domain/entities/chat_message_entity.dart';
 import 'package:aulasmart_front_end/features/chat/presentation/providers/chat_provider.dart';
-import 'package:aulasmart_front_end/themes/app_colors.dart';
+import 'package:aulasmart_front_end/core/themes/app_colors.dart';
 
 class ChatOverlay extends ConsumerStatefulWidget {
   const ChatOverlay({super.key});

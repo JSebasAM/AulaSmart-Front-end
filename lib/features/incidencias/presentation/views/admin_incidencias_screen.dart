@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:aulasmart_front_end/features/incidencias/domain/entities/incidencia_entity.dart';
 import 'package:aulasmart_front_end/features/incidencias/presentation/providers/incidencia_provider.dart';
-import 'package:aulasmart_front_end/themes/app_colors.dart';
-import 'package:aulasmart_front_end/themes/app_text_styles.dart';
-import 'package:aulasmart_front_end/themes/app_styles.dart';
+import 'package:aulasmart_front_end/core/themes/app_colors.dart';
+import 'package:aulasmart_front_end/core/themes/app_text_styles.dart';
+import 'package:aulasmart_front_end/core/themes/app_styles.dart';
 
 class AdminIncidenciasScreen extends ConsumerStatefulWidget {
   const AdminIncidenciasScreen({super.key});

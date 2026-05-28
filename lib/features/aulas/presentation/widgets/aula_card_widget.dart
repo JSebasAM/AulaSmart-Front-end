@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/aula_entity.dart';
 import '../views/aula_detail_screen.dart';
-import '../../../../themes/app_colors.dart';
-import '../../../../themes/app_text_styles.dart';
-import '../../../../themes/app_styles.dart';
+import '../../../../core/themes/app_colors.dart';
+import '../../../../core/themes/app_text_styles.dart';
+import '../../../../core/themes/app_styles.dart';
 
 class AulaCardWidget extends StatelessWidget {
   final AulaEntity aula;

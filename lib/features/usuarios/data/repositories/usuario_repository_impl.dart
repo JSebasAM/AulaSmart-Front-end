@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import '../../domain/entities/usuario_entity.dart';
 import '../../domain/repositories/iusuario_repository.dart';
 import '../models/usuario_model.dart';
-import '../../../../services/api_exception.dart';
+import '../../../../core/error/api_exception.dart';
 
 class UsuarioRepositoryImpl implements IUsuarioRepository {
   final Dio dio;

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:aulasmart_front_end/services/dio_client.dart';
+import 'package:aulasmart_front_end/core/network/dio_client.dart';
 import 'package:aulasmart_front_end/features/incidencias/domain/entities/incidencia_entity.dart';
 import 'package:aulasmart_front_end/features/incidencias/data/datasources/incidencia_remote_data_source.dart';
 import 'package:aulasmart_front_end/features/incidencias/data/repositories/incidencia_repository_impl.dart';

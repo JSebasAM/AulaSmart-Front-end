@@ -7,9 +7,9 @@ import 'package:aulasmart_front_end/features/reservas/presentation/providers/res
 import 'package:aulasmart_front_end/features/reservas/domain/entities/reserva_entity.dart';
 import 'package:aulasmart_front_end/features/reservas/presentation/widgets/reserva_form_sheet.dart';
 import 'package:aulasmart_front_end/features/auth/presentation/providers/user_role_provider.dart';
-import 'package:aulasmart_front_end/themes/app_colors.dart';
-import 'package:aulasmart_front_end/themes/app_text_styles.dart';
-import 'package:aulasmart_front_end/themes/app_styles.dart';
+import 'package:aulasmart_front_end/core/themes/app_colors.dart';
+import 'package:aulasmart_front_end/core/themes/app_text_styles.dart';
+import 'package:aulasmart_front_end/core/themes/app_styles.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class AulaDetailScreen extends ConsumerStatefulWidget {
