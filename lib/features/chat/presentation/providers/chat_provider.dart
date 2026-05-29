@@ -87,6 +87,14 @@ class ChatNotifier extends Notifier<List<ChatMessageEntity>> {
       ];
     }
   }
+  Future<void> reset() async {
+    _isLoading = false;
+    state = [];
+    try {
+      final remote = ref.read(chatRemoteDataSourceProvider);
+      await remote.resetConversation();
+    } catch (_) {}
+  }
 }
 
 final chatProvider =

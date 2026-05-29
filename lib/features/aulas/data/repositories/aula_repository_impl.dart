@@ -114,4 +114,31 @@ class AulaRepositoryImpl implements IAulaRepository {
       throw ApiException.fromDioException(e);
     }
   }
+
+  @override
+  Future<List<AulaEntity>> getAulasDisponibles({
+    String? fecha,
+    String? horaInicio,
+    String? horaFin,
+  }) async {
+    try {
+      final queryParams = <String, dynamic>{};
+      if (fecha != null) queryParams['fecha'] = fecha;
+      if (horaInicio != null) queryParams['horaInicio'] = horaInicio;
+      if (horaFin != null) queryParams['horaFin'] = horaFin;
+
+      final response = await dio.get(
+        '/aula-service/aulas/disponibles',
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['aulas'];
+        return data.map((json) => AulaModel.fromJson(json)).toList();
+      }
+      throw Exception('Error HTTP: ${response.statusCode}');
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
 }

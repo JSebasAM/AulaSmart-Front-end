@@ -10,4 +10,9 @@ abstract class IAulaRepository {
   Future<void> delete(int id);
   Future<List<TipoAulaEntity>> getTiposAula();
   Future<List<BloqueEntity>> getBloques();
+  Future<List<AulaEntity>> getAulasDisponibles({
+    String? fecha,
+    String? horaInicio,
+    String? horaFin,
+  });
 }

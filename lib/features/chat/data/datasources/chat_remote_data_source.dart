@@ -14,4 +14,8 @@ class ChatRemoteDataSource {
     }
     return data.toString();
   }
+
+  Future<void> resetConversation() async {
+    await dio.post('/chat/reset');
+  }
 }

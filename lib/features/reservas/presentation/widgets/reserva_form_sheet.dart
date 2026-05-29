@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:aulasmart_front_end/features/aulas/domain/entities/aula_entity.dart';
+import 'package:aulasmart_front_end/features/reservas/domain/entities/reserva_entity.dart';
 
 class ReservaFormData {
   final DateTime fecha;
@@ -39,12 +40,14 @@ class ReservaFormSheet extends StatefulWidget {
   final AulaEntity aula;
   final DateTime fechaInicial;
   final bool puedeReservar;
+  final List<ReservaEntity>? reservasExistentes;
 
   const ReservaFormSheet({
     super.key,
     required this.aula,
     required this.fechaInicial,
     required this.puedeReservar,
+    this.reservasExistentes,
   });
 
   @override
@@ -93,6 +96,20 @@ class _ReservaFormSheetState extends State<ReservaFormSheet> {
     final inicio = _horaInicio.hour * 60 + _horaInicio.minute;
     final fin = _horaFin.hour * 60 + _horaFin.minute;
     return fin > inicio;
+  }
+
+  bool get _tieneConflicto {
+    final reservas = widget.reservasExistentes;
+    if (reservas == null || reservas.isEmpty) return false;
+    final inicioDt = formData.fechaHoraInicio;
+    final finDt = formData.fechaHoraFin;
+    for (final r in reservas) {
+      if (r.estado.toLowerCase() == 'cancelada') continue;
+      if (r.horaInicio.isBefore(finDt) && r.horaFin.isAfter(inicioDt)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   Future<void> _pickDate() async {
@@ -327,6 +344,16 @@ class _ReservaFormSheetState extends State<ReservaFormSheet> {
                       ? null
                       : () {
                           if (_formKey.currentState!.validate()) {
+                            if (_tieneConflicto) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('El horario seleccionado entra en conflicto con una reserva existente. Elige otro horario.'),
+                                  backgroundColor: Colors.red,
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                              return;
+                            }
                             Navigator.of(context).pop(formData);
                           }
                         },

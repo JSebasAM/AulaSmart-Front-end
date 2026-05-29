@@ -46,6 +46,9 @@ class _AulaDetailScreenState extends ConsumerState<AulaDetailScreen> {
   }
 
   Future<void> _mostrarFormularioReserva() async {
+    final reservasAsync = ref.read(reservasPorAulaProvider(widget.aula.id));
+    final reservas = reservasAsync.value ?? [];
+
     final result = await showModalBottomSheet<ReservaFormData>(
       context: context,
       isScrollControlled: true,
@@ -56,6 +59,7 @@ class _AulaDetailScreenState extends ConsumerState<AulaDetailScreen> {
         aula: widget.aula,
         fechaInicial: _selectedDate,
         puedeReservar: _puedeReservar,
+        reservasExistentes: reservas,
       ),
     );
 
@@ -193,6 +197,14 @@ class _AulaDetailScreenState extends ConsumerState<AulaDetailScreen> {
     final aula = widget.aula;
     final reservasAsync = ref.watch(reservasPorAulaProvider(aula.id));
 
+    final hoy = DateTime.now();
+    final hoyKey = '${hoy.year}-${hoy.month.toString().padLeft(2, '0')}-${hoy.day.toString().padLeft(2, '0')}';
+    final reservas = reservasAsync.value ?? [];
+    final tieneReservasHoy = reservas.any((r) {
+      final rKey = '${r.horaInicio.year}-${r.horaInicio.month.toString().padLeft(2, '0')}-${r.horaInicio.day.toString().padLeft(2, '0')}';
+      return rKey == hoyKey && r.estado.toLowerCase() != 'cancelada';
+    });
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -252,7 +264,7 @@ class _AulaDetailScreenState extends ConsumerState<AulaDetailScreen> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
                   children: [
-                    _buildAulaInfo(aula),
+                    _buildAulaInfo(aula, tieneReservasHoy),
                     AppGaps.hLg,
                     TableCalendar<ReservaEntity>(
                       firstDay: DateTime.now().subtract(const Duration(days: 365)),
@@ -322,7 +334,7 @@ class _AulaDetailScreenState extends ConsumerState<AulaDetailScreen> {
     );
   }
 
-  Widget _buildAulaInfo(AulaEntity aula) {
+  Widget _buildAulaInfo(AulaEntity aula, bool tieneReservasHoy) {
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
@@ -392,6 +404,24 @@ class _AulaDetailScreenState extends ConsumerState<AulaDetailScreen> {
                           ],
                         ),
                       ),
+                    if (tieneReservasHoy) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: AppDecorations.pill(color: AppColors.danger),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.event_busy_outlined, size: 14, color: AppColors.danger),
+                            AppGaps.wXs,
+                            Text('Ocupado hoy',
+                                style: AppTextStyles.tinyLabel.copyWith(
+                                    color: AppColors.danger,
+                                    fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
                 ),
                 AppGaps.hMd,

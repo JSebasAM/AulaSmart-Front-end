@@ -10,6 +10,7 @@ class AulaCardWidget extends StatelessWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final VoidCallback? onTap;
+  final bool? estaDisponible;
 
   const AulaCardWidget({
     super.key,
@@ -17,6 +18,7 @@ class AulaCardWidget extends StatelessWidget {
     this.onEdit,
     this.onDelete,
     this.onTap,
+    this.estaDisponible,
   });
 
   @override
@@ -47,7 +49,12 @@ class AulaCardWidget extends StatelessWidget {
             children: [
               Positioned(
                 left: 0, top: 0, bottom: 0,
-                child: Container(width: 4, color: AppColors.success),
+                child: Container(
+                  width: 4,
+                  color: (estaDisponible == false)
+                      ? AppColors.danger
+                      : AppColors.success,
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.only(left: 24, top: 20, right: 20, bottom: 20),
@@ -57,6 +64,24 @@ class AulaCardWidget extends StatelessWidget {
                 Row(
                   children: [
                     _buildBloqueBadge(),
+                    if (estaDisponible == false) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: AppColors.danger.withValues(alpha: 0.12),
+                          borderRadius: AppShapes.circular8,
+                        ),
+                        child: const Text(
+                          'Ocupado',
+                          style: TextStyle(
+                            color: AppColors.danger,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
                     const Spacer(),
                     if (aula.requiereAutorizacion)
                       Tooltip(

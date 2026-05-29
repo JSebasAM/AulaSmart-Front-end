@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aulasmart_front_end/features/chat/domain/entities/chat_message_entity.dart';
 import 'package:aulasmart_front_end/features/chat/presentation/providers/chat_provider.dart';
@@ -81,6 +82,15 @@ class _ChatOverlayState extends ConsumerState<ChatOverlay> {
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Reiniciar conversacion',
+            onPressed: () {
+              ref.read(chatProvider.notifier).reset();
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -113,7 +123,16 @@ class _ChatOverlayState extends ConsumerState<ChatOverlay> {
                               onTap: () {
                                 ref
                                     .read(chatProvider.notifier)
-                                    .send('Aulas disponibles hoy');
+                                    .send('Que aulas estan disponibles hoy de 7am a 7pm?');
+                                _scrollToBottom();
+                              },
+                            ),
+                            _SuggestionChip(
+                              label: 'Aulas libres manana',
+                              onTap: () {
+                                ref
+                                    .read(chatProvider.notifier)
+                                    .send('Que aulas estan disponibles manana?');
                                 _scrollToBottom();
                               },
                             ),
@@ -123,15 +142,6 @@ class _ChatOverlayState extends ConsumerState<ChatOverlay> {
                                 ref
                                     .read(chatProvider.notifier)
                                     .send('Quiero reservar un aula');
-                                _scrollToBottom();
-                              },
-                            ),
-                            _SuggestionChip(
-                              label: 'Aulas por tipo',
-                              onTap: () {
-                                ref
-                                    .read(chatProvider.notifier)
-                                    .send('Que tipos de aulas hay?');
                                 _scrollToBottom();
                               },
                             ),
@@ -253,7 +263,7 @@ class _ChatBubble extends StatelessWidget {
           Flexible(
             child: Container(
               constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.7,
+                maxWidth: MediaQuery.of(context).size.width * 0.85,
               ),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
@@ -271,15 +281,32 @@ class _ChatBubble extends StatelessWidget {
                       : const Radius.circular(18),
                 ),
               ),
-              child: Text(
-                message.text,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: isUser
-                      ? Colors.white
-                      : theme.colorScheme.onSurface,
-                ),
-              ),
+              child: isUser
+                  ? Text(
+                      message.text,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                    )
+                  : MarkdownBody(
+                      data: message.text,
+                      shrinkWrap: true,
+                      styleSheet: MarkdownStyleSheet(
+                        p: TextStyle(
+                          fontSize: 14,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                        strong: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                        em: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ),
             ),
           ),
           if (isUser) const SizedBox(width: 8),
@@ -319,33 +346,25 @@ class _TypingIndicatorState extends State<_TypingIndicator>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        AnimatedBuilder(
-          animation: _controller,
-          builder: (_, child) {
-            final scale = 0.9 + (_controller.value <= 0.5
-                ? _controller.value * 0.2
-                : (1.0 - _controller.value) * 0.2);
-            return Transform.scale(
-              scale: scale,
-              child: child,
-            );
-          },
-          child: Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppColors.primary, Color(0xFF7C83F6)],
-              ),
-              borderRadius: BorderRadius.circular(10),
+        Container(
+          width: 30,
+          height: 30,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppColors.primary, Color(0xFF7C83F6)],
             ),
-            child: const Icon(Icons.smart_toy_rounded,
-                color: Colors.white, size: 18),
+            borderRadius: BorderRadius.circular(8),
           ),
+          child: const Icon(Icons.smart_toy_rounded,
+              color: Colors.white, size: 16),
         ),
         const SizedBox(width: 8),
         Container(
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.75,
+          ),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
             color: theme.colorScheme.surfaceContainerHighest,
@@ -358,32 +377,43 @@ class _TypingIndicatorState extends State<_TypingIndicator>
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
-            children: List.generate(3, (i) {
-              return AnimatedBuilder(
-                animation: _controller,
-                builder: (_, child) {
-                  final t = (_controller.value + i * 0.3) % 1.0;
-                  final opacity = t < 0.3
-                      ? t / 0.3 * 0.8
-                      : t < 0.6
-                          ? 0.8
-                          : (1.0 - t) / 0.4 * 0.8;
-                  return Opacity(
-                    opacity: opacity.clamp(0.15, 0.9),
-                    child: child,
-                  );
-                },
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 3),
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primaryDark,
-                    shape: BoxShape.circle,
-                  ),
+            children: [
+              const Text(
+                'Pensando',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey,
                 ),
-              );
-            }),
+              ),
+              ...List.generate(3, (i) {
+                return AnimatedBuilder(
+                  animation: _controller,
+                  builder: (_, child) {
+                    final t = (_controller.value + i * 0.3) % 1.0;
+                    final opacity = t < 0.3
+                        ? t / 0.3 * 0.8
+                        : t < 0.6
+                            ? 0.8
+                            : (1.0 - t) / 0.4 * 0.8;
+                    return Opacity(
+                      opacity: opacity.clamp(0.15, 0.9),
+                      child: child,
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: Colors.grey,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ],
           ),
         ),
       ],
