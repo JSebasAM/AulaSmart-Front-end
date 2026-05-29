@@ -5,8 +5,8 @@ import 'package:aulasmart_front_end/features/aulas/presentation/providers/aulas_
 import 'package:aulasmart_front_end/features/aulas/domain/entities/aula_entity.dart';
 import 'package:aulasmart_front_end/features/incidencias/domain/entities/incidencia_entity.dart';
 import 'package:aulasmart_front_end/features/incidencias/presentation/providers/incidencia_provider.dart';
-import 'package:aulasmart_front_end/themes/app_colors.dart';
-import 'package:aulasmart_front_end/themes/app_text_styles.dart';
+import 'package:aulasmart_front_end/core/themes/app_colors.dart';
+import 'package:aulasmart_front_end/core/themes/app_text_styles.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,7 +14,8 @@ import 'package:image_picker/image_picker.dart';
 
 class NewReportModalView extends ConsumerStatefulWidget {
   final VoidCallback onClose;
-  const NewReportModalView({super.key, required this.onClose});
+  final ScrollController? scrollController;
+  const NewReportModalView({super.key, required this.onClose, this.scrollController});
 
   @override
   ConsumerState<NewReportModalView> createState() => _NewReportModalViewState();
@@ -62,7 +63,7 @@ class _NewReportModalViewState extends ConsumerState<NewReportModalView> {
         'tipoIncidencia': _selectedType,
       });
       _cartaGenerada = _incidenciaCreada!.cartaFormalGenerada;
-      ref.invalidate(incidenciasPendientesProvider);
+      ref.read(incidenciasPendientesProvider.notifier).refresh();
       ref.invalidate(todasLasIncidenciasProvider);
       if (mounted) setState(() { _isGenerating = false; _showPreview = true; });
     } on DioException catch (e) {
@@ -205,6 +206,7 @@ class _NewReportModalViewState extends ConsumerState<NewReportModalView> {
   Widget _buildPreview() {
     return SafeArea(
       child: SingleChildScrollView(
+        controller: widget.scrollController,
         padding: const EdgeInsets.all(24),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
@@ -242,6 +244,7 @@ class _NewReportModalViewState extends ConsumerState<NewReportModalView> {
 
     return SafeArea(
       child: SingleChildScrollView(
+        controller: widget.scrollController,
         padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + bottomInset),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: RepaintBoundary(
@@ -312,7 +315,29 @@ class _NewReportModalViewState extends ConsumerState<NewReportModalView> {
           ]),
           if (_imagenFile != null) ...[
             const SizedBox(height: 10),
-            ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.file(_imagenFile!, height: 120, width: double.infinity, fit: BoxFit.cover)),
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.file(_imagenFile!, height: 120, width: double.infinity, fit: BoxFit.cover),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: GestureDetector(
+                    onTap: () => setState(() => _imagenFile = null),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: Colors.black54,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.close, color: Colors.white, size: 18),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
           const SizedBox(height: 24),
           SizedBox(width: double.infinity, height: 52, child: FilledButton.icon(
@@ -328,3 +353,4 @@ class _NewReportModalViewState extends ConsumerState<NewReportModalView> {
     );
   }
 }
+

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/aula_entity.dart';
 import '../providers/aulas_provider.dart';
 import '../widgets/aula_form_widget.dart';
-import '../../../../themes/app_colors.dart';
+import '../../../../core/themes/app_colors.dart';
 
 class AulaFormScreen extends ConsumerWidget {
   final AulaEntity? aula;

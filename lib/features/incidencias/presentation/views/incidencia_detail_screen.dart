@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aulasmart_front_end/features/incidencias/domain/entities/incidencia_entity.dart';
 import 'package:aulasmart_front_end/features/incidencias/presentation/providers/incidencia_provider.dart';
-import 'package:aulasmart_front_end/themes/app_colors.dart';
+import 'package:aulasmart_front_end/core/themes/app_colors.dart';
 
 class IncidenciaDetailScreen extends ConsumerWidget {
   final String id;

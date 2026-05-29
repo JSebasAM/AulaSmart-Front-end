@@ -1,13 +1,13 @@
-import 'package:aulasmart_front_end/themes/app_colors.dart';
-import 'package:aulasmart_front_end/views/admin/admin_dashboard_view.dart';
+import 'package:aulasmart_front_end/core/themes/app_colors.dart';
+import 'package:aulasmart_front_end/core/presentation/admin_dashboard_view.dart';
 import 'package:aulasmart_front_end/features/aulas/presentation/views/aulas_screen.dart';
-import 'package:aulasmart_front_end/views/perfil_view.dart';
-import 'package:aulasmart_front_end/views/reportes_view.dart';
-import 'package:aulasmart_front_end/views/reservas_view.dart';
-import 'package:aulasmart_front_end/widgets/app_bottom_nav.dart';
+import 'package:aulasmart_front_end/features/usuarios/presentation/views/perfil_view.dart';
+import 'package:aulasmart_front_end/features/incidencias/presentation/views/reportes_view.dart';
+import 'package:aulasmart_front_end/features/reservas/presentation/views/reservas_view.dart';
+import 'package:aulasmart_front_end/core/widgets/app_bottom_nav.dart';
 import 'package:aulasmart_front_end/features/chat/presentation/widgets/chat_overlay.dart';
 import 'package:aulasmart_front_end/features/auth/presentation/providers/user_role_provider.dart';
-import 'package:aulasmart_front_end/services/rbac.dart';
+import 'package:aulasmart_front_end/core/auth/rbac.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

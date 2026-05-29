@@ -2,8 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:aulasmart_front_end/features/auth/domain/entities/auth_entity.dart';
 import 'package:aulasmart_front_end/features/auth/domain/repositories/iauth_repository.dart';
 import 'package:aulasmart_front_end/features/auth/data/models/auth_model.dart';
-import 'package:aulasmart_front_end/services/storage_service.dart';
-import 'package:aulasmart_front_end/services/api_exception.dart';
+import 'package:aulasmart_front_end/core/storage/storage_service.dart';
+import 'package:aulasmart_front_end/core/error/api_exception.dart';
 
 class AuthRepositoryImpl implements IAuthRepository {
   final Dio dio;

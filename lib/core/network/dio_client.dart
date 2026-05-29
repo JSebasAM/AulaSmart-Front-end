@@ -2,9 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'storage_service.dart';
-import 'crypto_interceptor.dart';
-import 'session_provider.dart';
+import '../storage/storage_service.dart';
+import '../security/crypto_interceptor.dart';
+import '../auth/session_provider.dart';
 
 class ApiUrls {
   static String get auth        => dotenv.env['API_AUTH'] ?? 'http://localhost:8081/api/v1';
@@ -17,7 +17,7 @@ class ApiUrls {
 
 final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(BaseOptions(
-    connectTimeout: const Duration(seconds: 10),
+    connectTimeout: const Duration(seconds: 20),
     receiveTimeout: const Duration(seconds: 10),
     headers: {'Content-Type': 'application/json'},
   ));

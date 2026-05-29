@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aulasmart_front_end/features/auth/presentation/providers/auth_state.dart';
 import 'package:aulasmart_front_end/features/auth/presentation/providers/auth_provider.dart';
-import 'package:aulasmart_front_end/services/storage_service.dart';
+import 'package:aulasmart_front_end/core/storage/storage_service.dart';
 
 final currentUserRoleProvider = FutureProvider<String>((ref) async {
   final authState = ref.watch(authProvider);

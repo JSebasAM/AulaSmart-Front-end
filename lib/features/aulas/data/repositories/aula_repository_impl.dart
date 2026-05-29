@@ -6,7 +6,7 @@ import '../../domain/repositories/iaula_repository.dart';
 import '../models/aula_model.dart';
 import '../models/tipo_aula_model.dart';
 import '../models/bloque_model.dart';
-import '../../../../services/api_exception.dart';
+import '../../../../core/error/api_exception.dart';
 
 class AulaRepositoryImpl implements IAulaRepository {
   final Dio dio;

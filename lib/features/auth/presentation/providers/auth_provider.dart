@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../data/repositories/auth_repository_impl.dart';
-import '../../../../services/dio_client.dart';
-import '../../../../services/storage_service.dart';
-import '../../../../services/api_exception.dart';
+import '../../../../core/network/dio_client.dart';
+import '../../../../core/storage/storage_service.dart';
+import '../../../../core/error/api_exception.dart';
 import 'auth_state.dart';
 import '../../../usuarios/presentation/providers/usuarios_provider.dart';
 

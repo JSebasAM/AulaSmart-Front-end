@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:aulasmart_front_end/services/dio_client.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:aulasmart_front_end/core/network/dio_client.dart';
 import 'package:aulasmart_front_end/features/incidencias/domain/entities/incidencia_entity.dart';
 import 'package:aulasmart_front_end/features/incidencias/data/datasources/incidencia_remote_data_source.dart';
 import 'package:aulasmart_front_end/features/incidencias/data/repositories/incidencia_repository_impl.dart';
 import 'package:aulasmart_front_end/features/incidencias/domain/repositories/iincidencia_repository.dart';
+
+part 'incidencia_provider.g.dart';
 
 final incidenciaRemoteDsProvider = Provider<IncidenciaRemoteDataSource>((ref) {
   final dio = ref.read(dioProvider);
@@ -22,36 +25,35 @@ final incidenciaRepoProvider = Provider<IIncidenciaRepository>((ref) {
   return IncidenciaRepositoryImpl(remote: remote);
 });
 
-final incidenciasPendientesProvider =
-    FutureProvider.autoDispose<List<IncidenciaEntity>>((ref) async {
-  return ref.read(incidenciaRepoProvider).getPendientes();
-});
+@riverpod
+class IncidenciasPendientes extends _$IncidenciasPendientes {
+  @override
+  FutureOr<List<IncidenciaEntity>> build() async {
+    return ref.read(incidenciaRepoProvider).getPendientes();
+  }
+
+  Future<void> refresh() async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(
+      () => ref.read(incidenciaRepoProvider).getPendientes(),
+    );
+  }
+
+  Future<void> responder(String id, String respuesta) async {
+    await ref.read(incidenciaRepoProvider).responder(id, respuesta);
+    await refresh();
+  }
+
+  Future<void> cerrar(String id) async {
+    await ref.read(incidenciaRepoProvider).update(id, {'estado': 'CERRADA'});
+    await refresh();
+  }
+}
 
 final todasLasIncidenciasProvider =
     FutureProvider<List<IncidenciaEntity>>((ref) async {
   return ref.read(incidenciaRepoProvider).getAll();
 });
-
-final incidenciasCountProvider =
-    NotifierProvider<IncidenciaCountNotifier, AsyncValue<int>>(
-        IncidenciaCountNotifier.new);
-
-class IncidenciaCountNotifier extends Notifier<AsyncValue<int>> {
-  Timer? _timer;
-  @override
-  AsyncValue<int> build() {
-    _fetch();
-    _timer = Timer.periodic(const Duration(seconds: 30), (_) => _fetch());
-    return const AsyncValue.loading();
-  }
-  Future<void> _fetch() async {
-    try {
-      state = AsyncValue.data(await ref.read(incidenciaRepoProvider).getCountPendientes());
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-}
 
 final incidenciaByIdProvider =
     FutureProvider.family<IncidenciaEntity, String>((ref, id) async {

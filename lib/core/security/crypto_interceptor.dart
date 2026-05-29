@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'crypto_service.dart';
 import 'session_manager.dart';
-import 'storage_service.dart';
+import '../storage/storage_service.dart';
 
 class CryptoInterceptor extends Interceptor {
   final Dio _cleanDio = Dio(BaseOptions(

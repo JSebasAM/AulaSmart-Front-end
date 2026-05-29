@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:aulasmart_front_end/services/dio_client.dart';
+import 'package:aulasmart_front_end/core/network/dio_client.dart';
 import 'package:aulasmart_front_end/features/reservas/domain/entities/reserva_entity.dart';
 import 'package:aulasmart_front_end/features/reservas/domain/usecases/get_reservas_por_aula.dart';
 import 'package:aulasmart_front_end/features/reservas/domain/usecases/get_mis_reservas.dart';

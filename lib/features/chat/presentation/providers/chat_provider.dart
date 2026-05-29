@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:aulasmart_front_end/services/dio_client.dart';
+import 'package:aulasmart_front_end/core/network/dio_client.dart';
 import 'package:aulasmart_front_end/features/chat/domain/entities/chat_message_entity.dart';
 import 'package:aulasmart_front_end/features/chat/domain/usecases/send_message.dart';
 import 'package:aulasmart_front_end/features/chat/data/datasources/chat_remote_data_source.dart';

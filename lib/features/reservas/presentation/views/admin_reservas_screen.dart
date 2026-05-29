@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aulasmart_front_end/features/reservas/domain/entities/reserva_entity.dart';
 import 'package:aulasmart_front_end/features/reservas/presentation/providers/reservas_provider.dart';
-import 'package:aulasmart_front_end/themes/app_colors.dart';
+import 'package:aulasmart_front_end/core/themes/app_colors.dart';
+import 'package:aulasmart_front_end/core/themes/app_text_styles.dart';
+import 'package:aulasmart_front_end/core/themes/app_styles.dart';
 
 class AdminReservasScreen extends ConsumerWidget {
   const AdminReservasScreen({super.key});
@@ -12,59 +14,84 @@ class AdminReservasScreen extends ConsumerWidget {
     final pendientesAsync = ref.watch(reservasPendientesProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Reservas Pendientes',
-            style: TextStyle(fontWeight: FontWeight.w700)),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      body: pendientesAsync.when(
-        loading: () =>
-            const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Error al cargar reservas pendientes'),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () =>
-                    ref.invalidate(reservasPendientesProvider),
-                child: const Text('Reintentar'),
-              ),
-            ],
-          ),
-        ),
-        data: (pendientes) {
-          if (pendientes.isEmpty) {
-            return const Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.check_circle_outline,
-                      size: 64, color: Colors.green),
-                  SizedBox(height: 16),
-                  Text('No hay reservas pendientes',
-                      style: TextStyle(fontSize: 16)),
-                ],
-              ),
-            );
-          }
-
-          return RefreshIndicator(
-            onRefresh: () async {
-              ref.invalidate(reservasPendientesProvider);
-              await ref.read(reservasPendientesProvider.future);
-            },
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: pendientes.length,
-              itemBuilder: (context, index) {
-                return _PendienteCard(reserva: pendientes[index]);
-              },
-            ),
-          );
+      backgroundColor: AppColors.background,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(reservasPendientesProvider);
+          await ref.read(reservasPendientesProvider.future);
         },
+        child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            toolbarHeight: 80,
+            floating: false,
+            pinned: false,
+            backgroundColor: Colors.transparent,
+            forceMaterialTransparency: true,
+            title: Padding(
+              padding: const EdgeInsets.only(left: 24, top: 8),
+              child: DefaultTextStyle(
+                style: const TextStyle(),
+                softWrap: true,
+                overflow: TextOverflow.visible,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ShaderMask(
+                      shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
+                      child: Text(
+                        'Reservas',
+                        style: AppTextStyles.pageTitle.copyWith(color: Colors.white, letterSpacing: -0.02),
+                      ),
+                    ),
+                    AppGaps.hSm,
+                    Container(width: 24, height: 2, decoration: BoxDecoration(color: AppColors.textSecondary, borderRadius: AppShapes.circular20)),
+                    AppGaps.hXs,
+                    Text('Solicitudes y turnos', style: AppTextStyles.pageSubtitle.copyWith(height: 1.5)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          pendientesAsync.when(
+            loading: () => const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+            ),
+            error: (e, _) => SliverFillRemaining(
+              child: Center(
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  const Text('Error al cargar reservas pendientes', style: AppTextStyles.sectionBody),
+                  AppGaps.hSm,
+                  ElevatedButton(
+                    onPressed: () => ref.invalidate(reservasPendientesProvider),
+                    child: const Text('Reintentar'),
+                  ),
+                ]),
+              ),
+            ),
+            data: (pendientes) {
+              if (pendientes.isEmpty) {
+                return SliverFillRemaining(
+                  child: Center(
+                    child: Column(mainAxisSize: MainAxisSize.min, children: [
+                      const Icon(Icons.check_circle_outline, size: 64, color: AppColors.success),
+                      AppGaps.hLg,
+                      const Text('No hay reservas pendientes', style: AppTextStyles.sectionTitle),
+                    ]),
+                  ),
+                );
+              }
+              return SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) => _PendienteCard(reserva: pendientes[index]),
+                  childCount: pendientes.length,
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       ),
     );
   }
@@ -76,118 +103,107 @@ class _PendienteCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+      child: Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: AppShapes.circular24,
+          border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04), blurRadius: 15, offset: const Offset(0, 10), spreadRadius: -3,
+            ),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02), blurRadius: 6, offset: const Offset(0, 4), spreadRadius: -2,
+            ),
+          ],
+        ),
+        child: Stack(
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  alignment: Alignment.center,
-                  child: const Text('P',
-                      style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.orange)),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            Positioned(left: 0, top: 0, bottom: 0, child: Container(width: 4, color: AppColors.warning)),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                      Text(reserva.displayTitulo,
-                          style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700)),
-                      const SizedBox(height: 4),
-                      Text(reserva.displayAula,
-                          style: TextStyle(
-                              color: theme.colorScheme.onSurfaceVariant)),
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: AppColors.warning.withValues(alpha: 0.12),
+                          borderRadius: AppShapes.circular16,
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text('P', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.warning)),
+                      ),
+                      AppGaps.wMd,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(reserva.displayTitulo, style: AppTextStyles.cardTitle.copyWith(fontSize: 16)),
+                            AppGaps.hXs2,
+                            Text(reserva.displayAula, style: AppTextStyles.cardSubtitle),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.warning.withValues(alpha: 0.12),
+                          borderRadius: AppShapes.circular20,
+                        ),
+                        child: const Text('PENDIENTE', style: TextStyle(color: AppColors.warning, fontWeight: FontWeight.w700, fontSize: 12)),
+                      ),
                     ],
                   ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(20),
+                  AppGaps.hMd,
+                  _InfoRow(icon: Icons.person_outline, label: 'Solicitante', value: reserva.displaySolicitante),
+                  AppGaps.hXs,
+                  _InfoRow(icon: Icons.access_time, label: 'Horario', value: '${reserva.displayFecha}  ${reserva.displayHorario}'),
+                  if (reserva.displayPrograma != '-') ...[
+                    AppGaps.hXs,
+                    _InfoRow(icon: Icons.school, label: 'Programa', value: reserva.displayPrograma),
+                  ],
+                  if (reserva.displayGrupo != '-') ...[
+                    AppGaps.hXs,
+                    _InfoRow(icon: Icons.group, label: 'Grupo', value: reserva.displayGrupo),
+                  ],
+                  AppGaps.hMd,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => _rechazar(context, ref),
+                          icon: const Icon(Icons.close, size: 18),
+                          label: const Text('Rechazar'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.danger,
+                            side: const BorderSide(color: AppColors.danger),
+                            shape: RoundedRectangleBorder(borderRadius: AppShapes.circular12),
+                          ),
+                        ),
+                      ),
+                      AppGaps.wMd,
+                      Expanded(
+                        child: FilledButton.icon(
+                          onPressed: () => _confirmar(context, ref),
+                          icon: const Icon(Icons.check, size: 18),
+                          label: const Text('Confirmar'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.success,
+                            shape: RoundedRectangleBorder(borderRadius: AppShapes.circular12),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  child: const Text('PENDIENTE',
-                      style: TextStyle(
-                          color: Colors.orange,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12)),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            _InfoRow(
-                icon: Icons.person_outline,
-                label: 'Solicitante',
-                value: reserva.displaySolicitante),
-            const SizedBox(height: 4),
-            _InfoRow(
-                icon: Icons.access_time,
-                label: 'Horario',
-                value:
-                    '${reserva.displayFecha}  ${reserva.displayHorario}'),
-            if (reserva.displayPrograma != '-') ...[
-              const SizedBox(height: 4),
-              _InfoRow(
-                  icon: Icons.school,
-                  label: 'Programa',
-                  value: reserva.displayPrograma),
-            ],
-            if (reserva.displayGrupo != '-') ...[
-              const SizedBox(height: 4),
-              _InfoRow(
-                  icon: Icons.group,
-                  label: 'Grupo',
-                  value: reserva.displayGrupo),
-            ],
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _rechazar(context, ref),
-                    icon: const Icon(Icons.close, size: 18),
-                    label: const Text('Rechazar'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red,
-                      side: const BorderSide(color: Colors.red),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: () => _confirmar(context, ref),
-                    icon: const Icon(Icons.check, size: 18),
-                    label: const Text('Confirmar'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
@@ -195,8 +211,7 @@ class _PendienteCard extends ConsumerWidget {
     );
   }
 
-  Future<void> _confirmar(
-      BuildContext context, WidgetRef ref) async {
+  Future<void> _confirmar(BuildContext context, WidgetRef ref) async {
     try {
       final useCase = ref.read(confirmarReservaProvider);
       await useCase.call(reserva.id);
@@ -204,17 +219,13 @@ class _PendienteCard extends ConsumerWidget {
       ref.invalidate(todasLasReservasProvider);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Reserva confirmada'),
-              backgroundColor: Colors.green),
+          const SnackBar(content: Text('Reserva confirmada'), backgroundColor: AppColors.success),
         );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Error: $e'),
-              backgroundColor: Colors.red),
+          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.danger),
         );
       }
     }
@@ -228,17 +239,13 @@ class _PendienteCard extends ConsumerWidget {
       ref.invalidate(todasLasReservasProvider);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Reserva rechazada'),
-              backgroundColor: Colors.orange),
+          const SnackBar(content: Text('Reserva rechazada'), backgroundColor: AppColors.warning),
         );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Error: $e'),
-              backgroundColor: Colors.red),
+          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.danger),
         );
       }
     }
@@ -249,21 +256,17 @@ class _InfoRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  const _InfoRow(
-      {required this.icon, required this.label, required this.value});
+
+  const _InfoRow({required this.icon, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: Colors.grey),
-        const SizedBox(width: 6),
-        Text('$label: ',
-            style: const TextStyle(
-                fontSize: 13, color: Colors.grey)),
-        Expanded(
-            child: Text(value,
-                style: const TextStyle(fontSize: 13))),
+        Icon(icon, size: 16, color: AppColors.neutral),
+        AppGaps.wXs,
+        Text('$label: ', style: const TextStyle(fontSize: 13, color: AppColors.neutral)),
+        Expanded(child: Text(value, style: const TextStyle(fontSize: 13, color: AppColors.textPrimary))),
       ],
     );
   }
