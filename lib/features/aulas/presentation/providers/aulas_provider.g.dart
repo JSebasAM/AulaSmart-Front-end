@@ -80,7 +80,7 @@ final class AulasProvider
   Aulas create() => Aulas();
 }
 
-String _$aulasHash() => r'b6f787a08f7305119c8a4bec04b4e49fc06583c2';
+String _$aulasHash() => r'109338638a620ec18b947dfe43b1181f8988c045';
 
 abstract class _$Aulas extends $AsyncNotifier<List<AulaEntity>> {
   FutureOr<List<AulaEntity>> build();
