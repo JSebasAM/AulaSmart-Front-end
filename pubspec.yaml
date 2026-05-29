@@ -36,6 +36,13 @@ dependencies:
   riverpod_annotation: ^4.0.2
   image_picker: ^1.1.2
   intl: ^0.20.2
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons: 
+  image_path: "lib/core/assets/logo_apk.png" 
+  android: true  
+  ios: true
+  remove_alpha_ios: true
 
 dev_dependencies:
   flutter_test:

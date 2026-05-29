@@ -63,7 +63,7 @@ class _NewReportModalViewState extends ConsumerState<NewReportModalView> {
         'tipoIncidencia': _selectedType,
       });
       _cartaGenerada = _incidenciaCreada!.cartaFormalGenerada;
-      ref.invalidate(incidenciasPendientesProvider);
+      ref.read(incidenciasPendientesProvider.notifier).refresh();
       ref.invalidate(todasLasIncidenciasProvider);
       if (mounted) setState(() { _isGenerating = false; _showPreview = true; });
     } on DioException catch (e) {
@@ -315,7 +315,29 @@ class _NewReportModalViewState extends ConsumerState<NewReportModalView> {
           ]),
           if (_imagenFile != null) ...[
             const SizedBox(height: 10),
-            ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.file(_imagenFile!, height: 120, width: double.infinity, fit: BoxFit.cover)),
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.file(_imagenFile!, height: 120, width: double.infinity, fit: BoxFit.cover),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: GestureDetector(
+                    onTap: () => setState(() => _imagenFile = null),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: Colors.black54,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.close, color: Colors.white, size: 18),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
           const SizedBox(height: 24),
           SizedBox(width: double.infinity, height: 52, child: FilledButton.icon(

@@ -15,44 +15,51 @@ class AdminIncidenciasScreen extends ConsumerStatefulWidget {
   ConsumerState<AdminIncidenciasScreen> createState() => _AdminIncidenciasScreenState();
 }
 
-class _AdminIncidenciasScreenState extends ConsumerState<AdminIncidenciasScreen>
-    with WidgetsBindingObserver {
-  Timer? _pollingTimer;
+class _AdminIncidenciasScreenState extends ConsumerState<AdminIncidenciasScreen> {
+  Timer? _pollTimer;
+  int _prevCount = 0;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _startPolling();
+    _pollTimer = Timer.periodic(const Duration(seconds: 30), (_) => _checkNew());
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    _pollingTimer?.cancel();
+    _pollTimer?.cancel();
     super.dispose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
-      _pollingTimer?.cancel();
-    } else if (state == AppLifecycleState.resumed) {
-      _refresh();
-      _startPolling();
-    }
-  }
-
-  void _startPolling() {
-    _pollingTimer?.cancel();
-    _pollingTimer = Timer.periodic(const Duration(seconds: 20), (_) => _refresh());
+  Future<void> _checkNew() async {
+    try {
+      final data = await ref.read(incidenciaRepoProvider).getPendientes();
+      if (!mounted) return;
+      if (data.length > _prevCount && _prevCount > 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Nuevas incidencias disponibles'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: AppColors.info,
+            duration: const Duration(seconds: 10),
+            action: SnackBarAction(
+              label: 'Actualizar',
+              textColor: Colors.white,
+              onPressed: () {
+                ref.read(incidenciasPendientesProvider.notifier).refresh();
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              },
+            ),
+          ),
+        );
+      }
+      _prevCount = data.length;
+    } catch (_) {}
   }
 
   Future<void> _refresh() async {
-    try {
-      ref.invalidate(incidenciasPendientesProvider);
-      await ref.read(incidenciasPendientesProvider.future);
-    } catch (_) {}
+    _prevCount = 0;
+    await ref.read(incidenciasPendientesProvider.notifier).refresh();
   }
 
   Color _chipBg(TipoIncidencia t) => switch (t) {
@@ -86,7 +93,7 @@ class _AdminIncidenciasScreenState extends ConsumerState<AdminIncidenciasScreen>
   @override
   Widget build(BuildContext context) {
     final pendientes = ref.watch(incidenciasPendientesProvider);
-    final count = ref.watch(incidenciasCountProvider).value ?? 0;
+    final count = pendientes.value?.length ?? 0;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -343,7 +350,7 @@ class _Card extends ConsumerWidget {
                 if (ctrl.text.trim().isEmpty) return;
                 await responderIncidencia(ref, incidencia.id.toString(), ctrl.text.trim());
                 if (ctx.mounted) Navigator.pop(ctx);
-                ref.invalidate(incidenciasPendientesProvider);
+                ref.read(incidenciasPendientesProvider.notifier).refresh();
               },
               style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: AppShapes.circular12)),
               child: const Text('ENVIAR RESPUESTA', style: TextStyle(fontWeight: FontWeight.w700)),
@@ -357,7 +364,7 @@ class _Card extends ConsumerWidget {
 
   void _cerrar(WidgetRef ref) async {
     await actualizarIncidencia(ref, incidencia.id.toString(), {'estado': 'CERRADA'});
-    ref.invalidate(incidenciasPendientesProvider);
+    ref.read(incidenciasPendientesProvider.notifier).refresh();
   }
 
   void _img(BuildContext context, String url) {

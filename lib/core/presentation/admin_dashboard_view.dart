@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../themes/app_colors.dart';
 import '../themes/app_text_styles.dart';
 import '../themes/app_styles.dart';
+import '../../features/incidencias/presentation/providers/incidencia_provider.dart';
+import '../../features/reservas/presentation/providers/reservas_provider.dart';
 
-class AdminDashboardView extends StatelessWidget {
+class AdminDashboardView extends ConsumerWidget {
   const AdminDashboardView({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final incidenciasPendientesAsync = ref.watch(incidenciasPendientesProvider);
+    final reservasPendientesAsync = ref.watch(reservasPendientesProvider);
+
+    final incidenciasCount = (incidenciasPendientesAsync.value ?? []).length;
+    final reservasCount = (reservasPendientesAsync.value ?? []).length;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
@@ -76,6 +84,7 @@ class AdminDashboardView extends StatelessWidget {
                     icon: Icons.warning_amber_rounded,
                     color: AppColors.danger,
                     route: '/admin/incidencias',
+                    badgeCount: incidenciasCount,
                   ),
                   AppGaps.hMd,
                   _SectionCard(
@@ -90,6 +99,7 @@ class AdminDashboardView extends StatelessWidget {
                     icon: Icons.calendar_today_rounded,
                     color: AppColors.info,
                     route: '/admin/reservas',
+                    badgeCount: reservasCount,
                   ),
                 ],
               ),
@@ -106,12 +116,14 @@ class _SectionCard extends StatelessWidget {
   final IconData icon;
   final Color color;
   final String route;
+  final int badgeCount;
 
   const _SectionCard({
     required this.title,
     required this.icon,
     required this.color,
     required this.route,
+    this.badgeCount = 0,
   });
 
   @override
@@ -160,7 +172,24 @@ class _SectionCard extends StatelessWidget {
                   Expanded(
                     child: Text(title, style: AppTextStyles.cardTitle.copyWith(fontSize: 17)),
                   ),
-                  Icon(Icons.chevron_right_rounded, color: color.withValues(alpha: 0.6), size: 28),
+                  if (badgeCount > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.danger,
+                        borderRadius: AppShapes.circular20,
+                      ),
+                      child: Text(
+                        badgeCount > 99 ? '99+' : badgeCount.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    )
+                  else
+                    Icon(Icons.chevron_right_rounded, color: color.withValues(alpha: 0.6), size: 28),
                 ],
               ),
             ),
